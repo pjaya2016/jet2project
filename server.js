@@ -44,6 +44,10 @@ app.get('/', function(req, res) {
   return res.sendFile(__dirname + '/public/index.html');
 });
 
+app.get('*', function(req, res) {
+  return res.sendFile(__dirname + '/public/index.html');
+});
+
 // ***** LISTEN ***** //
 app.listen(config.port, function() {
   console.log('\napp is running on port ' + config.port + '\n');

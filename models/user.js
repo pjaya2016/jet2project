@@ -5,12 +5,14 @@ var validator = require("validator");
 var userSchema = mongoose.Schema({
   firstName:    { type: String },
   lastName:     { type: String },
-  image:        { type: String },
   username:     { type: String, required: true, unique: true },
   email:        { type: String, required: true, unique: true },
-  type:         { type: String, enum: ['spartan', 'admin'], required: true },
+  type:         { type: String ,enum: ['approver', 'contractor', 'invoice-admin'],required: true },
   passwordHash: { type: String }
 });
+
+
+
 
 // Instance method to validate password
 userSchema.methods.validatePassword = function(password) {
@@ -37,7 +39,7 @@ userSchema.path("passwordHash").validate(function(){
     if (!this._password) {
       this.invalidate("password", "required");
     }
-    if (this._password.length < 6) {
+    if (this._password.length < 2) {
       this.invalidate("password", "must be greater than 6 characters");
     }
     if (this._password !== this._passwordConfirmation) {
