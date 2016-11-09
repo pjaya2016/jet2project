@@ -11,12 +11,11 @@ var Nav = React.createClass({
               <a className="navbar-brand" href="#">JetTwoProject</a>
             </div>
             <ul className="nav navbar-nav navbar-right">
-              <li><Link to='/ApproverHome' className="glyphicon glyphicon-log-in">Login</Link></li>
+              <li><Link to='/login' className="glyphicon glyphicon-log-in">Login</Link></li>
             </ul>
           </div>
         </nav>
     )
   }
 });
-
 module.exports = Nav;

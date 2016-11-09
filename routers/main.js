@@ -1,6 +1,7 @@
 var express = require('express'),
     router = express.Router(),
-    authenticationController = require('../controllers/authentication');
+    authenticationController = require('../controllers/authentication')
+    userController           = require('../controllers/users');
 
 // AUTH ROUTES -----------------------------------------------------------------
 // Method to allow a user to login from a form
@@ -12,10 +13,21 @@ router.route("/register")
   .post(authenticationController.register);
 // -----------------------------------------------------------------------------
 
-// USERS ROUTES ----------------------------------------------------------------
+//  ----------------------------------------------------------------
+router.route("/getContractor")
+  .get(userController.getContractor);
 // -----------------------------------------------------------------------------
 
-// PROFILES ROUTES -------------------------------------------------------------
+//  ----------------------------------------------------------------
+
+
+//-------------------------------------------------------------
+router.route("/addTimesheet/:id")
+  .post(userController.addContractorTimeSheet)
+  .get(userController.getTimeSheet);
 // -----------------------------------------------------------------------------
+
+router.route("/getidtimesheet")
+  .get(userController.getIdTimeSheet);
 
 module.exports = router;

@@ -3,17 +3,16 @@ var User = require('../models/user'),
     jwt = require('jsonwebtoken');
 
 function register(req, res) {
-  // User.create(req.body, function(err, user) {
-  //   if (err) return res.status(401).send({error: err});
-  //   if (!user) return res.status(500).send({error: 'Database error, is it connected?'});
-  //   var token = jwt.sign(user._id, config.secret, {expiresIn: 60*60*24});
-  //   return res.status(200).send({
-  //     message: 'User successfully created',
-  //     token: token,
-  //     user: user
-  //   })
-  // });
-  return res.status(200).send('ok');
+  User.create(req.body, function(err, user) {
+    if (err) return res.status(401).send({error: err});
+    if (!user) return res.status(500).send({error: 'Database error, is it connected?'});
+    var token = jwt.sign(user._id, config.secret, {expiresIn: 60*60*24});
+    return res.status(200).send({
+      message: 'User successfully created',
+      token: token,
+      user: user
+    })
+  });
 }
 
 function login(req, res) {

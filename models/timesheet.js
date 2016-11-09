@@ -1,0 +1,33 @@
+var mongoose  = require("mongoose");
+  var TimesheetScheama = mongoose.Schema({
+    Date1           : String,
+    Time1           : String,
+    LunchStart1     : String,
+    LunchEnd1       : String,
+    Timeout1        : String,
+    Date2           : String,
+    Time2           : String,
+    LunchStart2     : String,
+    LunchEnd2       : String,
+    Timeout2        : String,
+    Date3           : String,
+    Time3           : String,
+    LunchStart3     : String,
+    LunchEnd3       : String,
+    Timeout3        : String,
+    Date4           : String,
+    Time4           : String,
+    LunchStart4     : String,
+    LunchEnd4       : String,
+    Timeout4        : String,
+    Date5           : String,
+    Time5           : String,
+    LunchStart5     : String,
+    LunchEnd5       : String,
+    Timeout5        : String,
+    TotalHourWorked : String,
+    StartDate       : String,
+    EndDate         : String,
+    Status          : String
+  });
+module.exports = TimesheetScheama;

@@ -29,8 +29,15 @@ app.use(methodOverride(function(req, res) {
 // ***** ROUTING ***** //
 // Set the static files directory
 app.use(express.static(__dirname + '/public'));
+
+
 // Set up expressJWT to authenticate all api routes except the login and register forms (see documentation for more information)
-app.use('/api', expressJWT({ secret: config.secret })
+app.use('/api', expressJWT({
+  secret: config.secret,
+  getToken: function(req){
+    return req.headers.token || null;
+  }
+})
 .unless({
   path: [
     { url: '/api/login', methods: ['POST'] },

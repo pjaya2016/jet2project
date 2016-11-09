@@ -1,6 +1,7 @@
 var mongoose  = require("mongoose");
 var bcrypt    = require("bcrypt-nodejs");
 var validator = require("validator");
+var TimeSheet = require('./timesheet');
 
 var userSchema = mongoose.Schema({
   firstName:    { type: String },
@@ -8,7 +9,10 @@ var userSchema = mongoose.Schema({
   username:     { type: String, required: true, unique: true },
   email:        { type: String, required: true, unique: true },
   type:         { type: String ,enum: ['approver', 'contractor', 'invoice-admin'],required: true },
-  passwordHash: { type: String }
+  passwordHash: { type: String },
+  startdate :   {type : String, required: true },
+  enddate :     {type : String, required: true },
+  TimeSheet :   [TimeSheet]
 });
 
 

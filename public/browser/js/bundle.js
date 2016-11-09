@@ -51,14 +51,18 @@
 	var Router = __webpack_require__(172).Router;
 	var Route = __webpack_require__(172).Route;
 	var browserHistory = __webpack_require__(172).browserHistory;
-
-	/*****
+	/********
 	components
-	****/
+	*********/
 	var Login = __webpack_require__(227);
-	var ApproverHome = __webpack_require__(228);
-	var Approveradduser = __webpack_require__(230);
-
+	var ApproverHome = __webpack_require__(260);
+	var Approveradduser = __webpack_require__(261);
+	var ApproverViewContarctor = __webpack_require__(263);
+	var TimeSheet = __webpack_require__(266);
+	var Nav = __webpack_require__(262);
+	var AddTimeSheet = __webpack_require__(268);
+	var dashbored = __webpack_require__(270);
+	/************************************************************************/
 	var App = React.createClass({
 	  displayName: 'App',
 
@@ -66,6 +70,7 @@
 	    return React.createElement(
 	      'div',
 	      { className: 'container' },
+	      React.createElement(Nav, null),
 	      React.createElement(
 	        'div',
 	        { className: 'row' },
@@ -78,9 +83,17 @@
 	ReactDOM.render(React.createElement(
 	  Router,
 	  { history: browserHistory },
-	  React.createElement(Route, { path: '/', component: Login }),
-	  React.createElement(Route, { path: '/approverhome', component: ApproverHome }),
-	  React.createElement(Route, { path: '/approveradduser', component: Approveradduser })
+	  React.createElement(
+	    Route,
+	    { path: '/', component: App },
+	    React.createElement(Route, { path: '/login', component: Login }),
+	    React.createElement(Route, { path: '/approverhome', component: ApproverHome }),
+	    React.createElement(Route, { path: '/approveradduser', component: Approveradduser }),
+	    React.createElement(Route, { path: '/approverviewuser', component: ApproverViewContarctor }),
+	    React.createElement(Route, { path: '/timesheet/:id', component: TimeSheet }),
+	    React.createElement(Route, { path: '/addtimesheet/:id', component: AddTimeSheet }),
+	    React.createElement(Route, { path: '/dashbored', component: dashbored })
+	  )
 	), document.getElementById('app'), function () {
 	  console.log('react app rendered successfully onto the dom!');
 	});
@@ -26368,21 +26381,50 @@
 	var Router = __webpack_require__(172).Router;
 	var Route = __webpack_require__(172).Route;
 	var browserHistory = __webpack_require__(172).browserHistory;
-	var Nav = __webpack_require__(229);
-
+	var Dispatcher = __webpack_require__(228);
+	var userStore = __webpack_require__(231);
 	/****
 	components
 	****/
+	var error = React.createElement(
+	  'div',
+	  { className: 'alert alert-danger' },
+	  React.createElement(
+	    'strong',
+	    null,
+	    'Danger!'
+	  ),
+	  ' Indicates a dangerous or potentially negative action.'
+	);
 
 	var Login = React.createClass({
 	  displayName: 'Login',
-	  getData: function getData(event) {},
+	  getInitialState: function getInitialState() {
+	    return {
+	      error: false
+	    };
+	  },
+	  getData: function getData(event) {
+	    var self = this;
+	    Dispatcher.dispatch({
+	      action: 'LOGIN',
+	      data: {
+	        username: this.refs.username.value,
+	        password: this.refs.password.value
+	      }
+	    });
+	    /////////////////listing for wrong login details
+	    userStore.on('wrongLoginDetails', function () {
+	      self.setState({
+	        error: true
+	      });
+	    });
+	  },
 
 	  render: function render() {
 	    return React.createElement(
 	      'div',
 	      null,
-	      React.createElement(Nav, null),
 	      React.createElement(
 	        'div',
 	        { className: 'col-sm-4 col-md-8 col-lg-12' },
@@ -26420,12 +26462,12 @@
 	          'button',
 	          { type: 'submit', onClick: this.getData, className: 'btn btn-default' },
 	          'Submit'
-	        )
+	        ),
+	        this.state.error ? error : ''
 	      )
 	    );
 	  }
 	});
-
 	module.exports = Login;
 
 /***/ },
@@ -26434,236 +26476,14 @@
 
 	'use strict';
 
-	var React = __webpack_require__(1);
-	var ReactDOM = __webpack_require__(34);
-	var Router = __webpack_require__(172).Router;
-	var Route = __webpack_require__(172).Route;
-	var browserHistory = __webpack_require__(172).browserHistory;
-
-	var ApproverHome = React.createClass({
-	  displayName: 'ApproverHome',
-
-	  render: function render() {
-	    return React.createElement(
-	      'div',
-	      { className: 'col-sm-4 col-md-8 col-lg-12' },
-	      React.createElement(
-	        'h1',
-	        null,
-	        'Approver Home'
-	      )
-	    );
-	  }
-	});
-
-	module.exports = ApproverHome;
-
-/***/ },
-/* 229 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var React = __webpack_require__(1);
-	var browserHistory = __webpack_require__(172).browserHistory;
-	var Link = __webpack_require__(172).Link;
-
-	var Nav = React.createClass({
-	  displayName: 'Nav',
-
-	  render: function render() {
-	    return React.createElement(
-	      'nav',
-	      { className: 'navbar navbar-inverse' },
-	      React.createElement(
-	        'div',
-	        { className: 'container-fluid' },
-	        React.createElement(
-	          'div',
-	          { className: 'navbar-header' },
-	          React.createElement(
-	            'a',
-	            { className: 'navbar-brand', href: '#' },
-	            'JetTwoProject'
-	          )
-	        ),
-	        React.createElement(
-	          'ul',
-	          { className: 'nav navbar-nav navbar-right' },
-	          React.createElement(
-	            'li',
-	            null,
-	            React.createElement(
-	              Link,
-	              { to: '/ApproverHome', className: 'glyphicon glyphicon-log-in' },
-	              'Login'
-	            )
-	          )
-	        )
-	      )
-	    );
-	  }
-	});
-
-	module.exports = Nav;
-
-/***/ },
-/* 230 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var React = __webpack_require__(1);
-	var ReactDOM = __webpack_require__(34);
-	var Router = __webpack_require__(172).Router;
-	var Route = __webpack_require__(172).Route;
-	var browserHistory = __webpack_require__(172).browserHistory;
-	var Dispatcher = __webpack_require__(231);
-	var userStore = __webpack_require__(234);
-
-	var successMsg = React.createElement(
-	  'div',
-	  { className: 'alert alert-success' },
-	  React.createElement(
-	    'strong',
-	    null,
-	    'Success!'
-	  ),
-	  ' Indicates a successful or positive action.'
-	);
-
-	var Approveradduser = React.createClass({
-	  displayName: 'Approveradduser',
-	  getInitialState: function getInitialState() {
-	    return {
-	      success: false
-	    };
-	  },
-	  createContractor: function createContractor(event) {
-	    var self = this;
-	    Dispatcher.dispatch({
-	      action: 'REGISTER',
-	      data: {
-	        firstName: this.refs.firstName.value,
-	        lastName: this.refs.lastName.value,
-	        username: this.refs.username.value,
-	        passwordHash: this.refs.passwordHash.value,
-	        passwordConfirmation: this.refs.passwordConfirmation.value,
-	        email: this.refs.email.value,
-	        type: this.refs.type.value
-	      }
-	    });
-
-	    userStore.on('contractorCreated', function () {
-	      self.setState({
-	        success: true
-	      });
-	    });
-
-	    event.preventDefault();
-	  },
-
-	  render: function render() {
-	    console.log(this.state.success);
-	    return React.createElement(
-	      'div',
-	      { className: 'col-sm-4 col-md-8 col-lg-12' },
-	      this.state.success ? successMsg : '',
-	      React.createElement(
-	        'div',
-	        { className: 'form-group' },
-	        React.createElement(
-	          'label',
-	          { htmlFor: 'firstName' },
-	          'First Name:'
-	        ),
-	        React.createElement('input', { type: 'text', className: 'form-control', id: 'firstName', ref: 'firstName' })
-	      ),
-	      React.createElement(
-	        'div',
-	        { className: 'form-group' },
-	        React.createElement(
-	          'label',
-	          { htmlFor: 'lastName' },
-	          'Last Name:'
-	        ),
-	        React.createElement('input', { type: 'text', className: 'form-control', id: 'lastName', ref: 'lastName' })
-	      ),
-	      React.createElement(
-	        'div',
-	        { className: 'form-group' },
-	        React.createElement(
-	          'label',
-	          { htmlFor: 'username' },
-	          'Username:'
-	        ),
-	        React.createElement('input', { type: 'text', className: 'form-control', id: 'username', ref: 'username' })
-	      ),
-	      React.createElement(
-	        'div',
-	        { className: 'form-group' },
-	        React.createElement(
-	          'label',
-	          { htmlFor: 'email' },
-	          'Email:'
-	        ),
-	        React.createElement('input', { type: 'text', className: 'form-control', id: 'email', ref: 'email' })
-	      ),
-	      React.createElement(
-	        'div',
-	        { className: 'form-group' },
-	        React.createElement(
-	          'label',
-	          { htmlFor: 'type' },
-	          'Type:'
-	        ),
-	        React.createElement('input', { type: 'text', className: 'form-control', id: 'type', ref: 'type' })
-	      ),
-	      React.createElement(
-	        'div',
-	        { className: 'form-group' },
-	        React.createElement(
-	          'label',
-	          { htmlFor: 'passwordHash' },
-	          'Password:'
-	        ),
-	        React.createElement('input', { type: 'password', className: 'form-control', id: 'passwordHash', ref: 'passwordHash' })
-	      ),
-	      React.createElement(
-	        'div',
-	        { className: 'form-group' },
-	        React.createElement(
-	          'label',
-	          { htmlFor: 'password' },
-	          'Confirm password:'
-	        ),
-	        React.createElement('input', { type: 'password', className: 'form-control', id: 'password', ref: 'passwordConfirmation' })
-	      ),
-	      React.createElement(
-	        'button',
-	        { type: 'submit', onClick: this.createContractor, className: 'btn btn-default' },
-	        'Submit'
-	      )
-	    );
-	  }
-	});
-
-	module.exports = Approveradduser;
-
-/***/ },
-/* 231 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var Dispatcher = __webpack_require__(232).Dispatcher;
+	var Dispatcher = __webpack_require__(229).Dispatcher;
 
 	var appDispatcher = new Dispatcher();
 
 	module.exports = appDispatcher;
 
 /***/ },
-/* 232 */
+/* 229 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -26675,11 +26495,11 @@
 	 * of patent rights can be found in the PATENTS file in the same directory.
 	 */
 
-	module.exports.Dispatcher = __webpack_require__(233);
+	module.exports.Dispatcher = __webpack_require__(230);
 
 
 /***/ },
-/* 233 */
+/* 230 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {/**
@@ -26916,20 +26736,33 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
 
 /***/ },
-/* 234 */
+/* 231 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var merge = __webpack_require__(235);
-	var EventEmitter = __webpack_require__(237).EventEmitter;
-	var axios = __webpack_require__(238);
-	var Dispatcher = __webpack_require__(231);
-	// var getToken = require('../helpers/token.js');
+	var merge = __webpack_require__(232);
+	var EventEmitter = __webpack_require__(234).EventEmitter;
+	var axios = __webpack_require__(235);
+	var Dispatcher = __webpack_require__(228);
+	var getToken = __webpack_require__(264);
 	var assign = __webpack_require__(4);
 	var browserHistory = __webpack_require__(172).browserHistory;
 
-	var UserStore = merge(EventEmitter.prototype, {});
+	var _getContarctor = null;
+
+	var _getTimesheet = null;
+
+	var id = localStorage.getItem('id');
+
+	var UserStore = merge(EventEmitter.prototype, {
+	  getContractors: function getContractors() {
+	    return _getContarctor;
+	  },
+	  getTimeSheets: function getTimeSheets() {
+	    return _getTimesheet;
+	  }
+	});
 	module.exports = UserStore;
 
 	Dispatcher.register(handleAction);
@@ -26938,6 +26771,18 @@
 	  switch (payload.action) {
 	    case 'REGISTER':
 	      return createContractor(payload);
+	      break;
+	    case 'LOGIN':
+	      return Login(payload);
+	      break;
+	    case 'GETCONTRACTOR':
+	      return getContractor();
+	      break;
+	    case 'ADDTIMESHEET':
+	      return addTimeSheet();
+	      break;
+	    case 'GETTIMESHEET':
+	      return getTimeSheet();
 	      break;
 	  }
 	}
@@ -26950,6 +26795,8 @@
 	    password: payload.data.passwordHash,
 	    passwordConfirmation: payload.data.passwordConfirmation,
 	    email: payload.data.email,
+	    startdate: payload.data.startdate,
+	    enddate: payload.data.enddate,
 	    type: payload.data.type
 	  }).then(function (response) {
 	    console.log(response);
@@ -26959,10 +26806,62 @@
 	  });
 	}
 
-	function Login(payload) {}
+	function Login(payload) {
+	  axios.post('/api/login', {
+	    username: payload.data.username,
+	    password: payload.data.password
+	  }).then(function (response) {
+	    localStorage.setItem("token", response.data.token);
+	    localStorage.setItem("id", response.data.user._id);
+	    browserHistory.push('approverhome');
+	  }).catch(function (error) {
+	    UserStore.emit("wrongLoginDetails");
+	    console.log(error);
+	  });
+	}
+
+	function getContractor() {
+	  axios({
+	    method: 'GET',
+	    url: '/api/getContractor',
+	    headers: {
+	      'token': getToken()
+	    }
+	  }).then(function (response) {
+	    _getContarctor = response;
+	    UserStore.emit("getContractor");
+	  });
+	}
+
+	function addTimeSheet(payload) {
+	  axios({
+	    method: 'POST',
+	    url: '/api/addTimesheet/' + id,
+	    headers: {
+	      'token': getToken()
+	    }
+	  }).then(function (response) {
+	    //  _getContarctor = response
+	    //  UserStore.emit("getContractor");
+	    console.log(response);
+	  });
+	}
+
+	function getTimeSheet() {
+	  axios({
+	    method: 'GET',
+	    url: '/api/addTimesheet/' + id,
+	    headers: {
+	      'token': getToken()
+	    }
+	  }).then(function (response) {
+	    _getTimesheet = response;
+	    UserStore.emit("getTimeSheets");
+	  });
+	}
 
 /***/ },
-/* 235 */
+/* 232 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {/*!
@@ -27140,10 +27039,10 @@
 		}
 
 	})(typeof module === 'object' && module && typeof module.exports === 'object' && module.exports);
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(236)(module)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(233)(module)))
 
 /***/ },
-/* 236 */
+/* 233 */
 /***/ function(module, exports) {
 
 	module.exports = function(module) {
@@ -27159,7 +27058,7 @@
 
 
 /***/ },
-/* 237 */
+/* 234 */
 /***/ function(module, exports) {
 
 	// Copyright Joyent, Inc. and other Node contributors.
@@ -27467,20 +27366,20 @@
 
 
 /***/ },
-/* 238 */
+/* 235 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = __webpack_require__(239);
+	module.exports = __webpack_require__(236);
 
 /***/ },
-/* 239 */
+/* 236 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var utils = __webpack_require__(240);
-	var bind = __webpack_require__(241);
-	var Axios = __webpack_require__(242);
+	var utils = __webpack_require__(237);
+	var bind = __webpack_require__(238);
+	var Axios = __webpack_require__(239);
 
 	/**
 	 * Create an instance of Axios
@@ -27513,15 +27412,15 @@
 	};
 
 	// Expose Cancel & CancelToken
-	axios.Cancel = __webpack_require__(260);
-	axios.CancelToken = __webpack_require__(261);
-	axios.isCancel = __webpack_require__(257);
+	axios.Cancel = __webpack_require__(257);
+	axios.CancelToken = __webpack_require__(258);
+	axios.isCancel = __webpack_require__(254);
 
 	// Expose all/spread
 	axios.all = function all(promises) {
 	  return Promise.all(promises);
 	};
-	axios.spread = __webpack_require__(262);
+	axios.spread = __webpack_require__(259);
 
 	module.exports = axios;
 
@@ -27530,12 +27429,12 @@
 
 
 /***/ },
-/* 240 */
+/* 237 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var bind = __webpack_require__(241);
+	var bind = __webpack_require__(238);
 
 	/*global toString:true*/
 
@@ -27835,7 +27734,7 @@
 
 
 /***/ },
-/* 241 */
+/* 238 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -27852,17 +27751,17 @@
 
 
 /***/ },
-/* 242 */
+/* 239 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var defaults = __webpack_require__(243);
-	var utils = __webpack_require__(240);
-	var InterceptorManager = __webpack_require__(254);
-	var dispatchRequest = __webpack_require__(255);
-	var isAbsoluteURL = __webpack_require__(258);
-	var combineURLs = __webpack_require__(259);
+	var defaults = __webpack_require__(240);
+	var utils = __webpack_require__(237);
+	var InterceptorManager = __webpack_require__(251);
+	var dispatchRequest = __webpack_require__(252);
+	var isAbsoluteURL = __webpack_require__(255);
+	var combineURLs = __webpack_require__(256);
 
 	/**
 	 * Create a new instance of Axios
@@ -27943,13 +27842,13 @@
 
 
 /***/ },
-/* 243 */
+/* 240 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
 
-	var utils = __webpack_require__(240);
-	var normalizeHeaderName = __webpack_require__(244);
+	var utils = __webpack_require__(237);
+	var normalizeHeaderName = __webpack_require__(241);
 
 	var PROTECTION_PREFIX = /^\)\]\}',?\n/;
 	var DEFAULT_CONTENT_TYPE = {
@@ -27966,10 +27865,10 @@
 	  var adapter;
 	  if (typeof XMLHttpRequest !== 'undefined') {
 	    // For browsers use XHR adapter
-	    adapter = __webpack_require__(245);
+	    adapter = __webpack_require__(242);
 	  } else if (typeof process !== 'undefined') {
 	    // For node use HTTP adapter
-	    adapter = __webpack_require__(245);
+	    adapter = __webpack_require__(242);
 	  }
 	  return adapter;
 	}
@@ -28036,12 +27935,12 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
 
 /***/ },
-/* 244 */
+/* 241 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var utils = __webpack_require__(240);
+	var utils = __webpack_require__(237);
 
 	module.exports = function normalizeHeaderName(headers, normalizedName) {
 	  utils.forEach(headers, function processHeader(value, name) {
@@ -28054,18 +27953,18 @@
 
 
 /***/ },
-/* 245 */
+/* 242 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {'use strict';
 
-	var utils = __webpack_require__(240);
-	var settle = __webpack_require__(246);
-	var buildURL = __webpack_require__(249);
-	var parseHeaders = __webpack_require__(250);
-	var isURLSameOrigin = __webpack_require__(251);
-	var createError = __webpack_require__(247);
-	var btoa = (typeof window !== 'undefined' && window.btoa) || __webpack_require__(252);
+	var utils = __webpack_require__(237);
+	var settle = __webpack_require__(243);
+	var buildURL = __webpack_require__(246);
+	var parseHeaders = __webpack_require__(247);
+	var isURLSameOrigin = __webpack_require__(248);
+	var createError = __webpack_require__(244);
+	var btoa = (typeof window !== 'undefined' && window.btoa) || __webpack_require__(249);
 
 	module.exports = function xhrAdapter(config) {
 	  return new Promise(function dispatchXhrRequest(resolve, reject) {
@@ -28161,7 +28060,7 @@
 	    // This is only done if running in a standard browser environment.
 	    // Specifically not if we're in a web worker, or react-native.
 	    if (utils.isStandardBrowserEnv()) {
-	      var cookies = __webpack_require__(253);
+	      var cookies = __webpack_require__(250);
 
 	      // Add xsrf header
 	      var xsrfValue = (config.withCredentials || isURLSameOrigin(config.url)) && config.xsrfCookieName ?
@@ -28238,12 +28137,12 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)))
 
 /***/ },
-/* 246 */
+/* 243 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var createError = __webpack_require__(247);
+	var createError = __webpack_require__(244);
 
 	/**
 	 * Resolve or reject a Promise based on response status.
@@ -28269,12 +28168,12 @@
 
 
 /***/ },
-/* 247 */
+/* 244 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var enhanceError = __webpack_require__(248);
+	var enhanceError = __webpack_require__(245);
 
 	/**
 	 * Create an Error with the specified message, config, error code, and response.
@@ -28292,7 +28191,7 @@
 
 
 /***/ },
-/* 248 */
+/* 245 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -28317,12 +28216,12 @@
 
 
 /***/ },
-/* 249 */
+/* 246 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var utils = __webpack_require__(240);
+	var utils = __webpack_require__(237);
 
 	function encode(val) {
 	  return encodeURIComponent(val).
@@ -28391,12 +28290,12 @@
 
 
 /***/ },
-/* 250 */
+/* 247 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var utils = __webpack_require__(240);
+	var utils = __webpack_require__(237);
 
 	/**
 	 * Parse headers into an object
@@ -28434,12 +28333,12 @@
 
 
 /***/ },
-/* 251 */
+/* 248 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var utils = __webpack_require__(240);
+	var utils = __webpack_require__(237);
 
 	module.exports = (
 	  utils.isStandardBrowserEnv() ?
@@ -28508,7 +28407,7 @@
 
 
 /***/ },
-/* 252 */
+/* 249 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -28550,12 +28449,12 @@
 
 
 /***/ },
-/* 253 */
+/* 250 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var utils = __webpack_require__(240);
+	var utils = __webpack_require__(237);
 
 	module.exports = (
 	  utils.isStandardBrowserEnv() ?
@@ -28609,12 +28508,12 @@
 
 
 /***/ },
-/* 254 */
+/* 251 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var utils = __webpack_require__(240);
+	var utils = __webpack_require__(237);
 
 	function InterceptorManager() {
 	  this.handlers = [];
@@ -28667,15 +28566,15 @@
 
 
 /***/ },
-/* 255 */
+/* 252 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var utils = __webpack_require__(240);
-	var transformData = __webpack_require__(256);
-	var isCancel = __webpack_require__(257);
-	var defaults = __webpack_require__(243);
+	var utils = __webpack_require__(237);
+	var transformData = __webpack_require__(253);
+	var isCancel = __webpack_require__(254);
+	var defaults = __webpack_require__(240);
 
 	/**
 	 * Throws a `Cancel` if cancellation has been requested.
@@ -28752,12 +28651,12 @@
 
 
 /***/ },
-/* 256 */
+/* 253 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var utils = __webpack_require__(240);
+	var utils = __webpack_require__(237);
 
 	/**
 	 * Transform the data for a request or a response
@@ -28778,7 +28677,7 @@
 
 
 /***/ },
-/* 257 */
+/* 254 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -28789,7 +28688,7 @@
 
 
 /***/ },
-/* 258 */
+/* 255 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -28809,7 +28708,7 @@
 
 
 /***/ },
-/* 259 */
+/* 256 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -28827,7 +28726,7 @@
 
 
 /***/ },
-/* 260 */
+/* 257 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -28852,12 +28751,12 @@
 
 
 /***/ },
-/* 261 */
+/* 258 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var Cancel = __webpack_require__(260);
+	var Cancel = __webpack_require__(257);
 
 	/**
 	 * A `CancelToken` is an object that can be used to request cancellation of an operation.
@@ -28915,7 +28814,7 @@
 
 
 /***/ },
-/* 262 */
+/* 259 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -28946,6 +28845,934 @@
 	  };
 	};
 
+
+/***/ },
+/* 260 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var React = __webpack_require__(1);
+	var ReactDOM = __webpack_require__(34);
+	var Router = __webpack_require__(172).Router;
+	var Route = __webpack_require__(172).Route;
+	var browserHistory = __webpack_require__(172).browserHistory;
+
+	var ApproverHome = React.createClass({
+	  displayName: 'ApproverHome',
+
+	  render: function render() {
+	    return React.createElement(
+	      'div',
+	      { className: 'col-sm-4 col-md-8 col-lg-12' },
+	      React.createElement(
+	        'h1',
+	        null,
+	        'Approver Home'
+	      )
+	    );
+	  }
+	});
+	module.exports = ApproverHome;
+
+/***/ },
+/* 261 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var React = __webpack_require__(1);
+	var ReactDOM = __webpack_require__(34);
+	var Router = __webpack_require__(172).Router;
+	var Route = __webpack_require__(172).Route;
+	var browserHistory = __webpack_require__(172).browserHistory;
+	var Dispatcher = __webpack_require__(228);
+	var userStore = __webpack_require__(231);
+
+	var successMsg = React.createElement(
+	  'div',
+	  { className: 'alert alert-success' },
+	  React.createElement(
+	    'strong',
+	    null,
+	    'Success!'
+	  ),
+	  ' Indicates a successful or positive action.'
+	);
+
+	var Approveradduser = React.createClass({
+	  displayName: 'Approveradduser',
+	  getInitialState: function getInitialState() {
+	    return {
+	      success: false
+	    };
+	  },
+	  createContractor: function createContractor(event) {
+	    var self = this;
+	    Dispatcher.dispatch({
+	      action: 'REGISTER',
+	      data: {
+	        firstName: this.refs.firstName.value,
+	        lastName: this.refs.lastName.value,
+	        username: this.refs.username.value,
+	        passwordHash: this.refs.passwordHash.value,
+	        passwordConfirmation: this.refs.passwordConfirmation.value,
+	        email: this.refs.email.value,
+	        startdate: this.refs.startdate.value,
+	        enddate: this.refs.enddate.value,
+	        type: this.refs.type.value
+	      }
+	    });
+
+	    userStore.on('contractorCreated', function () {
+	      self.setState({
+	        success: true
+	      });
+	    });
+
+	    event.preventDefault();
+	  },
+
+	  render: function render() {
+	    console.log(this.state.success);
+	    return React.createElement(
+	      'div',
+	      { className: 'col-sm-4 col-md-8 col-lg-12' },
+	      this.state.success ? successMsg : '',
+	      React.createElement(
+	        'div',
+	        { className: 'form-group' },
+	        React.createElement(
+	          'label',
+	          { htmlFor: 'firstName' },
+	          'First Name:'
+	        ),
+	        React.createElement('input', { type: 'text', className: 'form-control', id: 'firstName', ref: 'firstName' })
+	      ),
+	      React.createElement(
+	        'div',
+	        { className: 'form-group' },
+	        React.createElement(
+	          'label',
+	          { htmlFor: 'lastName' },
+	          'Last Name:'
+	        ),
+	        React.createElement('input', { type: 'text', className: 'form-control', id: 'lastName', ref: 'lastName' })
+	      ),
+	      React.createElement(
+	        'div',
+	        { className: 'form-group' },
+	        React.createElement(
+	          'label',
+	          { htmlFor: 'username' },
+	          'Username:'
+	        ),
+	        React.createElement('input', { type: 'text', className: 'form-control', id: 'username', ref: 'username' })
+	      ),
+	      React.createElement(
+	        'div',
+	        { className: 'form-group' },
+	        React.createElement(
+	          'label',
+	          { htmlFor: 'email' },
+	          'Email:'
+	        ),
+	        React.createElement('input', { type: 'text', className: 'form-control', id: 'email', ref: 'email' })
+	      ),
+	      React.createElement(
+	        'div',
+	        { className: 'form-group' },
+	        React.createElement(
+	          'label',
+	          { htmlFor: 'type' },
+	          'Type:'
+	        ),
+	        React.createElement('input', { type: 'text', className: 'form-control', id: 'type', ref: 'type' })
+	      ),
+	      React.createElement(
+	        'div',
+	        { className: 'form-group' },
+	        React.createElement(
+	          'label',
+	          { htmlFor: 'passwordHash' },
+	          'Password:'
+	        ),
+	        React.createElement('input', { type: 'password', className: 'form-control', id: 'passwordHash', ref: 'passwordHash' })
+	      ),
+	      React.createElement(
+	        'div',
+	        { className: 'form-group' },
+	        React.createElement(
+	          'label',
+	          { htmlFor: 'password' },
+	          'Confirm password:'
+	        ),
+	        React.createElement('input', { type: 'password', className: 'form-control', id: 'password', ref: 'passwordConfirmation' })
+	      ),
+	      React.createElement(
+	        'div',
+	        { className: 'form-group' },
+	        React.createElement(
+	          'label',
+	          { htmlFor: 'startdate' },
+	          'startdate:'
+	        ),
+	        React.createElement('input', { type: 'date', name: 'startdate', id: 'startdate', ref: 'startdate' })
+	      ),
+	      React.createElement(
+	        'div',
+	        { className: 'form-group' },
+	        React.createElement(
+	          'label',
+	          { htmlFor: 'enddate' },
+	          'enddate:'
+	        ),
+	        React.createElement('input', { type: 'date', name: 'enddate', id: 'enddate', ref: 'enddate' })
+	      ),
+	      React.createElement(
+	        'button',
+	        { type: 'submit', onClick: this.createContractor, className: 'btn btn-default' },
+	        'Submit'
+	      )
+	    );
+	  }
+	});
+
+	module.exports = Approveradduser;
+
+/***/ },
+/* 262 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var React = __webpack_require__(1);
+	var browserHistory = __webpack_require__(172).browserHistory;
+	var Link = __webpack_require__(172).Link;
+
+	var Nav = React.createClass({
+	  displayName: 'Nav',
+
+	  render: function render() {
+	    return React.createElement(
+	      'nav',
+	      { className: 'navbar navbar-inverse' },
+	      React.createElement(
+	        'div',
+	        { className: 'container-fluid' },
+	        React.createElement(
+	          'div',
+	          { className: 'navbar-header' },
+	          React.createElement(
+	            'a',
+	            { className: 'navbar-brand', href: '#' },
+	            'JetTwoProject'
+	          )
+	        ),
+	        React.createElement(
+	          'ul',
+	          { className: 'nav navbar-nav navbar-right' },
+	          React.createElement(
+	            'li',
+	            null,
+	            React.createElement(
+	              Link,
+	              { to: '/login', className: 'glyphicon glyphicon-log-in' },
+	              'Login'
+	            )
+	          )
+	        )
+	      )
+	    );
+	  }
+	});
+	module.exports = Nav;
+
+/***/ },
+/* 263 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var React = __webpack_require__(1);
+	var ReactDOM = __webpack_require__(34);
+	var Router = __webpack_require__(172).Router;
+	var Route = __webpack_require__(172).Route;
+	var browserHistory = __webpack_require__(172).browserHistory;
+	var userStore = __webpack_require__(231);
+	var Dispatcher = __webpack_require__(228);
+	var Link = __webpack_require__(172).Link;
+
+	var ApproverViewContarctor = React.createClass({
+	  displayName: 'ApproverViewContarctor',
+	  getInitialState: function getInitialState() {
+	    return {
+	      contractor: userStore.getContractors()
+	    };
+	  },
+
+	  componentWillMount: function componentWillMount() {
+	    var self = this;
+	    Dispatcher.dispatch({
+	      action: 'GETCONTRACTOR'
+	    });
+
+	    userStore.on('getContractor', function () {
+	      self.setState({
+	        contractor: userStore.getContractors()
+	      });
+	    });
+	  },
+	  render: function render() {
+	    var self = this;
+	    console.log(this.state.contractor);
+	    if (this.state.contractor) {
+	      var contractors = self.state.contractor.data.contractor.map(function (contractor, i) {
+	        return React.createElement(
+	          'tr',
+	          { key: i, className: 'success' },
+	          React.createElement(
+	            'td',
+	            null,
+	            contractor.startdate
+	          ),
+	          React.createElement(
+	            'td',
+	            null,
+	            contractor.enddate
+	          ),
+	          React.createElement(
+	            'td',
+	            null,
+	            contractor.firstName
+	          ),
+	          React.createElement(
+	            'td',
+	            null,
+	            contractor.lastName
+	          ),
+	          React.createElement(
+	            'td',
+	            null,
+	            React.createElement(
+	              Link,
+	              { to: 'timesheet/' + contractor._id },
+	              'Edit'
+	            )
+	          ),
+	          React.createElement(
+	            'td',
+	            null,
+	            React.createElement(
+	              Link,
+	              { to: 'timesheet/' + contractor._id },
+	              'View TimeSheets'
+	            )
+	          ),
+	          React.createElement(
+	            'td',
+	            null,
+	            React.createElement(
+	              Link,
+	              { to: 'timesheet/' + contractor._id },
+	              'Delete'
+	            )
+	          )
+	        );
+	      });
+	      return React.createElement(
+	        'table',
+	        { className: 'table' },
+	        React.createElement(
+	          'thead',
+	          null,
+	          React.createElement(
+	            'tr',
+	            null,
+	            React.createElement(
+	              'th',
+	              null,
+	              'Start Date'
+	            ),
+	            React.createElement(
+	              'th',
+	              null,
+	              'End Date'
+	            ),
+	            React.createElement(
+	              'th',
+	              null,
+	              'First Name'
+	            ),
+	            React.createElement(
+	              'th',
+	              null,
+	              'Last Name'
+	            ),
+	            React.createElement(
+	              'th',
+	              null,
+	              'Edit'
+	            ),
+	            React.createElement(
+	              'th',
+	              null,
+	              'View TimeSheets'
+	            ),
+	            React.createElement(
+	              'th',
+	              null,
+	              'Delete'
+	            )
+	          )
+	        ),
+	        React.createElement(
+	          'tbody',
+	          null,
+	          contractors
+	        )
+	      );
+	    } else {
+	      return React.createElement('div', { className: 'loader' });
+	    }
+	  }
+	});
+	module.exports = ApproverViewContarctor;
+
+/***/ },
+/* 264 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	module.exports = function () {
+	  return localStorage.getItem('token') || "";
+	};
+
+/***/ },
+/* 265 */,
+/* 266 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var React = __webpack_require__(1);
+	var ReactDOM = __webpack_require__(34);
+	var Router = __webpack_require__(172).Router;
+	var Route = __webpack_require__(172).Route;
+	var browserHistory = __webpack_require__(172).browserHistory;
+
+	var Timesheet = React.createClass({
+	  displayName: 'Timesheet',
+
+	  render: function render() {
+	    console.log(this.props.params.id);
+	    return React.createElement(
+	      'div',
+	      { className: 'col-sm-4 col-md-8 col-lg-12' },
+	      React.createElement(
+	        'h3',
+	        null,
+	        'Timesheet User ID : ',
+	        this.props.params.id
+	      )
+	    );
+	  }
+	});
+	module.exports = Timesheet;
+
+/***/ },
+/* 267 */,
+/* 268 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var React = __webpack_require__(1);
+	var ReactDOM = __webpack_require__(34);
+	var Router = __webpack_require__(172).Router;
+	var Route = __webpack_require__(172).Route;
+	var browserHistory = __webpack_require__(172).browserHistory;
+	var TimeSheet = __webpack_require__(269);
+	var Dispatcher = __webpack_require__(228);
+	var userStore = __webpack_require__(231);
+
+	var AddTimeSheet = React.createClass({
+	  displayName: 'AddTimeSheet',
+	  getInitialState: function getInitialState() {
+	    return {
+	      mondayHourWorked: 0,
+	      tuesdayHourWorked: 0,
+	      wednesdayHourWorked: 0,
+	      thursdayHourWorked: 0,
+	      fridayHourWorked: 0
+	    };
+	  },
+	  getData: function getData(event) {},
+	  monday: function monday() {
+	    var self = this;
+	    var totalDay = parseInt(this.refs.timeout1.value) - parseInt(this.refs.timein1.value);
+	    var totalLuch = parseInt(this.refs.lunchend1.value) - parseInt(this.refs.lunchstart1.value);
+	    var workedHour = totalDay - totalLuch;
+	    if (workedHour > 0 && workedHour != 'NaN') {
+	      self.setState({
+	        mondayHourWorked: workedHour
+	      });
+	    }
+	  },
+	  tuesday: function tuesday() {
+	    var self = this;
+	    var totalDay = parseInt(this.refs.timeout2.value) - parseInt(this.refs.timein2.value);
+	    var totalLuch = parseInt(this.refs.lunchend2.value) - parseInt(this.refs.lunchstart2.value);
+	    var workedHour = totalDay - totalLuch;
+	    if (workedHour > 0 && workedHour != 'NaN') {
+	      self.setState({
+	        tuesdayHourWorked: workedHour
+	      });
+	    }
+	  },
+	  wednesday: function wednesday() {
+	    var self = this;
+	    var totalDay = parseInt(this.refs.timeout3.value) - parseInt(this.refs.timein3.value);
+	    var totalLuch = parseInt(this.refs.lunchend3.value) - parseInt(this.refs.lunchstart3.value);
+	    var workedHour = totalDay - totalLuch;
+	    if (workedHour > 0 && workedHour != 'NaN') {
+	      self.setState({
+	        wednesdayHourWorked: workedHour
+	      });
+	    }
+	  },
+	  thursday: function thursday() {
+	    var self = this;
+	    var totalDay = parseInt(this.refs.timeout4.value) - parseInt(this.refs.timein4.value);
+	    var totalLuch = parseInt(this.refs.lunchend4.value) - parseInt(this.refs.lunchstart4.value);
+	    var workedHour = totalDay - totalLuch;
+	    if (workedHour > 0 && workedHour != 'NaN') {
+	      self.setState({
+	        thursdayHourWorked: workedHour
+	      });
+	    }
+	  },
+	  friday: function friday() {
+	    var self = this;
+	    var totalDay = parseInt(this.refs.timeout5.value) - parseInt(this.refs.timein5.value);
+	    var totalLuch = parseInt(this.refs.lunchend5.value) - parseInt(this.refs.lunchstart5.value);
+	    var workedHour = totalDay - totalLuch;
+	    if (workedHour > 0 && workedHour != 'NaN') {
+	      self.setState({
+	        fridayHourWorked: workedHour
+	      });
+	    }
+	  },
+
+	  render: function render() {
+	    return React.createElement(
+	      'div',
+	      { className: 'col-sm-4 col-md-8 col-lg-12' },
+	      React.createElement(
+	        'h5',
+	        null,
+	        'TimeSheet ID : ',
+	        this.props.params.id,
+	        ' '
+	      ),
+	      React.createElement(
+	        'table',
+	        { className: 'table' },
+	        React.createElement(
+	          'thead',
+	          null,
+	          React.createElement(
+	            'tr',
+	            null,
+	            React.createElement(
+	              'th',
+	              null,
+	              'Day'
+	            ),
+	            React.createElement(
+	              'th',
+	              null,
+	              'Dates'
+	            ),
+	            React.createElement(
+	              'th',
+	              null,
+	              'Time In'
+	            ),
+	            React.createElement(
+	              'th',
+	              null,
+	              'Lunch Start'
+	            ),
+	            React.createElement(
+	              'th',
+	              null,
+	              'Lunch End'
+	            ),
+	            React.createElement(
+	              'th',
+	              null,
+	              'Time Out'
+	            ),
+	            React.createElement(
+	              'th',
+	              null,
+	              'Hours worked'
+	            )
+	          )
+	        ),
+	        React.createElement(
+	          'tbody',
+	          null,
+	          React.createElement(
+	            'tr',
+	            { className: 'success form-group' },
+	            React.createElement(
+	              'td',
+	              null,
+	              'Monday'
+	            ),
+	            React.createElement(
+	              'td',
+	              null,
+	              React.createElement('input', { type: 'date', className: 'form-control', name: 'date', ref: 'date1' })
+	            ),
+	            React.createElement(
+	              'td',
+	              null,
+	              React.createElement('input', { type: 'time', className: 'form-control', name: 'timein', ref: 'timein1', onChange: this.monday })
+	            ),
+	            React.createElement(
+	              'td',
+	              null,
+	              React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchstart', ref: 'lunchstart1', onChange: this.monday })
+	            ),
+	            React.createElement(
+	              'td',
+	              null,
+	              React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchend', ref: 'lunchend1', onChange: this.monday })
+	            ),
+	            React.createElement(
+	              'td',
+	              null,
+	              React.createElement('input', { type: 'time', className: 'form-control', name: 'timeout', ref: 'timeout1', onChange: this.monday })
+	            ),
+	            React.createElement(
+	              'td',
+	              null,
+	              React.createElement('input', { type: 'text', className: 'form-control', name: 'hoursworked', ref: 'hoursworked1', value: this.state.mondayHourWorked, disabled: true })
+	            )
+	          ),
+	          React.createElement(
+	            'tr',
+	            { className: 'success form-group' },
+	            React.createElement(
+	              'td',
+	              null,
+	              'Tuesday'
+	            ),
+	            React.createElement(
+	              'td',
+	              null,
+	              React.createElement('input', { type: 'date', className: 'form-control', name: 'date', ref: 'date2' })
+	            ),
+	            React.createElement(
+	              'td',
+	              null,
+	              React.createElement('input', { type: 'time', className: 'form-control', name: 'timein', ref: 'timein2', onChange: this.tuesday })
+	            ),
+	            React.createElement(
+	              'td',
+	              null,
+	              React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchstart', ref: 'lunchstart2', onChange: this.tuesday })
+	            ),
+	            React.createElement(
+	              'td',
+	              null,
+	              React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchend', ref: 'lunchend2', onChange: this.tuesday })
+	            ),
+	            React.createElement(
+	              'td',
+	              null,
+	              React.createElement('input', { type: 'time', className: 'form-control', name: 'timeout', ref: 'timeout2', onChange: this.tuesday })
+	            ),
+	            React.createElement(
+	              'td',
+	              null,
+	              React.createElement('input', { type: 'text', className: 'form-control', name: 'hoursworked', ref: 'hoursworked2', value: this.state.tuesdayHourWorked, disabled: true })
+	            )
+	          ),
+	          React.createElement(
+	            'tr',
+	            { className: 'success form-group' },
+	            React.createElement(
+	              'td',
+	              null,
+	              'Wednesday'
+	            ),
+	            React.createElement(
+	              'td',
+	              null,
+	              React.createElement('input', { type: 'date', className: 'form-control', name: 'date', ref: 'date3' })
+	            ),
+	            React.createElement(
+	              'td',
+	              null,
+	              React.createElement('input', { type: 'time', className: 'form-control', name: 'timein', ref: 'timein3', onChange: this.wednesday })
+	            ),
+	            React.createElement(
+	              'td',
+	              null,
+	              React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchstart', ref: 'lunchstart3', onChange: this.wednesday })
+	            ),
+	            React.createElement(
+	              'td',
+	              null,
+	              React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchend', ref: 'lunchend3', onChange: this.wednesday })
+	            ),
+	            React.createElement(
+	              'td',
+	              null,
+	              React.createElement('input', { type: 'time', className: 'form-control', name: 'timeout', ref: 'timeout3', onChange: this.wednesday })
+	            ),
+	            React.createElement(
+	              'td',
+	              null,
+	              React.createElement('input', { type: 'text', className: 'form-control', name: 'hoursworked', ref: 'hoursworked3', value: this.state.wednesdayHourWorked, disabled: true })
+	            )
+	          ),
+	          React.createElement(
+	            'tr',
+	            { className: 'success form-group' },
+	            React.createElement(
+	              'td',
+	              null,
+	              'Thursday'
+	            ),
+	            React.createElement(
+	              'td',
+	              null,
+	              React.createElement('input', { type: 'date', className: 'form-control', name: 'date', ref: 'date4' })
+	            ),
+	            React.createElement(
+	              'td',
+	              null,
+	              React.createElement('input', { type: 'time', className: 'form-control', name: 'timein', ref: 'timein4', onChange: this.thursday })
+	            ),
+	            React.createElement(
+	              'td',
+	              null,
+	              React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchstart', ref: 'lunchstart4', onChange: this.thursday })
+	            ),
+	            React.createElement(
+	              'td',
+	              null,
+	              React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchend', ref: 'lunchend4', onChange: this.thursday })
+	            ),
+	            React.createElement(
+	              'td',
+	              null,
+	              React.createElement('input', { type: 'time', className: 'form-control', name: 'timeout', ref: 'timeout4', onChange: this.thursday })
+	            ),
+	            React.createElement(
+	              'td',
+	              null,
+	              React.createElement('input', { type: 'text', className: 'form-control', name: 'hoursworked', ref: 'hoursworked4', value: this.state.thursdayHourWorked, disabled: true })
+	            )
+	          ),
+	          React.createElement(
+	            'tr',
+	            { className: 'success form-group' },
+	            React.createElement(
+	              'td',
+	              null,
+	              'Firday'
+	            ),
+	            React.createElement(
+	              'td',
+	              null,
+	              React.createElement('input', { type: 'date', className: 'form-control', name: 'date', ref: 'date5' })
+	            ),
+	            React.createElement(
+	              'td',
+	              null,
+	              React.createElement('input', { type: 'time', className: 'form-control', name: 'timein', ref: 'timein5', onChange: this.friday })
+	            ),
+	            React.createElement(
+	              'td',
+	              null,
+	              React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchstart', ref: 'lunchstart5', onChange: this.friday })
+	            ),
+	            React.createElement(
+	              'td',
+	              null,
+	              React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchend', ref: 'lunchend5', onChange: this.friday })
+	            ),
+	            React.createElement(
+	              'td',
+	              null,
+	              React.createElement('input', { type: 'time', className: 'form-control', name: 'timeout', ref: 'timeout5', onChange: this.friday })
+	            ),
+	            React.createElement(
+	              'td',
+	              null,
+	              React.createElement('input', { type: 'text', className: 'form-control', name: 'hoursworked', ref: 'hoursworked5', value: this.state.fridayHourWorked, disabled: true })
+	            )
+	          )
+	        )
+	      ),
+	      React.createElement(
+	        'h4',
+	        null,
+	        'Totle hours worked : ',
+	        this.state.mondayHourWorked + this.state.tuesdayHourWorked + this.state.wednesdayHourWorked + this.state.thursdayHourWorked + this.state.fridayHourWorked
+	      ),
+	      React.createElement('input', { type: 'button', className: 'form-control', value: 'save', onClick: this.getData })
+	    );
+	  }
+	});
+	module.exports = AddTimeSheet;
+
+/***/ },
+/* 269 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var React = __webpack_require__(1);
+	var ReactDOM = __webpack_require__(34);
+	var Router = __webpack_require__(172).Router;
+	var Route = __webpack_require__(172).Route;
+	var browserHistory = __webpack_require__(172).browserHistory;
+
+	var TimeSheet = React.createClass({
+	  displayName: 'TimeSheet',
+
+	  render: function render() {
+	    return React.createElement(
+	      'tr',
+	      { className: 'success form-group' },
+	      React.createElement(
+	        'td',
+	        null,
+	        'Monday'
+	      ),
+	      React.createElement(
+	        'td',
+	        null,
+	        React.createElement('input', { type: 'text', className: 'form-control', name: 'date' })
+	      ),
+	      React.createElement(
+	        'td',
+	        null,
+	        React.createElement('input', { type: 'text', className: 'form-control', name: 'timein' })
+	      ),
+	      React.createElement(
+	        'td',
+	        null,
+	        React.createElement('input', { type: 'text', className: 'form-control', name: 'lunchstart' })
+	      ),
+	      React.createElement(
+	        'td',
+	        null,
+	        React.createElement('input', { type: 'text', className: 'form-control', name: 'lunchend' })
+	      ),
+	      React.createElement(
+	        'td',
+	        null,
+	        React.createElement('input', { type: 'text', className: 'form-control', name: 'timeout' })
+	      ),
+	      React.createElement(
+	        'td',
+	        null,
+	        React.createElement('input', { type: 'text', className: 'form-control', name: 'hoursworked', disabled: true })
+	      )
+	    );
+	  }
+	});
+	module.exports = TimeSheet;
+
+/***/ },
+/* 270 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var React = __webpack_require__(1);
+	var ReactDOM = __webpack_require__(34);
+	var Router = __webpack_require__(172).Router;
+	var Route = __webpack_require__(172).Route;
+	var browserHistory = __webpack_require__(172).browserHistory;
+	var Dispatcher = __webpack_require__(228);
+	var userStore = __webpack_require__(231);
+	var Link = __webpack_require__(172).Link;
+
+	var ContractorDashbored = React.createClass({
+	  displayName: 'ContractorDashbored',
+	  getInitialState: function getInitialState() {
+	    return {
+	      timesheet: userStore.getTimeSheets()
+	    };
+	  },
+
+	  componentWillMount: function componentWillMount() {
+	    var self = this;
+	    Dispatcher.dispatch({
+	      action: 'GETTIMESHEET'
+	    });
+
+	    userStore.on('getTimeSheets', function () {
+	      self.setState({
+	        timesheet: userStore.getTimeSheets()
+	      });
+	    });
+	  },
+	  AddTimeSheet: function AddTimeSheet() {
+	    Dispatcher.dispatch({
+	      action: 'ADDTIMESHEET'
+	    });
+	  },
+
+	  render: function render() {
+	    var self = this;
+
+	    if (this.state.timesheet) {
+	      var timesheets = self.state.timesheet.data.contractor.map(function (timesheet, i) {
+	        return React.createElement(
+	          'div',
+	          { key: i, className: 'card card-block' },
+	          React.createElement(
+	            'h4',
+	            { className: 'card-title' },
+	            'TimeSheet id : ',
+	            timesheet._id
+	          ),
+	          React.createElement('p', { className: 'card-text' }),
+	          React.createElement(
+	            Link,
+	            { to: '/addtimesheet/' + timesheet._id },
+	            ' Edit '
+	          ),
+	          React.createElement(
+	            Link,
+	            { to: '' },
+	            ' Delete '
+	          )
+	        );
+	      });
+	      return React.createElement(
+	        'div',
+	        { className: 'col-sm-4 col-md-8 col-lg-12' },
+	        React.createElement('input', { type: 'button', onClick: this.AddTimeSheet, value: 'add' }),
+	        timesheets
+	      );
+	    } else {
+	      return React.createElement('div', { className: 'loader' });
+	    }
+	  }
+	});
+	module.exports = ContractorDashbored;
 
 /***/ }
 /******/ ]);

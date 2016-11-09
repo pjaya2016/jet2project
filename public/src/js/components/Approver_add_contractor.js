@@ -28,6 +28,8 @@ var Approveradduser = React.createClass({
           passwordHash : this.refs.passwordHash.value,
           passwordConfirmation : this.refs.passwordConfirmation.value,
           email : this.refs.email.value,
+          startdate : this.refs.startdate.value,
+          enddate : this.refs.enddate.value,
           type: this.refs.type.value,
         }
       });
@@ -81,6 +83,17 @@ var Approveradduser = React.createClass({
                 <label htmlFor="password">Confirm password:</label>
                 <input type="password" className="form-control" id="password" ref="passwordConfirmation" />
               </div>
+
+              <div className="form-group">
+                <label htmlFor="startdate">startdate:</label>
+                <input type="date" name="startdate" id="startdate" ref='startdate'   />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="enddate">enddate:</label>
+                <input type="date" name="enddate" id="enddate" ref='enddate'   />
+              </div>
+
 
               <button type="submit" onClick={this.createContractor} className="btn btn-default">Submit</button>
       </div>
