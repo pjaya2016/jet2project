@@ -10,6 +10,8 @@ var _getContarctor = null;
 
 var _getTimesheet = null;
 
+var _getIdTimesheet = null;
+
 var id = localStorage.getItem('id');
 
 var UserStore = merge(EventEmitter.prototype, {
@@ -18,12 +20,15 @@ var UserStore = merge(EventEmitter.prototype, {
   },
   getTimeSheets(){
     return _getTimesheet;
+  },
+  getIdTimeSheets(){
+    return _getIdTimesheet;
   }
 });
 module.exports = UserStore;
 
 Dispatcher.register(handleAction);
-
+//TIMESHEETDATASEND
 function handleAction(payload){
   switch(payload.action){
     case 'REGISTER' :
@@ -40,6 +45,12 @@ function handleAction(payload){
       break;
     case 'GETTIMESHEET'    :
       return getTimeSheet();
+      break;
+    case 'GETIDTIMESHEET'    :
+      return getIdTimeSheet(payload);
+      break;
+    case 'TIMESHEETDATASEND'    :
+      return updateTimeSheet(payload);
       break;
   }
 }
@@ -124,5 +135,43 @@ function getTimeSheet(){
    _getTimesheet = response
    UserStore.emit("getTimeSheets");
   });
+
+}
+
+function getIdTimeSheet(payload){
+  axios({
+      method : 'POST',
+      url : '/api/getidtimesheet/' + id ,
+      data: {
+            TimeSheet : payload.data
+            },
+      headers : {
+        'token': getToken()
+      }
+    })
+  .then(function(response){
+   _getIdTimesheet = response
+   UserStore.emit("getIdTimeSheets");
+  });
+}
+
+function updateTimeSheet(payload){
+
+  axios({
+      method : 'POST',
+      url : '/api/updateTimesheet/' + id ,
+      data: {
+            datas : payload.data
+            },
+      headers : {
+        'token': getToken()
+      }
+    })
+  .then(function(response){
+  //  _getIdTimesheet = response
+  //  UserStore.emit("getIdTimeSheets");
+  });
+
+
 
 }

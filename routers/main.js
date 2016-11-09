@@ -20,14 +20,17 @@ router.route("/getContractor")
 
 //  ----------------------------------------------------------------
 
-
 //-------------------------------------------------------------
 router.route("/addTimesheet/:id")
   .post(userController.addContractorTimeSheet)
   .get(userController.getTimeSheet);
 // -----------------------------------------------------------------------------
 
-router.route("/getidtimesheet")
-  .get(userController.getIdTimeSheet);
+router.route("/getidtimesheet/:id")
+  .post(userController.getIdTimeSheet);
+
+
+  router.route("/updateTimesheet/:id")
+    .post(userController.updateTimesheet);
 
 module.exports = router;

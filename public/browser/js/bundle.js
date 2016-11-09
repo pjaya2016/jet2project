@@ -26753,6 +26753,8 @@
 
 	var _getTimesheet = null;
 
+	var _getIdTimesheet = null;
+
 	var id = localStorage.getItem('id');
 
 	var UserStore = merge(EventEmitter.prototype, {
@@ -26761,12 +26763,15 @@
 	  },
 	  getTimeSheets: function getTimeSheets() {
 	    return _getTimesheet;
+	  },
+	  getIdTimeSheets: function getIdTimeSheets() {
+	    return _getIdTimesheet;
 	  }
 	});
 	module.exports = UserStore;
 
 	Dispatcher.register(handleAction);
-
+	//TIMESHEETDATASEND
 	function handleAction(payload) {
 	  switch (payload.action) {
 	    case 'REGISTER':
@@ -26783,6 +26788,12 @@
 	      break;
 	    case 'GETTIMESHEET':
 	      return getTimeSheet();
+	      break;
+	    case 'GETIDTIMESHEET':
+	      return getIdTimeSheet(payload);
+	      break;
+	    case 'TIMESHEETDATASEND':
+	      return updateTimeSheet(payload);
 	      break;
 	  }
 	}
@@ -26857,6 +26868,39 @@
 	  }).then(function (response) {
 	    _getTimesheet = response;
 	    UserStore.emit("getTimeSheets");
+	  });
+	}
+
+	function getIdTimeSheet(payload) {
+	  axios({
+	    method: 'POST',
+	    url: '/api/getidtimesheet/' + id,
+	    data: {
+	      TimeSheet: payload.data
+	    },
+	    headers: {
+	      'token': getToken()
+	    }
+	  }).then(function (response) {
+	    _getIdTimesheet = response;
+	    UserStore.emit("getIdTimeSheets");
+	  });
+	}
+
+	function updateTimeSheet(payload) {
+
+	  axios({
+	    method: 'POST',
+	    url: '/api/updateTimesheet/' + id,
+	    data: {
+	      datas: payload.data
+	    },
+	    headers: {
+	      'token': getToken()
+	    }
+	  }).then(function (response) {
+	    //  _getIdTimesheet = response
+	    //  UserStore.emit("getIdTimeSheets");
 	  });
 	}
 
@@ -29288,6 +29332,10 @@
 
 	'use strict';
 
+	var _React$createClass;
+
+	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 	var React = __webpack_require__(1);
 	var ReactDOM = __webpack_require__(34);
 	var Router = __webpack_require__(172).Router;
@@ -29297,75 +29345,129 @@
 	var Dispatcher = __webpack_require__(228);
 	var userStore = __webpack_require__(231);
 
-	var AddTimeSheet = React.createClass({
+	var data = {};
+
+	var AddTimeSheet = React.createClass((_React$createClass = {
 	  displayName: 'AddTimeSheet',
 	  getInitialState: function getInitialState() {
 	    return {
-	      mondayHourWorked: 0,
-	      tuesdayHourWorked: 0,
-	      wednesdayHourWorked: 0,
-	      thursdayHourWorked: 0,
-	      fridayHourWorked: 0
+	      getTimeSheets: userStore.getIdTimeSheets()
 	    };
 	  },
-	  getData: function getData(event) {},
-	  monday: function monday() {
+	  componentWillMount: function componentWillMount() {
 	    var self = this;
-	    var totalDay = parseInt(this.refs.timeout1.value) - parseInt(this.refs.timein1.value);
-	    var totalLuch = parseInt(this.refs.lunchend1.value) - parseInt(this.refs.lunchstart1.value);
-	    var workedHour = totalDay - totalLuch;
-	    if (workedHour > 0 && workedHour != 'NaN') {
+	    Dispatcher.dispatch({
+	      action: 'GETIDTIMESHEET',
+	      data: this.props.params.id
+	    });
+	    userStore.on('getIdTimeSheets', function () {
 	      self.setState({
-	        mondayHourWorked: workedHour
+	        getTimeSheets: userStore.getIdTimeSheets()
 	      });
-	    }
-	  },
-	  tuesday: function tuesday() {
-	    var self = this;
-	    var totalDay = parseInt(this.refs.timeout2.value) - parseInt(this.refs.timein2.value);
-	    var totalLuch = parseInt(this.refs.lunchend2.value) - parseInt(this.refs.lunchstart2.value);
-	    var workedHour = totalDay - totalLuch;
-	    if (workedHour > 0 && workedHour != 'NaN') {
-	      self.setState({
-	        tuesdayHourWorked: workedHour
-	      });
-	    }
-	  },
-	  wednesday: function wednesday() {
-	    var self = this;
-	    var totalDay = parseInt(this.refs.timeout3.value) - parseInt(this.refs.timein3.value);
-	    var totalLuch = parseInt(this.refs.lunchend3.value) - parseInt(this.refs.lunchstart3.value);
-	    var workedHour = totalDay - totalLuch;
-	    if (workedHour > 0 && workedHour != 'NaN') {
-	      self.setState({
-	        wednesdayHourWorked: workedHour
-	      });
-	    }
-	  },
-	  thursday: function thursday() {
-	    var self = this;
-	    var totalDay = parseInt(this.refs.timeout4.value) - parseInt(this.refs.timein4.value);
-	    var totalLuch = parseInt(this.refs.lunchend4.value) - parseInt(this.refs.lunchstart4.value);
-	    var workedHour = totalDay - totalLuch;
-	    if (workedHour > 0 && workedHour != 'NaN') {
-	      self.setState({
-	        thursdayHourWorked: workedHour
-	      });
-	    }
-	  },
-	  friday: function friday() {
-	    var self = this;
-	    var totalDay = parseInt(this.refs.timeout5.value) - parseInt(this.refs.timein5.value);
-	    var totalLuch = parseInt(this.refs.lunchend5.value) - parseInt(this.refs.lunchstart5.value);
-	    var workedHour = totalDay - totalLuch;
-	    if (workedHour > 0 && workedHour != 'NaN') {
-	      self.setState({
-	        fridayHourWorked: workedHour
-	      });
-	    }
-	  },
+	    });
+	  }
+	}, _defineProperty(_React$createClass, 'getInitialState', function getInitialState() {
+	  return {
+	    mondayHourWorked: 0,
+	    tuesdayHourWorked: 0,
+	    wednesdayHourWorked: 0,
+	    thursdayHourWorked: 0,
+	    fridayHourWorked: 0
+	  };
+	}), _defineProperty(_React$createClass, 'getData', function getData(event) {
+	  data.date1 = this.refs.date1.value;
+	  data.timein1 = this.refs.timeout1.value;
+	  data.lunchstart1 = this.refs.lunchstart1.value;
+	  data.lunchend1 = this.refs.lunchend1.value;
+	  data.Timeout1 = this.refs.timeout1.value;
 
-	  render: function render() {
+	  data.date2 = this.refs.date2.value;
+	  data.timein2 = this.refs.timeout2.value;
+	  data.lunchstart2 = this.refs.lunchstart2.value;
+	  data.lunchend2 = this.refs.lunchend2.value;
+	  data.Timeout2 = this.refs.timeout2.value;
+
+	  data.date3 = this.refs.date3.value;
+	  data.timein3 = this.refs.timeout3.value;
+	  data.lunchstart3 = this.refs.lunchstart3.value;
+	  data.lunchend3 = this.refs.lunchend3.value;
+	  data.Timeout3 = this.refs.timeout3.value;
+
+	  data.date4 = this.refs.date4.value;
+	  data.timein4 = this.refs.timeout4.value;
+	  data.lunchstart4 = this.refs.lunchstart4.value;
+	  data.lunchend4 = this.refs.lunchend4.value;
+	  data.Timeout4 = this.refs.timeout4.value;
+
+	  data.date5 = this.refs.date5.value;
+	  data.timein5 = this.refs.timeout5.value;
+	  data.lunchstart5 = this.refs.lunchstart5.value;
+	  data.lunchend5 = this.refs.lunchend5.value;
+	  data.Timeout5 = this.refs.timeout5.value;
+
+	  data.totalWorkedHour = this.state.mondayHourWorked + this.state.tuesdayHourWorked + this.state.wednesdayHourWorked + this.state.thursdayHourWorked + this.state.fridayHourWorked;
+
+	  Dispatcher.dispatch({
+	    action: 'TIMESHEETDATASEND',
+	    data: {
+	      id: this.props.params.id,
+	      timesheetData: data
+	    }
+	  });
+	}), _defineProperty(_React$createClass, 'monday', function monday() {
+	  var self = this;
+	  var totalDay = parseInt(this.refs.timeout1.value) - parseInt(this.refs.timein1.value);
+	  var totalLuch = parseInt(this.refs.lunchend1.value) - parseInt(this.refs.lunchstart1.value);
+	  var workedHour = totalDay - totalLuch;
+	  if (workedHour > 0 && workedHour != 'NaN') {
+	    self.setState({
+	      mondayHourWorked: workedHour
+	    });
+	  }
+	}), _defineProperty(_React$createClass, 'tuesday', function tuesday() {
+	  var self = this;
+	  var totalDay = parseInt(this.refs.timeout2.value) - parseInt(this.refs.timein2.value);
+	  var totalLuch = parseInt(this.refs.lunchend2.value) - parseInt(this.refs.lunchstart2.value);
+	  var workedHour = totalDay - totalLuch;
+	  if (workedHour > 0 && workedHour != 'NaN') {
+	    self.setState({
+	      tuesdayHourWorked: workedHour
+	    });
+	  }
+	}), _defineProperty(_React$createClass, 'wednesday', function wednesday() {
+	  var self = this;
+	  var totalDay = parseInt(this.refs.timeout3.value) - parseInt(this.refs.timein3.value);
+	  var totalLuch = parseInt(this.refs.lunchend3.value) - parseInt(this.refs.lunchstart3.value);
+	  var workedHour = totalDay - totalLuch;
+	  if (workedHour > 0 && workedHour != 'NaN') {
+	    self.setState({
+	      wednesdayHourWorked: workedHour
+	    });
+	  }
+	}), _defineProperty(_React$createClass, 'thursday', function thursday() {
+	  var self = this;
+	  var totalDay = parseInt(this.refs.timeout4.value) - parseInt(this.refs.timein4.value);
+	  var totalLuch = parseInt(this.refs.lunchend4.value) - parseInt(this.refs.lunchstart4.value);
+	  var workedHour = totalDay - totalLuch;
+	  if (workedHour > 0 && workedHour != 'NaN') {
+	    self.setState({
+	      thursdayHourWorked: workedHour
+	    });
+	  }
+	}), _defineProperty(_React$createClass, 'friday', function friday() {
+	  var self = this;
+	  var totalDay = parseInt(this.refs.timeout5.value) - parseInt(this.refs.timein5.value);
+	  var totalLuch = parseInt(this.refs.lunchend5.value) - parseInt(this.refs.lunchstart5.value);
+	  var workedHour = totalDay - totalLuch;
+	  if (workedHour > 0 && workedHour != 'NaN') {
+	    self.setState({
+	      fridayHourWorked: workedHour
+	    });
+	  }
+	}), _defineProperty(_React$createClass, 'render', function render() {
+
+	  if (this.state.getTimeSheets) {
+	    console.log(this.state.getTimeSheets.data.TimeSheetID);
 	    return React.createElement(
 	      'div',
 	      { className: 'col-sm-4 col-md-8 col-lg-12' },
@@ -29441,22 +29543,22 @@
 	            React.createElement(
 	              'td',
 	              null,
-	              React.createElement('input', { type: 'time', className: 'form-control', name: 'timein', ref: 'timein1', onChange: this.monday })
+	              React.createElement('input', { type: 'time', className: 'form-control', name: 'timein', ref: 'timein1', onChange: this.monday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.Time1 })
 	            ),
 	            React.createElement(
 	              'td',
 	              null,
-	              React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchstart', ref: 'lunchstart1', onChange: this.monday })
+	              React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchstart', ref: 'lunchstart1', onChange: this.monday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.LunchStart1 })
 	            ),
 	            React.createElement(
 	              'td',
 	              null,
-	              React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchend', ref: 'lunchend1', onChange: this.monday })
+	              React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchend', ref: 'lunchend1', onChange: this.monday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.LunchEnd1 })
 	            ),
 	            React.createElement(
 	              'td',
 	              null,
-	              React.createElement('input', { type: 'time', className: 'form-control', name: 'timeout', ref: 'timeout1', onChange: this.monday })
+	              React.createElement('input', { type: 'time', className: 'form-control', name: 'timeout', ref: 'timeout1', onChange: this.monday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.Timeout1 })
 	            ),
 	            React.createElement(
 	              'td',
@@ -29480,22 +29582,22 @@
 	            React.createElement(
 	              'td',
 	              null,
-	              React.createElement('input', { type: 'time', className: 'form-control', name: 'timein', ref: 'timein2', onChange: this.tuesday })
+	              React.createElement('input', { type: 'time', className: 'form-control', name: 'timein', ref: 'timein2', onChange: this.tuesday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.Time2 })
 	            ),
 	            React.createElement(
 	              'td',
 	              null,
-	              React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchstart', ref: 'lunchstart2', onChange: this.tuesday })
+	              React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchstart', ref: 'lunchstart2', onChange: this.tuesday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.LunchStart2 })
 	            ),
 	            React.createElement(
 	              'td',
 	              null,
-	              React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchend', ref: 'lunchend2', onChange: this.tuesday })
+	              React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchend', ref: 'lunchend2', onChange: this.tuesday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.LunchEnd2 })
 	            ),
 	            React.createElement(
 	              'td',
 	              null,
-	              React.createElement('input', { type: 'time', className: 'form-control', name: 'timeout', ref: 'timeout2', onChange: this.tuesday })
+	              React.createElement('input', { type: 'time', className: 'form-control', name: 'timeout', ref: 'timeout2', onChange: this.tuesday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.Timeout2 })
 	            ),
 	            React.createElement(
 	              'td',
@@ -29519,22 +29621,22 @@
 	            React.createElement(
 	              'td',
 	              null,
-	              React.createElement('input', { type: 'time', className: 'form-control', name: 'timein', ref: 'timein3', onChange: this.wednesday })
+	              React.createElement('input', { type: 'time', className: 'form-control', name: 'timein', ref: 'timein3', onChange: this.wednesday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.Time3 })
 	            ),
 	            React.createElement(
 	              'td',
 	              null,
-	              React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchstart', ref: 'lunchstart3', onChange: this.wednesday })
+	              React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchstart', ref: 'lunchstart3', onChange: this.wednesday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.LunchStart3 })
 	            ),
 	            React.createElement(
 	              'td',
 	              null,
-	              React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchend', ref: 'lunchend3', onChange: this.wednesday })
+	              React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchend', ref: 'lunchend3', onChange: this.wednesday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.LunchEnd3 })
 	            ),
 	            React.createElement(
 	              'td',
 	              null,
-	              React.createElement('input', { type: 'time', className: 'form-control', name: 'timeout', ref: 'timeout3', onChange: this.wednesday })
+	              React.createElement('input', { type: 'time', className: 'form-control', name: 'timeout', ref: 'timeout3', onChange: this.wednesday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.Timeout3 })
 	            ),
 	            React.createElement(
 	              'td',
@@ -29558,22 +29660,22 @@
 	            React.createElement(
 	              'td',
 	              null,
-	              React.createElement('input', { type: 'time', className: 'form-control', name: 'timein', ref: 'timein4', onChange: this.thursday })
+	              React.createElement('input', { type: 'time', className: 'form-control', name: 'timein', ref: 'timein4', onChange: this.thursday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.Time4 })
 	            ),
 	            React.createElement(
 	              'td',
 	              null,
-	              React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchstart', ref: 'lunchstart4', onChange: this.thursday })
+	              React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchstart', ref: 'lunchstart4', onChange: this.thursday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.LunchStart4 })
 	            ),
 	            React.createElement(
 	              'td',
 	              null,
-	              React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchend', ref: 'lunchend4', onChange: this.thursday })
+	              React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchend', ref: 'lunchend4', onChange: this.thursday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.LunchEnd4 })
 	            ),
 	            React.createElement(
 	              'td',
 	              null,
-	              React.createElement('input', { type: 'time', className: 'form-control', name: 'timeout', ref: 'timeout4', onChange: this.thursday })
+	              React.createElement('input', { type: 'time', className: 'form-control', name: 'timeout', ref: 'timeout4', onChange: this.thursday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.Timeout4 })
 	            ),
 	            React.createElement(
 	              'td',
@@ -29597,22 +29699,22 @@
 	            React.createElement(
 	              'td',
 	              null,
-	              React.createElement('input', { type: 'time', className: 'form-control', name: 'timein', ref: 'timein5', onChange: this.friday })
+	              React.createElement('input', { type: 'time', className: 'form-control', name: 'timein', ref: 'timein5', onChange: this.friday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.Time5 })
 	            ),
 	            React.createElement(
 	              'td',
 	              null,
-	              React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchstart', ref: 'lunchstart5', onChange: this.friday })
+	              React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchstart', ref: 'lunchstart5', onChange: this.friday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.LunchStart5 })
 	            ),
 	            React.createElement(
 	              'td',
 	              null,
-	              React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchend', ref: 'lunchend5', onChange: this.friday })
+	              React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchend', ref: 'lunchend5', onChange: this.friday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.LunchEnd5 })
 	            ),
 	            React.createElement(
 	              'td',
 	              null,
-	              React.createElement('input', { type: 'time', className: 'form-control', name: 'timeout', ref: 'timeout5', onChange: this.friday })
+	              React.createElement('input', { type: 'time', className: 'form-control', name: 'timeout', ref: 'timeout5', onChange: this.friday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.Timeout5 })
 	            ),
 	            React.createElement(
 	              'td',
@@ -29630,8 +29732,14 @@
 	      ),
 	      React.createElement('input', { type: 'button', className: 'form-control', value: 'save', onClick: this.getData })
 	    );
+	  } else {
+	    return React.createElement(
+	      'h1',
+	      null,
+	      'Loading'
+	    );
 	  }
-	});
+	}), _React$createClass));
 	module.exports = AddTimeSheet;
 
 /***/ },

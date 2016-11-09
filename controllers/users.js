@@ -77,22 +77,46 @@ function getTimeSheet(req, res) {
   });
 }
 
-
 function getIdTimeSheet(req, res) {
-  // User.findOne({_id: req.params.id}, function (err, contractor) {
-  //   if (err) return res.status(401).send({error: err});
-  //   if (!contractor) return res.status(500).send({error: 'Database error, is it connected?'});
-  //
-  //   return res.status(200).send({
-  //     message: 'contractor info sucessfully accessed',
-  //     contractor : contractor.TimeSheet
-  //   });
-  //
-  // });
+  User.findOne({_id: req.params.id}, function (err, contractor) {
+    if (err) return res.status(401).send({error: err});
+    if (!contractor) return res.status(500).send({error: 'Database error, is it connected?'});
+
+    return res.status(200).send({
+      message: 'contractor info sucessfully accessed',
+      TimeSheetID : contractor.TimeSheet.id(req.body.TimeSheet)
+    });
+  });
 }
 
 
-function updateContractor(req, res) {}
+function updateContractor(req, res) {
+
+}
+
+function updateTimesheet(req, res) {
+
+// User.findOne({_id: req.params.id}, function (err, timesheet) {
+//   if (err) return res.status(401).send({error: err});
+//   if (!timesheet) return res.status(500).send({error: 'Database error, is it connected?'});
+//
+//    var timesheets = timesheet.TimeSheet.id(req.body.datas.id);
+//        timesheets  = req.body.datas.timesheetData;
+//
+//   // timesheet.save(function (err) {
+//   //     if (!err) console.log('Successfully updated!');
+//   // });
+//
+// // // console.log(req.body.datas.id)
+// //
+// console.log(timesheets)
+//
+// });
+
+
+
+}
+
 
 function removeContractor(req, res) {}
 
@@ -102,5 +126,6 @@ module.exports = {
   getContractor   : getContractor,
   updateContractor: updateContractor,
   removeContractor: removeContractor,
-  addContractorTimeSheet : addContractorTimeSheet
+  addContractorTimeSheet : addContractorTimeSheet,
+  updateTimesheet : updateTimesheet
 }
