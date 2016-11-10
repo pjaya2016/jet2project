@@ -90,37 +90,91 @@ function getIdTimeSheet(req, res) {
 }
 
 
+function deleteTimesheet(req,res){
+  User.findOne({_id: req.params.id}, function (err, contractor) {
+    if (err) return res.status(401).send({error: err});
+    if (!contractor) return res.status(500).send({error: 'Database error, is it connected?'});
+
+    contractor.TimeSheet.id(req.body.id).remove();
+    contractor.save(function (err) {
+      if(!err) console.log('timesheet deleted');
+    });
+
+    return res.status(200).send({
+      message: 'DELETED',
+    });
+  });
+
+  // console.log(req.body.id);
+}
+
+
 function updateContractor(req, res) {
 
 }
 
 function updateTimesheet(req, res) {
 
-// User.findOne({_id: req.params.id}, function (err, timesheet) {
-//   if (err) return res.status(401).send({error: err});
-//   if (!timesheet) return res.status(500).send({error: 'Database error, is it connected?'});
-//
-//    var timesheets = timesheet.TimeSheet.id(req.body.datas.id);
-//        timesheets  = req.body.datas.timesheetData;
-//
-//   // timesheet.save(function (err) {
-//   //     if (!err) console.log('Successfully updated!');
-//   // });
-//
-// // // console.log(req.body.datas.id)
-// //
-// console.log(timesheets)
-//
-// });
+ console.log(req.body.datas.timesheetData);
+
+  User.update({'TimeSheet._id': req.body.datas.id}, {'$set': {
+
+    'TimeSheet.$.Date1': req.body.datas.timesheetData.date1 ,
+    'TimeSheet.$.Time1': req.body.datas.timesheetData.timein1 ,
+    'TimeSheet.$.LunchStart1': req.body.datas.timesheetData.lunchstart1 ,
+    'TimeSheet.$.LunchEnd1': req.body.datas.timesheetData.lunchend1 ,
+    'TimeSheet.$.Timeout1': req.body.datas.timesheetData.Timeout1 ,
+
+    'TimeSheet.$.Date2': req.body.datas.timesheetData.date2 ,
+    'TimeSheet.$.Time2': req.body.datas.timesheetData.timein2 ,
+    'TimeSheet.$.LunchStart2': req.body.datas.timesheetData.lunchstart2 ,
+    'TimeSheet.$.LunchEnd2': req.body.datas.timesheetData.lunchend2 ,
+    'TimeSheet.$.Timeout2': req.body.datas.timesheetData.Timeout2 ,
+
+
+    'TimeSheet.$.Date3': req.body.datas.timesheetData.date3 ,
+    'TimeSheet.$.Time3': req.body.datas.timesheetData.timein3 ,
+    'TimeSheet.$.LunchStart3': req.body.datas.timesheetData.lunchstart3 ,
+    'TimeSheet.$.LunchEnd3': req.body.datas.timesheetData.lunchend3 ,
+    'TimeSheet.$.Timeout3': req.body.datas.timesheetData.Timeout3 ,
+
+
+    'TimeSheet.$.Date4': req.body.datas.timesheetData.date4 ,
+    'TimeSheet.$.Time4': req.body.datas.timesheetData.timein4 ,
+    'TimeSheet.$.LunchStart4': req.body.datas.timesheetData.lunchstart4 ,
+    'TimeSheet.$.LunchEnd4': req.body.datas.timesheetData.lunchend4 ,
+    'TimeSheet.$.Timeout4': req.body.datas.timesheetData.Timeout4 ,
+
+
+    'TimeSheet.$.Date5': req.body.datas.timesheetData.date5 ,
+    'TimeSheet.$.Time5': req.body.datas.timesheetData.timein5 ,
+    'TimeSheet.$.LunchStart5': req.body.datas.timesheetData.lunchstart5 ,
+    'TimeSheet.$.LunchEnd5': req.body.datas.timesheetData.lunchend5 ,
+    'TimeSheet.$.Timeout5': req.body.datas.timesheetData.Timeout5 ,
+
+
+
+
+    'TimeSheet.$.TotalHourWorked': req.body.datas.timesheetData.totalWorkedHour ,
+  }}, function(err) {
+
+  if(!err) console.log('sucess')
+      });
+
 
 
 
 }
 
 
+
+
+
+
 function removeContractor(req, res) {}
 
 module.exports = {
+  deleteTimesheet : deleteTimesheet,
   getIdTimeSheet : getIdTimeSheet,
   getTimeSheet   : getTimeSheet,
   getContractor   : getContractor,

@@ -52,6 +52,9 @@ function handleAction(payload){
     case 'TIMESHEETDATASEND'    :
       return updateTimeSheet(payload);
       break;
+    case 'DELTIMESHEET'    :
+      return deleteTimesheet(payload);
+      break;
   }
 }
 
@@ -171,7 +174,27 @@ function updateTimeSheet(payload){
   //  _getIdTimesheet = response
   //  UserStore.emit("getIdTimeSheets");
   });
+}
 
+function deleteTimesheet(payload){
 
+  axios({
+      method : 'DELETE',
+      url : '/api/deleteTimesheet/' + id ,
+      data: {
+            id : payload.data.id
+            },
+      headers : {
+        'token': getToken()
+      }
+    })
+  .then(function(response){
+    console.log(response.data.message);
+    if(response.data.message === "DELETED"){
+      UserStore.emit("TIMESHEETDEL");
+    }
+  });
+
+// console.log(payload.data.id)
 
 }

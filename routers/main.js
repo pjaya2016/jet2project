@@ -31,6 +31,12 @@ router.route("/getidtimesheet/:id")
 
 
   router.route("/updateTimesheet/:id")
-    .post(userController.updateTimesheet);
+    .post(userController.updateTimesheet)
+
+
+    router.route("/deleteTimesheet/:id")
+    .delete(userController.deleteTimesheet)
+
+
 
 module.exports = router;

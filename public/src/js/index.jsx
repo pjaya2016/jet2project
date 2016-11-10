@@ -14,6 +14,8 @@ var TimeSheet              = require('./components/contractor_timesheet');
 var Nav                    = require('./components/Nav');
 var AddTimeSheet           = require('./components/add_contractor_timesheet');
 var dashbored              = require('./components/contractor_dashbored');
+var ViewTimesheets         = require('./components/view_timesheets');
+var deleteTimesheet         = require('./components/delete_timesheet');
 /************************************************************************/
 var App = React.createClass({
   render: function() {
@@ -37,7 +39,9 @@ ReactDOM.render(
       <Route path="/approverviewuser" component={ApproverViewContarctor} />
       <Route path="/timesheet/:id" component={TimeSheet} />
       <Route path="/addtimesheet/:id" component={AddTimeSheet} />
+      <Route path="/viewtimesheets" component={ViewTimesheets} />
       <Route path="/dashbored" component={dashbored} />
+      <Route path="/deletetimesheets/:id" component={deleteTimesheet} />
     </Route>
   </Router>
   , document.getElementById('app'), function() {
