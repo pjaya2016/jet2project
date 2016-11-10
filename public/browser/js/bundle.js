@@ -26813,6 +26813,12 @@
 	    case 'CHECKFORAPPROVEL':
 	      return getApprovel();
 	      break;
+	    case 'APPROVEDBYAPPROVER':
+	      return approverApproved();
+	      break;
+	    case 'DECLINEDBYAPPROVER':
+	      return approverDecline();
+	      break;
 	  }
 	}
 
@@ -26968,6 +26974,26 @@
 	  }).then(function (response) {
 	    console.log(response);
 	  });
+	}
+
+	function approverApproved() {
+
+	  // axios({
+	  //     method : 'POST',
+	  //     url : '/api/approverapproved/' + id ,
+	  //     headers : {
+	  //       'token': getToken()
+	  //     }
+	  //   })
+	  // .then(function(response){
+	  //   console.log(response);
+	  // });
+
+	  console.log('hhhh');
+	}
+
+	function approverDecline() {
+	  console.log('decline');
 	}
 
 /***/ },
@@ -29346,6 +29372,17 @@
 	      });
 	    });
 	  },
+	  approver: function approver() {
+	    Dispatcher.dispatch({
+	      action: 'APPROVEDBYAPPROVER'
+	    });
+	  },
+	  decline: function decline() {
+	    Dispatcher.dispatch({
+	      action: 'DECLINEDBYAPPROVER'
+	    });
+	  },
+
 	  render: function render() {
 	    var self = this;
 	    if (this.state.approvelneeded) {
@@ -29588,8 +29625,8 @@
 	          this.props.params.id
 	        ),
 	        approvelNeeded,
-	        React.createElement('input', { type: 'button', value: 'approve', className: 'btn btn-success' }),
-	        React.createElement('input', { type: 'button', value: 'decline', className: 'btn btn-danger' })
+	        React.createElement('input', { type: 'button', value: 'approve', onClick: this.approver, className: 'btn btn-success' }),
+	        React.createElement('input', { type: 'button', value: 'decline', onClick: this.decline, className: 'btn btn-danger' })
 	      );
 	    } else {
 	      return React.createElement(

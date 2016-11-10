@@ -27,6 +27,18 @@ var Timesheet = React.createClass({
     })
 
   },
+  approver(){
+    Dispatcher.dispatch({
+      action : 'APPROVEDBYAPPROVER'
+      })
+
+
+  },
+  decline(){
+    Dispatcher.dispatch({
+      action : 'DECLINEDBYAPPROVER'
+    })
+  },
   render: function() {
     var self = this;
     if(this.state.approvelneeded){
@@ -95,8 +107,8 @@ var Timesheet = React.createClass({
         <div className="col-sm-4 col-md-8 col-lg-12">
           <h3>Timesheet User ID : {this.props.params.id}</h3>
           {approvelNeeded}
-          <input type='button' value='approve' className='btn btn-success' />
-          <input type='button' value='decline' className='btn btn-danger' />
+          <input type='button' value='approve' onClick={this.approver} className='btn btn-success' />
+          <input type='button' value='decline' onClick={this.decline} className='btn btn-danger' />
         </div>
       )
     }else{

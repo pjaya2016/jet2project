@@ -68,7 +68,14 @@ function handleAction(payload){
     case 'CHECKFORAPPROVEL'    :
       return getApprovel();
       break;
+    case 'APPROVEDBYAPPROVER'    :
+       return approverApproved();
+      break;
+    case 'DECLINEDBYAPPROVER'    :
+      return approverDecline();
+      break;
   }
+
 }
 
 
@@ -245,6 +252,26 @@ function sendForApprovel(payload){
   .then(function(response){
     console.log(response);
   });
+}
+
+function approverApproved(){
+
+  // axios({
+  //     method : 'POST',
+  //     url : '/api/approverapproved/' + id ,
+  //     headers : {
+  //       'token': getToken()
+  //     }
+  //   })
+  // .then(function(response){
+  //   console.log(response);
+  // });
+
+  console.log('hhhh')
 
 
+}
+
+function approverDecline(){
+    console.log('decline')
 }

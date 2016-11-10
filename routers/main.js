@@ -41,5 +41,8 @@ router.route("/sendforapprovel/:id")
 router.route("/getApproveltimesheets/:id")
    .get(userController.getTimeSheetNeedsApprovel)
 
+   router.route("/approverapproved/:id")
+      .get(userController.approverApproved)
+//
 
 module.exports = router;
