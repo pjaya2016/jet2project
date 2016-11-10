@@ -50,17 +50,20 @@ function addContractorTimeSheet(req, res) {
     if (err) return res.status(401).send({error: err});
     if (!contractor) return res.status(500).send({error: 'Database error, is it connected?'});
 
-    contractor.TimeSheet.push(defultTimeSheet);
-
-    contractor.save(function (err) {
-      if (!err) console.log('Success!');
+    contractor.TimeSheet.filter(function(item){
+         if(item.Status !== 'needApprovel'){
+           contractor.TimeSheet.push(defultTimeSheet);
+           contractor.save(function (err) {
+             if (!err) console.log('Success!');
+           });
+         }
     });
+
 
     // contractor.TimeSheet.pop();
     // contractor.save(function (err) {
     //   if (!err) console.log('Success!');
     // });
-
   });
 }
 
