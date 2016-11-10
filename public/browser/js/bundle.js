@@ -55,15 +55,15 @@
 	components
 	*********/
 	var Login = __webpack_require__(227);
-	var ApproverHome = __webpack_require__(260);
-	var Approveradduser = __webpack_require__(261);
+	var ApproverHome = __webpack_require__(261);
+	var Approveradduser = __webpack_require__(262);
 	var ApproverViewContarctor = __webpack_require__(263);
-	var TimeSheet = __webpack_require__(266);
-	var Nav = __webpack_require__(262);
-	var AddTimeSheet = __webpack_require__(268);
-	var dashbored = __webpack_require__(270);
-	var ViewTimesheets = __webpack_require__(271);
-	var deleteTimesheet = __webpack_require__(272);
+	var TimeSheet = __webpack_require__(264);
+	var Nav = __webpack_require__(265);
+	var AddTimeSheet = __webpack_require__(266);
+	var dashbored = __webpack_require__(268);
+	var ViewTimesheets = __webpack_require__(269);
+	var deleteTimesheet = __webpack_require__(270);
 	/************************************************************************/
 	var App = React.createClass({
 	  displayName: 'App',
@@ -26749,7 +26749,7 @@
 	var EventEmitter = __webpack_require__(234).EventEmitter;
 	var axios = __webpack_require__(235);
 	var Dispatcher = __webpack_require__(228);
-	var getToken = __webpack_require__(264);
+	var getToken = __webpack_require__(260);
 	var assign = __webpack_require__(4);
 	var browserHistory = __webpack_require__(172).browserHistory;
 
@@ -26758,6 +26758,8 @@
 	var _getTimesheet = null;
 
 	var _getIdTimesheet = null;
+	//////////////////////////////////////////////////////////////////////////////
+	var approvel = null;
 
 	var id = localStorage.getItem('id');
 
@@ -26770,6 +26772,9 @@
 	  },
 	  getIdTimeSheets: function getIdTimeSheets() {
 	    return _getIdTimesheet;
+	  },
+	  getTimesheetsApprovel: function getTimesheetsApprovel() {
+	    return approvel;
 	  }
 	});
 	module.exports = UserStore;
@@ -26802,7 +26807,27 @@
 	    case 'DELTIMESHEET':
 	      return deleteTimesheet(payload);
 	      break;
+	    case 'SENDFORAPPROVEL':
+	      return sendForApprovel(payload);
+	      break;
+	    case 'CHECKFORAPPROVEL':
+	      return getApprovel();
+	      break;
 	  }
+	}
+
+	function getApprovel() {
+
+	  axios({
+	    method: 'GET',
+	    url: '/api/getApproveltimesheets/' + id,
+	    headers: {
+	      'token': getToken()
+	    }
+	  }).then(function (response) {
+	    approvel = response;
+	    UserStore.emit("approvelTimesheet");
+	  });
 	}
 
 	function createContractor(payload) {
@@ -26847,6 +26872,7 @@
 	    }
 	  }).then(function (response) {
 	    _getContarctor = response;
+
 	    UserStore.emit("getContractor");
 	  });
 	}
@@ -26895,7 +26921,6 @@
 	}
 
 	function updateTimeSheet(payload) {
-
 	  axios({
 	    method: 'POST',
 	    url: '/api/updateTimesheet/' + id,
@@ -26928,8 +26953,21 @@
 	      UserStore.emit("TIMESHEETDEL");
 	    }
 	  });
+	}
 
-	  // console.log(payload.data.id)
+	function sendForApprovel(payload) {
+	  axios({
+	    method: 'POST',
+	    url: '/api/sendforapprovel/' + id,
+	    data: {
+	      approvelContarctor: payload.data.data.contractor
+	    },
+	    headers: {
+	      'token': getToken()
+	    }
+	  }).then(function (response) {
+	    console.log(response);
+	  });
 	}
 
 /***/ },
@@ -28920,6 +28958,16 @@
 
 /***/ },
 /* 260 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	module.exports = function () {
+	  return localStorage.getItem('token') || "";
+	};
+
+/***/ },
+/* 261 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -28948,7 +28996,7 @@
 	module.exports = ApproverHome;
 
 /***/ },
-/* 261 */
+/* 262 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -29113,54 +29161,6 @@
 	module.exports = Approveradduser;
 
 /***/ },
-/* 262 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var React = __webpack_require__(1);
-	var browserHistory = __webpack_require__(172).browserHistory;
-	var Link = __webpack_require__(172).Link;
-
-	var Nav = React.createClass({
-	  displayName: 'Nav',
-
-	  render: function render() {
-	    return React.createElement(
-	      'nav',
-	      { className: 'navbar navbar-inverse' },
-	      React.createElement(
-	        'div',
-	        { className: 'container-fluid' },
-	        React.createElement(
-	          'div',
-	          { className: 'navbar-header' },
-	          React.createElement(
-	            'a',
-	            { className: 'navbar-brand', href: '#' },
-	            'JetTwoProject'
-	          )
-	        ),
-	        React.createElement(
-	          'ul',
-	          { className: 'nav navbar-nav navbar-right' },
-	          React.createElement(
-	            'li',
-	            null,
-	            React.createElement(
-	              Link,
-	              { to: '/login', className: 'glyphicon glyphicon-log-in' },
-	              'Login'
-	            )
-	          )
-	        )
-	      )
-	    );
-	  }
-	});
-	module.exports = Nav;
-
-/***/ },
 /* 263 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -29197,7 +29197,7 @@
 	  },
 	  render: function render() {
 	    var self = this;
-	    console.log(this.state.contractor);
+	    //  console.log(this.state.contractor);
 	    if (this.state.contractor) {
 	      var contractors = self.state.contractor.data.contractor.map(function (contractor, i) {
 	        return React.createElement(
@@ -29313,16 +29313,345 @@
 
 /***/ },
 /* 264 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
-	"use strict";
+	'use strict';
 
-	module.exports = function () {
-	  return localStorage.getItem('token') || "";
-	};
+	var React = __webpack_require__(1);
+	var ReactDOM = __webpack_require__(34);
+	var Router = __webpack_require__(172).Router;
+	var Route = __webpack_require__(172).Route;
+	var browserHistory = __webpack_require__(172).browserHistory;
+	var Dispatcher = __webpack_require__(228);
+	var userStore = __webpack_require__(231);
+	var Link = __webpack_require__(172).Link;
+
+	var Timesheet = React.createClass({
+	  displayName: 'Timesheet',
+	  getInitialState: function getInitialState() {
+	    return {
+	      approvelneeded: userStore.getTimesheetsApprovel()
+	    };
+	  },
+
+	  componentWillMount: function componentWillMount() {
+	    var self = this;
+	    Dispatcher.dispatch({
+	      action: 'CHECKFORAPPROVEL'
+	    });
+
+	    userStore.on('approvelTimesheet', function () {
+	      self.setState({
+	        approvelneeded: userStore.getTimesheetsApprovel()
+	      });
+	    });
+	  },
+	  render: function render() {
+	    var self = this;
+	    if (this.state.approvelneeded) {
+	      var approvelNeeded = self.state.approvelneeded.data.contractor.map(function (timesheet, i) {
+	        return React.createElement(
+	          'div',
+	          { key: i, className: 'well well-lg' },
+	          React.createElement(
+	            'table',
+	            { className: 'table table-bordered table-responsive' },
+	            React.createElement(
+	              'thead',
+	              null,
+	              React.createElement(
+	                'tr',
+	                null,
+	                React.createElement(
+	                  'th',
+	                  null,
+	                  'Day'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  null,
+	                  'Dates'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  null,
+	                  'Time In'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  null,
+	                  'Lunch Start'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  null,
+	                  'Lunch End'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  null,
+	                  'Time Out'
+	                )
+	              )
+	            ),
+	            React.createElement(
+	              'tbody',
+	              null,
+	              React.createElement(
+	                'tr',
+	                null,
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  'Monday'
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Date1
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Time1
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchStart1
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchEnd1
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Timeout1
+	                )
+	              ),
+	              React.createElement(
+	                'tr',
+	                null,
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  'Tuesday'
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Date2
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Time2
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchStart2
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchEnd2
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Timeout2
+	                )
+	              ),
+	              React.createElement(
+	                'tr',
+	                null,
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  'Wednessday'
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Date3
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Time3
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchStart3
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchEnd3
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Timeout3
+	                )
+	              ),
+	              React.createElement(
+	                'tr',
+	                null,
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  'Thursday'
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Date4
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Time4
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchStart4
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchEnd4
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Timeout4
+	                )
+	              ),
+	              React.createElement(
+	                'tr',
+	                null,
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  'Firday'
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Date5
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Time5
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchStart5
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchEnd5
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Timeout5
+	                )
+	              )
+	            )
+	          ),
+	          React.createElement(
+	            'h5',
+	            null,
+	            'Total hour worked : ',
+	            timesheet.TotalHourWorked,
+	            ' '
+	          )
+	        );
+	      });
+	      return React.createElement(
+	        'div',
+	        { className: 'col-sm-4 col-md-8 col-lg-12' },
+	        React.createElement(
+	          'h3',
+	          null,
+	          'Timesheet User ID : ',
+	          this.props.params.id
+	        ),
+	        approvelNeeded,
+	        React.createElement('input', { type: 'button', value: 'approve', className: 'btn btn-success' }),
+	        React.createElement('input', { type: 'button', value: 'decline', className: 'btn btn-danger' })
+	      );
+	    } else {
+	      return React.createElement(
+	        'h1',
+	        null,
+	        'Loading'
+	      );
+	    }
+	  }
+
+	});
+	module.exports = Timesheet;
 
 /***/ },
-/* 265 */,
+/* 265 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var React = __webpack_require__(1);
+	var browserHistory = __webpack_require__(172).browserHistory;
+	var Link = __webpack_require__(172).Link;
+
+	var Nav = React.createClass({
+	  displayName: 'Nav',
+
+	  render: function render() {
+	    return React.createElement(
+	      'nav',
+	      { className: 'navbar navbar-inverse' },
+	      React.createElement(
+	        'div',
+	        { className: 'container-fluid' },
+	        React.createElement(
+	          'div',
+	          { className: 'navbar-header' },
+	          React.createElement(
+	            'a',
+	            { className: 'navbar-brand', href: '#' },
+	            'JetTwoProject'
+	          )
+	        ),
+	        React.createElement(
+	          'ul',
+	          { className: 'nav navbar-nav navbar-right' },
+	          React.createElement(
+	            'li',
+	            null,
+	            React.createElement(
+	              Link,
+	              { to: '/login', className: 'glyphicon glyphicon-log-in' },
+	              'Login'
+	            )
+	          )
+	        )
+	      )
+	    );
+	  }
+	});
+	module.exports = Nav;
+
+/***/ },
 /* 266 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -29333,39 +29662,7 @@
 	var Router = __webpack_require__(172).Router;
 	var Route = __webpack_require__(172).Route;
 	var browserHistory = __webpack_require__(172).browserHistory;
-
-	var Timesheet = React.createClass({
-	  displayName: 'Timesheet',
-
-	  render: function render() {
-	    console.log(this.props.params.id);
-	    return React.createElement(
-	      'div',
-	      { className: 'col-sm-4 col-md-8 col-lg-12' },
-	      React.createElement(
-	        'h3',
-	        null,
-	        'Timesheet User ID : ',
-	        this.props.params.id
-	      )
-	    );
-	  }
-	});
-	module.exports = Timesheet;
-
-/***/ },
-/* 267 */,
-/* 268 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var React = __webpack_require__(1);
-	var ReactDOM = __webpack_require__(34);
-	var Router = __webpack_require__(172).Router;
-	var Route = __webpack_require__(172).Route;
-	var browserHistory = __webpack_require__(172).browserHistory;
-	var TimeSheet = __webpack_require__(269);
+	var TimeSheet = __webpack_require__(267);
 	var Dispatcher = __webpack_require__(228);
 	var userStore = __webpack_require__(231);
 
@@ -29773,7 +30070,7 @@
 	module.exports = AddTimeSheet;
 
 /***/ },
-/* 269 */
+/* 267 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -29783,9 +30080,13 @@
 	var Router = __webpack_require__(172).Router;
 	var Route = __webpack_require__(172).Route;
 	var browserHistory = __webpack_require__(172).browserHistory;
+	var Dispatcher = __webpack_require__(228);
+	var userStore = __webpack_require__(231);
+	var Link = __webpack_require__(172).Link;
 
 	var TimeSheet = React.createClass({
 	  displayName: 'TimeSheet',
+
 
 	  render: function render() {
 	    return React.createElement(
@@ -29832,7 +30133,7 @@
 	module.exports = TimeSheet;
 
 /***/ },
-/* 270 */
+/* 268 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -29919,7 +30220,7 @@
 	module.exports = ContractorDashbored;
 
 /***/ },
-/* 271 */
+/* 269 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -29953,6 +30254,14 @@
 	      });
 	    });
 	  },
+	  sendApprovel: function sendApprovel() {
+
+	    Dispatcher.dispatch({
+	      action: 'SENDFORAPPROVEL',
+	      data: this.state.timesheet
+	    });
+	  },
+
 	  render: function render() {
 
 	    if (this.state.timesheet) {
@@ -30201,7 +30510,7 @@
 	        ),
 	        React.createElement(
 	          'button',
-	          { type: 'button', className: 'btn btn-success' },
+	          { type: 'button', onClick: this.sendApprovel, className: 'btn btn-success' },
 	          'Send For approvel'
 	        )
 	      );
@@ -30218,7 +30527,7 @@
 	module.exports = ViewTimesheets;
 
 /***/ },
-/* 272 */
+/* 270 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';

@@ -16,27 +16,30 @@ router.route("/register")
 //  ----------------------------------------------------------------
 router.route("/getContractor")
   .get(userController.getContractor);
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------
 
-//  ----------------------------------------------------------------
+//  ---------------------------------------------------------
 
-//-------------------------------------------------------------
+//------------------------------------------------------------
 router.route("/addTimesheet/:id")
   .post(userController.addContractorTimeSheet)
-  .get(userController.getTimeSheet);
+  .get(userController.getTimeSheetAppending);
 // -----------------------------------------------------------------------------
 
 router.route("/getidtimesheet/:id")
   .post(userController.getIdTimeSheet);
 
+router.route("/updateTimesheet/:id")
+  .post(userController.updateTimesheet)
 
-  router.route("/updateTimesheet/:id")
-    .post(userController.updateTimesheet)
+router.route("/deleteTimesheet/:id")
+  .delete(userController.deleteTimesheet)
 
+router.route("/sendforapprovel/:id")
+  .post(userController.sendForApprovel)
 
-    router.route("/deleteTimesheet/:id")
-    .delete(userController.deleteTimesheet)
-
+router.route("/getApproveltimesheets/:id")
+   .get(userController.getTimeSheetNeedsApprovel)
 
 
 module.exports = router;

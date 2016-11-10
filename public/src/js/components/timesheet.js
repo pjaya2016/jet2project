@@ -3,8 +3,12 @@ var ReactDOM       = require('react-dom');
 var Router         = require('react-router').Router;
 var Route          = require('react-router').Route;
 var browserHistory = require('react-router').browserHistory;
+var Dispatcher     = require('../dispatchers/mainDispatcher.js');
+var userStore      = require("../stores/userStore.js");
+var Link           = require('react-router').Link;
 
 var TimeSheet = React.createClass({
+
   render: function() {
     return (
       <tr className="success form-group" >

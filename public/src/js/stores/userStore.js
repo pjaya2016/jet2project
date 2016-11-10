@@ -11,6 +11,8 @@ var _getContarctor = null;
 var _getTimesheet = null;
 
 var _getIdTimesheet = null;
+//////////////////////////////////////////////////////////////////////////////
+var approvel = null;
 
 var id = localStorage.getItem('id');
 
@@ -23,9 +25,14 @@ var UserStore = merge(EventEmitter.prototype, {
   },
   getIdTimeSheets(){
     return _getIdTimesheet;
+  },
+  getTimesheetsApprovel(){
+    return approvel;
   }
 });
 module.exports = UserStore;
+
+
 
 Dispatcher.register(handleAction);
 //TIMESHEETDATASEND
@@ -55,7 +62,34 @@ function handleAction(payload){
     case 'DELTIMESHEET'    :
       return deleteTimesheet(payload);
       break;
+    case 'SENDFORAPPROVEL'    :
+      return sendForApprovel(payload);
+      break;
+    case 'CHECKFORAPPROVEL'    :
+      return getApprovel();
+      break;
   }
+}
+
+
+
+
+function getApprovel(){
+
+  axios({
+    method : 'GET',
+    url : '/api/getApproveltimesheets/' + id,
+    headers : {
+      'token': getToken()
+    }
+  })
+  .then(function(response){
+  approvel = response
+  UserStore.emit("approvelTimesheet");
+  });
+
+
+
 }
 
 function createContractor(payload){
@@ -105,8 +139,12 @@ function getContractor(){
   })
   .then(function(response){
    _getContarctor = response
+
    UserStore.emit("getContractor");
+
   });
+
+
 }
 
 function addTimeSheet(payload){
@@ -122,7 +160,6 @@ function addTimeSheet(payload){
   //  UserStore.emit("getContractor");
   console.log(response)
   });
-
 }
 
 
@@ -138,7 +175,6 @@ function getTimeSheet(){
    _getTimesheet = response
    UserStore.emit("getTimeSheets");
   });
-
 }
 
 function getIdTimeSheet(payload){
@@ -159,7 +195,6 @@ function getIdTimeSheet(payload){
 }
 
 function updateTimeSheet(payload){
-
   axios({
       method : 'POST',
       url : '/api/updateTimesheet/' + id ,
@@ -194,7 +229,22 @@ function deleteTimesheet(payload){
       UserStore.emit("TIMESHEETDEL");
     }
   });
+}
 
-// console.log(payload.data.id)
+function sendForApprovel(payload){
+  axios({
+      method : 'POST',
+      url : '/api/sendforapprovel/' + id ,
+      data: {
+            approvelContarctor : payload.data.data.contractor
+            },
+      headers : {
+        'token': getToken()
+      }
+    })
+  .then(function(response){
+    console.log(response);
+  });
+
 
 }

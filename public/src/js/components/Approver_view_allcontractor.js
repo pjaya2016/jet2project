@@ -28,7 +28,7 @@ var ApproverViewContarctor = React.createClass({
   },
   render: function() {
     var self = this;
-     console.log(this.state.contractor);
+    //  console.log(this.state.contractor);
     if(this.state.contractor){
       var contractors = self.state.contractor.data.contractor.map(function(contractor,i){
         return (

@@ -26,6 +26,14 @@ var ViewTimesheets = React.createClass({
     });
 
   },
+  sendApprovel () {
+
+    Dispatcher.dispatch({
+      action : 'SENDFORAPPROVEL',
+      data   : this.state.timesheet
+    })
+
+  },
   render: function() {
 
 
@@ -100,7 +108,7 @@ var ViewTimesheets = React.createClass({
         {timesheets}
 
         <h1>Total hour worked : {total}</h1>
-        <button type="button" className="btn btn-success">Send For approvel</button>
+        <button type="button"  onClick={this.sendApprovel} className="btn btn-success">Send For approvel</button>
       </div>
     )
 
