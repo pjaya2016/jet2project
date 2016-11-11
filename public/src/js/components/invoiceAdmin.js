@@ -38,7 +38,6 @@ userStore.on('invoice',function(){
         userId : this.props.params.id
       }
     })
-
   },
   render: function() {
     if(this.state.invoice){

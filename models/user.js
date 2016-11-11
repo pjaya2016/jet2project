@@ -2,6 +2,7 @@ var mongoose  = require("mongoose");
 var bcrypt    = require("bcrypt-nodejs");
 var validator = require("validator");
 var TimeSheet = require('./timesheet');
+var Invoice = require('./invoice');
 
 var userSchema = mongoose.Schema({
   firstName:    { type: String },
@@ -13,7 +14,8 @@ var userSchema = mongoose.Schema({
   startdate :   {type : String, required: true },
   enddate :     {type : String, required: true },
   comments :     {type : String},
-  TimeSheet :   [TimeSheet]
+  TimeSheet : [TimeSheet],
+  // Invoice  : [Invoice]
 });
 
 
