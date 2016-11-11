@@ -35,9 +35,9 @@ var ApproverViewContarctor = React.createClass({
             <td>{contractor.enddate}</td>
             <td>{contractor.firstName}</td>
             <td>{contractor.lastName}</td>
-            <td><Link to={`timesheet/${contractor._id}`}>Edit</Link></td>
-            <td><Link to={`timesheet/${contractor._id}`}>View TimeSheets</Link></td>
-            <td><Link to={`timesheet/${contractor._id}`}>Delete</Link></td>
+
+            <td><Link to={`invoiceadmin/${contractor._id}`}>View TimeSheets</Link></td>
+
           </tr>
         );
           });
@@ -49,9 +49,9 @@ var ApproverViewContarctor = React.createClass({
               <th>End Date</th>
               <th>First Name</th>
               <th>Last Name</th>
-              <th>Edit</th>
+
               <th>View TimeSheets</th>
-              <th>Delete</th>
+            
             </tr>
           </thead>
             <tbody>

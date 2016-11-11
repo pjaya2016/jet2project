@@ -1,5 +1,6 @@
 var User = require('../models/user');
 
+
 var defultTimeSheet = {
   Date1           : '',
   Time1           : '00:00',
@@ -57,7 +58,6 @@ function addContractorTimeSheet(req, res) {
         return item.Status === 'declined'
       }
     });
-
     if(shouldIaddTimesheet.length === 0) {
       contractor.TimeSheet.push(defultTimeSheet);
       contractor.save(function (err) {
@@ -91,7 +91,6 @@ function getTimeSheetAppending(req, res) {
   });
 }
 
-
 function getTimeSheet(req, res) {
   User.findOne({_id: req.params.id}, function (err, contractor) {
     if (err) return res.status(401).send({error: err});
@@ -103,12 +102,10 @@ function getTimeSheet(req, res) {
   });
 }
 
-
 function getIdTimeSheet(req, res) {
   User.findOne({_id: req.params.id}, function (err, contractor) {
     if (err) return res.status(401).send({error: err});
     if (!contractor) return res.status(500).send({error: 'Database error, is it connected?'});
-
     return res.status(200).send({
       message: 'contractor info sucessfully accessed',
       TimeSheetID : contractor.TimeSheet.id(req.body.TimeSheet)
@@ -116,24 +113,19 @@ function getIdTimeSheet(req, res) {
   });
 }
 
-
 function deleteTimesheet(req,res){
   User.findOne({_id: req.params.id}, function (err, contractor) {
     if (err) return res.status(401).send({error: err});
     if (!contractor) return res.status(500).send({error: 'Database error, is it connected?'});
-
     contractor.TimeSheet.id(req.body.id).remove();
     contractor.save(function (err) {
       if(!err) console.log('timesheet deleted');
     });
-
     return res.status(200).send({
       message: 'DELETED',
     });
   });
 }
-
-
 
 function sendForApprovel(req,res){
   User.findOne({_id: req.params.id}, function (err, contractor) {
@@ -224,9 +216,6 @@ function approverApproved(req,res){
 }
 
 function approverDeclined(req,res){
-    console.log(req.body.comment)
-
-
   User.findOne({_id: req.params.id}, function (err, contractor) {
     if (err) return res.status(401).send({error: err});
     if (!contractor) return res.status(500).send({error: 'Database error, is it connected?'});
@@ -237,16 +226,13 @@ function approverDeclined(req,res){
          }}, function(err) {if(!err) console.log('sucessfully timesheet is approved by the approver')});
        }
     })
-
     User.update({_id : req.params.id}, {'$set': {
            'comments'  : req.body.comment
          }}, function(err) {if(!err) console.log('update comment')});
-
     return res.status(200).send({
       message: 'declined',
     });
   });
-
 }
 
 function getComment(req,res){
@@ -259,6 +245,61 @@ function getComment(req,res){
     });
   });
 }
+
+function search(req,res){
+  User.findOne({_id: req.params.id}, function (err, contractor) {
+    if (err) return res.status(401).send({error: err});
+    if (!contractor) return res.status(500).send({error: 'Database error, is it connected?'});
+    var approvelNeeded = contractor.TimeSheet.filter(function(item,i){
+       if(item.Status === req.body.search ){
+          return item.Status
+       }
+    })
+    return res.status(200).send({
+      message: 'search',
+      search : approvelNeeded
+    });
+
+  });
+}
+
+function paid(req,res){
+  User.findOne({_id: req.params.id}, function (err, contractor) {
+    if (err) return res.status(401).send({error: err});
+    if (!contractor) return res.status(500).send({error: 'Database error, is it connected?'});
+    var needToPay = contractor.TimeSheet.filter(function(item,i){
+       if(item.Status === 'approved' ){
+          return item.Status
+       }
+    })
+    console.log(needToPay)
+    return res.status(200).send({
+      message: 'invoice approvel',
+      needToPay : needToPay
+    });
+  });
+}
+
+function changePaidStatus(req,res){
+  User.findOne({_id: req.params.id}, function (err, contractor) {
+    if (err) return res.status(401).send({error: err});
+    if (!contractor) return res.status(500).send({error: 'Database error, is it connected?'});
+    var needToPay = contractor.TimeSheet.filter(function(item,i){
+       if(item.Status === 'approved' ){
+         User.update({'TimeSheet._id': item._id}, {'$set': {
+           'TimeSheet.$.Status' : 'paid'
+         }}, function(err) {if(!err) console.log('sucessfully timesheet is approved and paid')});
+       }
+    })
+    console.log(needToPay)
+    return res.status(200).send({
+      message: 'invoice approvel',
+      needToPay : needToPay
+    });
+  });
+}
+
+
 
 module.exports = {
   sendForApprovel : sendForApprovel,
@@ -274,8 +315,10 @@ module.exports = {
   getTimeSheetNeedsApprovel : getTimeSheetNeedsApprovel,
   approverApproved : approverApproved,
   approverDeclined : approverDeclined,
-  getComment : getComment
-
+  getComment : getComment,
+  search : search,
+  paid : paid,
+  changePaidStatus : changePaidStatus
 }
 
 

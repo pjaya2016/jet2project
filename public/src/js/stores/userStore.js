@@ -14,7 +14,11 @@ var _getIdTimesheet = null;
 //////////////////////////////////////////////////////////////////////////////
 var approvel = null;
 
+var  _invoice = null;
+
 var _getComment = null;
+
+var _search = null;
 
 var id = localStorage.getItem('id');
 
@@ -33,6 +37,12 @@ var UserStore = merge(EventEmitter.prototype, {
   },
   getComment(){
     return _getComment;
+  },
+  getSearchResult(){
+    return _search;
+  },
+  getInvoice(){
+    return _invoice;
   }
 });
 module.exports = UserStore;
@@ -81,6 +91,15 @@ function handleAction(payload){
       break;
     case 'GETCOMMENT'    :
       return getComment();
+      break;
+    case 'SEARCH'    :
+      return search(payload);
+      break;
+    case 'INVOICE'    :
+      return invoice(payload);
+      break;
+    case 'PAID'    :
+      return paid(payload);
       break;
   }
 
@@ -155,9 +174,7 @@ function getContractor(){
   })
   .then(function(response){
    _getContarctor = response
-
    UserStore.emit("getContractor");
-
   });
 
 
@@ -274,7 +291,6 @@ function approverApproved(){
   .then(function(response){
     console.log(response);
   });
-
 }
 
 function approverDecline(payload){
@@ -304,6 +320,53 @@ function getComment(){
   .then(function(response){
    _getComment = response
   UserStore.emit("getcomment");
+  });
+
+}
+
+function search(payload){
+  axios({
+      method : 'POST',
+      url : '/api/search/' + id ,
+      data : {
+        search : payload.searchInfo
+      },
+      headers : {
+        'token': getToken()
+      }
+    })
+  .then(function(response){
+  _search = response
+  UserStore.emit("search");
+  });
+}
+
+function invoice(payload){
+  axios({
+      method : 'POST',
+      url : '/api/paid/' + payload.id.userId ,
+      headers : {
+        'token': getToken()
+      }
+    })
+  .then(function(response){
+   _invoice = response
+    UserStore.emit("invoice");
+  });
+}
+
+function paid(payload){
+  axios({
+      method : 'POST',
+      url : '/api/changePaid/' + payload.id.userId ,
+      headers : {
+        'token': getToken()
+      }
+    })
+  .then(function(response){
+  //  _invoice = response
+  //   UserStore.emit("invoice");
+  console.log(response)
   });
 
 }

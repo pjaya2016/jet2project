@@ -11,15 +11,10 @@ router.route("/login")
 // Method to allow a user to register from a form
 router.route("/register")
   .post(authenticationController.register);
-// -----------------------------------------------------------------------------
-
 //  ----------------------------------------------------------------
 router.route("/getContractor")
   .get(userController.getContractor);
 // ----------------------------------------------------------
-
-//  ---------------------------------------------------------
-
 //------------------------------------------------------------
 router.route("/addTimesheet/:id")
   .post(userController.addContractorTimeSheet)
@@ -49,6 +44,14 @@ router.route("/approverdeclined/:id")
 
 router.route("/getcomment/:id")
       .get(userController.getComment)
-//
+
+router.route("/search/:id")
+      .post(userController.search)
+
+router.route("/paid/:id")
+      .post(userController.paid)
+
+router.route("/changePaid/:id")
+      .post(userController.changePaidStatus)
 
 module.exports = router;

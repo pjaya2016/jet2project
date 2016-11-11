@@ -52,7 +52,6 @@ var ContractorDashbored = React.createClass({
             <p className="card-text"></p>
             <Link to={`/addtimesheet/${timesheet._id}`} > Edit </Link>
             <Link to={`/deletetimesheets/${timesheet._id}`} > Delete </Link>
-
           </div>
         )
       })

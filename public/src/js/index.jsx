@@ -15,7 +15,10 @@ var Nav                    = require('./components/Nav');
 var AddTimeSheet           = require('./components/add_contractor_timesheet');
 var dashbored              = require('./components/contractor_dashbored');
 var ViewTimesheets         = require('./components/view_timesheets');
-var deleteTimesheet         = require('./components/delete_timesheet');
+var deleteTimesheet        = require('./components/delete_timesheet');
+var search                 = require('./components/search_approved');
+var InvoiceAdmin           = require('./components/invoiceAdmin');
+var view_all_contractor_approved  = require('./components/all_contractor_approved.js');
 /************************************************************************/
 var App = React.createClass({
   render: function() {
@@ -29,7 +32,6 @@ var App = React.createClass({
     )
   }
 });
-
 ReactDOM.render(
   <Router history={browserHistory}>
     <Route path="/" component={App} >
@@ -41,7 +43,10 @@ ReactDOM.render(
       <Route path="/addtimesheet/:id" component={AddTimeSheet} />
       <Route path="/viewtimesheets" component={ViewTimesheets} />
       <Route path="/dashbored" component={dashbored} />
+      <Route path="/search" component={search} />
       <Route path="/deletetimesheets/:id" component={deleteTimesheet} />
+      <Route path="/invoiceadmin/:id" component={InvoiceAdmin} />
+      <Route path="/needpay" component={view_all_contractor_approved} />
     </Route>
   </Router>
   , document.getElementById('app'), function() {

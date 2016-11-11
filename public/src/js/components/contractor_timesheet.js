@@ -19,27 +19,22 @@ var Timesheet = React.createClass({
     Dispatcher.dispatch({
       action : 'CHECKFORAPPROVEL'
     })
-
     userStore.on('approvelTimesheet',function(){
       self.setState({
           approvelneeded : userStore.getTimesheetsApprovel()
       });
     })
-
   },
   approver(){
     Dispatcher.dispatch({
       action : 'APPROVEDBYAPPROVER'
       })
-
-
   },
   decline(){
         Dispatcher.dispatch({
          action : 'DECLINEDBYAPPROVER',
          comment : this.refs.comment.value
      })
-
   },
   render: function() {
     var self = this;
@@ -122,8 +117,6 @@ var Timesheet = React.createClass({
         <h1>Loading</h1>
       )
     }
-
   },
-
 });
 module.exports = Timesheet;
