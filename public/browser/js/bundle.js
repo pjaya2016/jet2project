@@ -26761,6 +26761,8 @@
 	//////////////////////////////////////////////////////////////////////////////
 	var approvel = null;
 
+	var _getComment = null;
+
 	var id = localStorage.getItem('id');
 
 	var UserStore = merge(EventEmitter.prototype, {
@@ -26775,6 +26777,9 @@
 	  },
 	  getTimesheetsApprovel: function getTimesheetsApprovel() {
 	    return approvel;
+	  },
+	  getComment: function getComment() {
+	    return _getComment;
 	  }
 	});
 	module.exports = UserStore;
@@ -26817,7 +26822,10 @@
 	      return approverApproved();
 	      break;
 	    case 'DECLINEDBYAPPROVER':
-	      return approverDecline();
+	      return approverDecline(payload);
+	      break;
+	    case 'GETCOMMENT':
+	      return getComment();
 	      break;
 	  }
 	}
@@ -26846,6 +26854,7 @@
 	    email: payload.data.email,
 	    startdate: payload.data.startdate,
 	    enddate: payload.data.enddate,
+	    comments: '',
 	    type: payload.data.type
 	  }).then(function (response) {
 	    console.log(response);
@@ -26977,23 +26986,43 @@
 	}
 
 	function approverApproved() {
-
-	  // axios({
-	  //     method : 'POST',
-	  //     url : '/api/approverapproved/' + id ,
-	  //     headers : {
-	  //       'token': getToken()
-	  //     }
-	  //   })
-	  // .then(function(response){
-	  //   console.log(response);
-	  // });
-
-	  console.log('hhhh');
+	  axios({
+	    method: 'POST',
+	    url: '/api/approverapproved/' + id,
+	    headers: {
+	      'token': getToken()
+	    }
+	  }).then(function (response) {
+	    console.log(response);
+	  });
 	}
 
-	function approverDecline() {
-	  console.log('decline');
+	function approverDecline(payload) {
+	  axios({
+	    method: 'POST',
+	    url: '/api/approverdeclined/' + id,
+	    data: {
+	      comment: payload.comment
+	    },
+	    headers: {
+	      'token': getToken()
+	    }
+	  }).then(function (response) {
+	    console.log(response);
+	  });
+	}
+
+	function getComment() {
+	  axios({
+	    method: 'GET',
+	    url: '/api/getcomment/' + id,
+	    headers: {
+	      'token': getToken()
+	    }
+	  }).then(function (response) {
+	    _getComment = response;
+	    UserStore.emit("getcomment");
+	  });
 	}
 
 /***/ },
@@ -29066,6 +29095,7 @@
 	        email: this.refs.email.value,
 	        startdate: this.refs.startdate.value,
 	        enddate: this.refs.enddate.value,
+	        comments: '',
 	        type: this.refs.type.value
 	      }
 	    });
@@ -29379,7 +29409,8 @@
 	  },
 	  decline: function decline() {
 	    Dispatcher.dispatch({
-	      action: 'DECLINEDBYAPPROVER'
+	      action: 'DECLINEDBYAPPROVER',
+	      comment: this.refs.comment.value
 	    });
 	  },
 
@@ -29626,7 +29657,17 @@
 	        ),
 	        approvelNeeded,
 	        React.createElement('input', { type: 'button', value: 'approve', onClick: this.approver, className: 'btn btn-success' }),
-	        React.createElement('input', { type: 'button', value: 'decline', onClick: this.decline, className: 'btn btn-danger' })
+	        React.createElement('input', { type: 'button', value: 'decline', onClick: this.decline, className: 'btn btn-danger' }),
+	        React.createElement(
+	          'div',
+	          { className: 'form-group' },
+	          React.createElement(
+	            'h1',
+	            null,
+	            'Add Comments'
+	          ),
+	          React.createElement('textarea', { className: 'form-control', ref: 'comment', rows: '5', id: 'comment' })
+	        )
 	      );
 	    } else {
 	      return React.createElement(
@@ -30188,7 +30229,8 @@
 	  displayName: 'ContractorDashbored',
 	  getInitialState: function getInitialState() {
 	    return {
-	      timesheet: userStore.getTimeSheets()
+	      timesheet: userStore.getTimeSheets(),
+	      comment: userStore.getComment()
 	    };
 	  },
 
@@ -30197,10 +30239,17 @@
 	    Dispatcher.dispatch({
 	      action: 'GETTIMESHEET'
 	    });
-
+	    Dispatcher.dispatch({
+	      action: 'GETCOMMENT'
+	    });
 	    userStore.on('getTimeSheets', function () {
 	      self.setState({
 	        timesheet: userStore.getTimeSheets()
+	      });
+	    });
+	    userStore.on('getcomment', function () {
+	      self.setState({
+	        comment: userStore.getComment()
 	      });
 	    });
 	  },
@@ -30213,8 +30262,11 @@
 
 	  render: function render() {
 	    var self = this;
+	    var declined = '';
 	    if (this.state.timesheet) {
 	      var timesheets = self.state.timesheet.data.contractor.map(function (timesheet, i) {
+	        declined = timesheet.Status;
+	        console.log(declined);
 	        return React.createElement(
 	          'div',
 	          { key: i, className: 'card card-block' },
@@ -30247,7 +30299,21 @@
 	          { className: 'btn btn-success btn-lg', to: '/viewtimesheets' },
 	          'Submit for approvel'
 	        ),
-	        timesheets
+	        timesheets,
+	        declined === 'declined' ? React.createElement(
+	          'div',
+	          { className: 'alert alert-danger' },
+	          React.createElement(
+	            'strong',
+	            null,
+	            'timesheets send has been declined please check the infromation and resubmit'
+	          ),
+	          React.createElement(
+	            'h4',
+	            null,
+	            this.state.comment ? ":      " + this.state.comment.data.contractor[0].comments : ''
+	          )
+	        ) : ''
 	      );
 	    } else {
 	      return React.createElement('div', { className: 'loader' });

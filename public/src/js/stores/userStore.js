@@ -14,6 +14,8 @@ var _getIdTimesheet = null;
 //////////////////////////////////////////////////////////////////////////////
 var approvel = null;
 
+var _getComment = null;
+
 var id = localStorage.getItem('id');
 
 var UserStore = merge(EventEmitter.prototype, {
@@ -28,6 +30,9 @@ var UserStore = merge(EventEmitter.prototype, {
   },
   getTimesheetsApprovel(){
     return approvel;
+  },
+  getComment(){
+    return _getComment;
   }
 });
 module.exports = UserStore;
@@ -72,7 +77,10 @@ function handleAction(payload){
        return approverApproved();
       break;
     case 'DECLINEDBYAPPROVER'    :
-      return approverDecline();
+      return approverDecline(payload);
+      break;
+    case 'GETCOMMENT'    :
+      return getComment();
       break;
   }
 
@@ -109,7 +117,8 @@ function createContractor(payload){
     email : payload.data.email,
     startdate : payload.data.startdate,
     enddate : payload.data.enddate,
-    type: payload.data.type,
+    comments : '',
+    type: payload.data.type
     })
     .then(function (response) {
       console.log(response);
@@ -255,23 +264,46 @@ function sendForApprovel(payload){
 }
 
 function approverApproved(){
-
-  // axios({
-  //     method : 'POST',
-  //     url : '/api/approverapproved/' + id ,
-  //     headers : {
-  //       'token': getToken()
-  //     }
-  //   })
-  // .then(function(response){
-  //   console.log(response);
-  // });
-
-  console.log('hhhh')
-
+  axios({
+      method : 'POST',
+      url : '/api/approverapproved/' + id ,
+      headers : {
+        'token': getToken()
+      }
+    })
+  .then(function(response){
+    console.log(response);
+  });
 
 }
 
-function approverDecline(){
-    console.log('decline')
+function approverDecline(payload){
+  axios({
+      method : 'POST',
+      url : '/api/approverdeclined/' + id ,
+      data: {
+            comment : payload.comment
+            },
+      headers : {
+        'token': getToken()
+      }
+    })
+  .then(function(response){
+    console.log(response);
+  });
+}
+
+function getComment(){
+  axios({
+      method : 'GET',
+      url : '/api/getcomment/' + id ,
+      headers : {
+        'token': getToken()
+      }
+    })
+  .then(function(response){
+   _getComment = response
+  UserStore.emit("getcomment");
+  });
+
 }

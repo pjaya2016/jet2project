@@ -35,9 +35,11 @@ var Timesheet = React.createClass({
 
   },
   decline(){
-    Dispatcher.dispatch({
-      action : 'DECLINEDBYAPPROVER'
-    })
+        Dispatcher.dispatch({
+         action : 'DECLINEDBYAPPROVER',
+         comment : this.refs.comment.value
+     })
+
   },
   render: function() {
     var self = this;
@@ -109,6 +111,10 @@ var Timesheet = React.createClass({
           {approvelNeeded}
           <input type='button' value='approve' onClick={this.approver} className='btn btn-success' />
           <input type='button' value='decline' onClick={this.decline} className='btn btn-danger' />
+            <div className="form-group">
+            <h1>Add Comments</h1>
+            <textarea className="form-control" ref='comment' rows="5" id="comment"></textarea>
+          </div>
         </div>
       )
     }else{

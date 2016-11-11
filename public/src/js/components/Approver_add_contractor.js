@@ -30,6 +30,7 @@ var Approveradduser = React.createClass({
           email : this.refs.email.value,
           startdate : this.refs.startdate.value,
           enddate : this.refs.enddate.value,
+          comments : '',
           type: this.refs.type.value,
         }
       });

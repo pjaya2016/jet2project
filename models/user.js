@@ -12,6 +12,7 @@ var userSchema = mongoose.Schema({
   passwordHash: { type: String },
   startdate :   {type : String, required: true },
   enddate :     {type : String, required: true },
+  comments :     {type : String},
   TimeSheet :   [TimeSheet]
 });
 

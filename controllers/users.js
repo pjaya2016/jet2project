@@ -50,16 +50,22 @@ function addContractorTimeSheet(req, res) {
     if (err) return res.status(401).send({error: err});
     if (!contractor) return res.status(500).send({error: 'Database error, is it connected?'});
 
-    contractor.TimeSheet.filter(function(item){
-         if(item.Status !== 'needApprovel'){
-           contractor.TimeSheet.push(defultTimeSheet);
-           contractor.save(function (err) {
-             if (!err) console.log('Success!');
-           });
-         }
+    var shouldIaddTimesheet = contractor.TimeSheet.filter(function(item){
+      if(item.Status === 'needApprovel'){
+        return item.Status === 'needApprovel'
+      }else{
+        return item.Status === 'declined'
+      }
     });
 
-
+    if(shouldIaddTimesheet.length === 0) {
+      contractor.TimeSheet.push(defultTimeSheet);
+      contractor.save(function (err) {
+        if (!err) console.log('Success!');
+      });
+    }else{
+      res.send('waiting for approvel ')
+    }
     // contractor.TimeSheet.pop();
     // contractor.save(function (err) {
     //   if (!err) console.log('Success!');
@@ -72,7 +78,11 @@ function getTimeSheetAppending(req, res) {
     if (err) return res.status(401).send({error: err});
     if (!contractor) return res.status(500).send({error: 'Database error, is it connected?'});
       var getPenddingTimesheet = contractor.TimeSheet.filter(function(item){
-           return item.Status === 'appending'
+            if(item.Status === 'appending') {
+             return item.Status === 'appending'
+           }else if(item.Status === 'declined'){
+             return item.Status === 'declined'
+           }
       });
     return res.status(200).send({
       message: 'contractor info sucessfully accessed',
@@ -121,8 +131,6 @@ function deleteTimesheet(req,res){
       message: 'DELETED',
     });
   });
-
-  // console.log(req.body.id);
 }
 
 
@@ -132,14 +140,14 @@ function sendForApprovel(req,res){
     if (err) return res.status(401).send({error: err});
     if (!contractor) return res.status(500).send({error: 'Database error, is it connected?'});
     var approvelNeeded = req.body.approvelContarctor.filter(function(item,i){
-       if(item.Status === 'appending' ){
+       if(item.Status === 'appending' || item.Status === 'declined' ){
          User.update({'TimeSheet._id': item._id}, {'$set': {
            'TimeSheet.$.Status' : 'needApprovel'
          }}, function(err) {if(!err) console.log('sucessfully send for approvel')});
        }
     })
     return res.status(200).send({
-      message: 'need for approvel',
+      message: 'send timeshetts that need for approvel',
     });
   });
 }
@@ -153,18 +161,15 @@ function getTimeSheetNeedsApprovel(req, res) {
            return item.Status === 'needApprovel'
       });
       return res.status(200).send({
-      message: 'contractor info sucessfully accessed',
+      message: 'needApprovel timesheets found',
       contractor : getPenddingTimesheet
     });
   });
 }
 
+function updateContractor(req, res) {}
 
-
-
-function updateContractor(req, res) {
-
-}
+function removeContractor(req, res) {}
 
 function updateTimesheet(req, res) {
  // console.log(req.body.datas.timesheetData);
@@ -200,11 +205,59 @@ function updateTimesheet(req, res) {
       });
 }
 
-function removeContractor(req, res) {}
+
+function approverApproved(req,res){
+  User.findOne({_id: req.params.id}, function (err, contractor) {
+    if (err) return res.status(401).send({error: err});
+    if (!contractor) return res.status(500).send({error: 'Database error, is it connected?'});
+    var approvelNeeded = contractor.TimeSheet.filter(function(item,i){
+       if(item.Status === 'needApprovel' ){
+         User.update({'TimeSheet._id': item._id}, {'$set': {
+           'TimeSheet.$.Status' : 'approved'
+         }}, function(err) {if(!err) console.log('sucessfully timesheet is approved by the approver')});
+       }
+    })
+    return res.status(200).send({
+      message: 'approved',
+    });
+  });
+}
+
+function approverDeclined(req,res){
+    console.log(req.body.comment)
 
 
-function approverApproved(){
-console.log('approverApproved')
+  User.findOne({_id: req.params.id}, function (err, contractor) {
+    if (err) return res.status(401).send({error: err});
+    if (!contractor) return res.status(500).send({error: 'Database error, is it connected?'});
+    var approvelNeeded = contractor.TimeSheet.filter(function(item,i){
+       if(item.Status === 'needApprovel' ){
+         User.update({'TimeSheet._id': item._id}, {'$set': {
+           'TimeSheet.$.Status' : 'declined'
+         }}, function(err) {if(!err) console.log('sucessfully timesheet is approved by the approver')});
+       }
+    })
+
+    User.update({_id : req.params.id}, {'$set': {
+           'comments'  : req.body.comment
+         }}, function(err) {if(!err) console.log('update comment')});
+
+    return res.status(200).send({
+      message: 'declined',
+    });
+  });
+
+}
+
+function getComment(req,res){
+  User.find({_id : req.params.id}, function (err, contractor) {
+    if (err) return res.status(401).send({error: err});
+    if (!contractor) return res.status(500).send({error: 'Database error, is it connected?'});
+    return res.status(200).send({
+      message: 'get comment',
+      contractor : contractor
+    });
+  });
 }
 
 module.exports = {
@@ -219,6 +272,16 @@ module.exports = {
   addContractorTimeSheet : addContractorTimeSheet,
   updateTimesheet : updateTimesheet,
   getTimeSheetNeedsApprovel : getTimeSheetNeedsApprovel,
-  approverApproved : approverApproved
+  approverApproved : approverApproved,
+  approverDeclined : approverDeclined,
+  getComment : getComment
 
 }
+
+
+/*******
+appending,
+needApprovel
+approved
+paid
+********/
