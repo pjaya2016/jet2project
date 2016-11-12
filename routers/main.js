@@ -54,4 +54,7 @@ router.route("/paid/:id")
 router.route("/changePaid/:id")
       .post(userController.changePaidStatus)
 
+router.route("/invoicesearch")
+      .post(userController.invoiceSearch)
+
 module.exports = router;

@@ -17,7 +17,8 @@ var Timesheet = React.createClass({
   componentWillMount: function() {
     var self = this;
     Dispatcher.dispatch({
-      action : 'CHECKFORAPPROVEL'
+      action : 'CHECKFORAPPROVEL',
+      contractorId : this.props.params.id
     })
     userStore.on('approvelTimesheet',function(){
       self.setState({

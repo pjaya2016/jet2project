@@ -141,7 +141,6 @@ if(this.state.getTimeSheets){
       <table className="table">
         <thead>
           <tr>
-            <th>Day</th>
             <th>Dates</th>
             <th>Time In</th>
             <th>Lunch Start</th>
@@ -152,7 +151,6 @@ if(this.state.getTimeSheets){
         </thead>
         <tbody>
           <tr className="success form-group" >
-              <td>Monday</td>
               <td><input type="text" className="form-control" name='date' ref='date1' defaultValue={this.state.getTimeSheets.data.TimeSheetID.Date1} /></td>
               <td><input type="time" className="form-control" name='timein' ref='timein1' onChange={this.monday} defaultValue={this.state.getTimeSheets.data.TimeSheetID.Time1}/></td>
               <td><input type="time" className="form-control" name='lunchstart'ref='lunchstart1' onChange={this.monday} defaultValue={this.state.getTimeSheets.data.TimeSheetID.LunchStart1}/></td>
@@ -161,7 +159,6 @@ if(this.state.getTimeSheets){
               <td><input type="text" className="form-control" name='hoursworked' ref='hoursworked1' value={this.state.mondayHourWorked} disabled/></td>
           </tr>
           <tr className="success form-group" >
-              <td>Tuesday</td>
               <td><input type="text" className="form-control" name='date' ref='date2' defaultValue={this.state.getTimeSheets.data.TimeSheetID.Date2}  /></td>
               <td><input type="time" className="form-control" name='timein' ref='timein2' onChange={this.tuesday} defaultValue={this.state.getTimeSheets.data.TimeSheetID.Time2}/></td>
               <td><input type="time" className="form-control" name='lunchstart'ref='lunchstart2' onChange={this.tuesday} defaultValue={this.state.getTimeSheets.data.TimeSheetID.LunchStart2}/></td>
@@ -171,7 +168,6 @@ if(this.state.getTimeSheets){
 
           </tr>
           <tr className="success form-group" >
-              <td>Wednesday</td>
               <td><input type="text" className="form-control" name='date' ref='date3' defaultValue={this.state.getTimeSheets.data.TimeSheetID.Date3}  /></td>
               <td><input type="time" className="form-control" name='timein' ref='timein3' onChange={this.wednesday} defaultValue={this.state.getTimeSheets.data.TimeSheetID.Time3}/></td>
               <td><input type="time" className="form-control" name='lunchstart'ref='lunchstart3' onChange={this.wednesday} defaultValue={this.state.getTimeSheets.data.TimeSheetID.LunchStart3}/></td>
@@ -180,7 +176,6 @@ if(this.state.getTimeSheets){
               <td><input type="text" className="form-control" name='hoursworked' ref='hoursworked3' value={this.state.wednesdayHourWorked} disabled/></td>
           </tr>
           <tr className="success form-group" >
-              <td>Thursday</td>
               <td><input type="text" className="form-control" name='date' ref='date4' defaultValue={this.state.getTimeSheets.data.TimeSheetID.Date4}  /></td>
               <td><input type="time" className="form-control" name='timein' ref='timein4' onChange={this.thursday} defaultValue={this.state.getTimeSheets.data.TimeSheetID.Time4}/></td>
               <td><input type="time" className="form-control" name='lunchstart'ref='lunchstart4' onChange={this.thursday} defaultValue={this.state.getTimeSheets.data.TimeSheetID.LunchStart4}/></td>
@@ -190,7 +185,6 @@ if(this.state.getTimeSheets){
 
           </tr>
           <tr className="success form-group" >
-              <td>Firday</td>
               <td><input type="text" className="form-control" name='date' ref='date5' defaultValue={this.state.getTimeSheets.data.TimeSheetID.Date5}  /></td>
               <td><input type="time" className="form-control" name='timein' ref='timein5' onChange={this.friday}  defaultValue={this.state.getTimeSheets.data.TimeSheetID.Time5}/></td>
               <td><input type="time" className="form-control" name='lunchstart'ref='lunchstart5' onChange={this.friday} defaultValue={this.state.getTimeSheets.data.TimeSheetID.LunchStart5}/></td>

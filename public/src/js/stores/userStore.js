@@ -20,6 +20,8 @@ var _getComment = null;
 
 var _search = null;
 
+var _invoiceSearch = null;
+
 var id = localStorage.getItem('id');
 
 var UserStore = merge(EventEmitter.prototype, {
@@ -50,69 +52,67 @@ module.exports = UserStore;
 
 
 Dispatcher.register(handleAction);
-//TIMESHEETDATASEND
 function handleAction(payload){
   switch(payload.action){
-    case 'REGISTER' :
+    case 'REGISTER':
       return createContractor(payload);
       break;
-    case 'LOGIN'    :
+    case 'LOGIN':
       return Login(payload);
       break;
-    case 'GETCONTRACTOR'    :
+    case 'GETCONTRACTOR':
       return getContractor();
       break;
-    case 'ADDTIMESHEET'    :
+    case 'ADDTIMESHEET':
       return addTimeSheet();
       break;
-    case 'GETTIMESHEET'    :
+    case 'GETTIMESHEET':
       return getTimeSheet();
       break;
-    case 'GETIDTIMESHEET'    :
+    case 'GETIDTIMESHEET':
       return getIdTimeSheet(payload);
       break;
-    case 'TIMESHEETDATASEND'    :
+    case 'TIMESHEETDATASEND':
       return updateTimeSheet(payload);
       break;
-    case 'DELTIMESHEET'    :
+    case 'DELTIMESHEET':
       return deleteTimesheet(payload);
       break;
-    case 'SENDFORAPPROVEL'    :
+    case 'SENDFORAPPROVEL':
       return sendForApprovel(payload);
       break;
-    case 'CHECKFORAPPROVEL'    :
-      return getApprovel();
+    case 'CHECKFORAPPROVEL':
+      return getApprovel(payload);
       break;
-    case 'APPROVEDBYAPPROVER'    :
+    case 'APPROVEDBYAPPROVER':
        return approverApproved();
       break;
-    case 'DECLINEDBYAPPROVER'    :
+    case 'DECLINEDBYAPPROVER':
       return approverDecline(payload);
       break;
-    case 'GETCOMMENT'    :
+    case 'GETCOMMENT':
       return getComment();
       break;
-    case 'SEARCH'    :
+    case 'SEARCH':
       return search(payload);
       break;
-    case 'INVOICE'    :
+    case 'INVOICE':
       return invoice(payload);
       break;
-    case 'PAID'    :
+    case 'PAID':
       return paid(payload);
+      break;
+    case 'SEARCHINVOICE':
+      return InvoiceSearchAdmin(payload.search);
       break;
   }
 
 }
 
-
-
-
-function getApprovel(){
-
+function getApprovel(paylaod){
   axios({
     method : 'GET',
-    url : '/api/getApproveltimesheets/' + id,
+    url : '/api/getApproveltimesheets/' + paylaod.contractorId,
     headers : {
       'token': getToken()
     }
@@ -121,9 +121,6 @@ function getApprovel(){
   approvel = response
   UserStore.emit("approvelTimesheet");
   });
-
-
-
 }
 
 function createContractor(payload){
@@ -176,8 +173,6 @@ function getContractor(){
    _getContarctor = response
    UserStore.emit("getContractor");
   });
-
-
 }
 
 function addTimeSheet(payload){
@@ -368,5 +363,21 @@ function paid(payload){
   //   UserStore.emit("invoice");
   console.log(response)
   });
+}
 
+function InvoiceSearchAdmin(payload){
+  axios({
+      method : 'POST',
+      url : '/api/invoicesearch',
+      data :{
+        searchInvoice : payload
+      },
+      headers : {
+        'token': getToken()
+      }
+    })
+  .then(function(response){
+    // _invoiceSearch = response
+    UserStore.emit('invoiceSearch',response)
+  });
 }

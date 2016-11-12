@@ -15,7 +15,7 @@ var userSchema = mongoose.Schema({
   enddate :     {type : String, required: true },
   comments :     {type : String},
   TimeSheet : [TimeSheet],
-  // Invoice  : [Invoice]
+  Invoice  : [Invoice]
 });
 
 

@@ -1,38 +1,66 @@
 var User = require('../models/user');
 
+var date = new Date();
+monday = date.setDate(date.getDate());
+monday = new Date(monday);
+monday = monday.toString().substring(0, 15);
+
+tuesday = date.setDate(date.getDate() + 1);
+tuesday = new Date(tuesday);
+tuesday = tuesday.toString().substring(0, 15);
+
+wednesday = date.setDate(date.getDate() + 2);
+wednesday = new Date(wednesday);
+wednesday = wednesday.toString().substring(0, 15);
+
+thursday = date.setDate(date.getDate() + 3);
+thursday = new Date(thursday);
+thursday = thursday.toString().substring(0, 15);
+
+firday = date.setDate(date.getDate() + 4);
+firday = new Date(firday);
+firday = firday.toString().substring(0, 15);
+
+var dateForInvoice = date.toString().substring(0, 15);
+
+
 
 var defultTimeSheet = {
-  Date1           : '',
+  Date1           : monday,
   Time1           : '00:00',
   LunchStart1     : '00:00',
   LunchEnd1       : '00:00',
   Timeout1        : '00:00',
-  Date2           : '',
+  Date2           : tuesday,
   Time2           : '00:00',
   LunchStart2     : '00:00',
   LunchEnd2       : '00:00',
   Timeout2        : '00:00',
-  Date3           : '',
+  Date3           : wednesday,
   Time3           : '00:00',
   LunchStart3     : '00:00',
   LunchEnd3       : '00:00',
   Timeout3        : '00:00',
-  Date4           : '',
+  Date4           : thursday,
   Time4           : '00:00',
   LunchStart4     : '00:00',
   LunchEnd4       : '00:00',
   Timeout4        : '00:00',
-  Date5           : '',
+  Date5           : firday,
   Time5           : '00:00',
   LunchStart5     : '00:00',
   LunchEnd5       : '00:00',
   Timeout5        : '00:00',
   TotalHourWorked : '0',
-  StartDate       : '' ,
-  EndDate         : '' ,
+  StartDate       : monday ,
+  EndDate         : firday ,
   Status          : 'appending'
 }
 
+var defultInvoice = {
+Invoice : '',
+date    : dateForInvoice
+}
 
 function getContractor(req, res) {
   User.find({type : 'contractor'}, function (err, contractor) {
@@ -59,7 +87,7 @@ function addContractorTimeSheet(req, res) {
       }
     });
     if(shouldIaddTimesheet.length === 0) {
-      contractor.TimeSheet.push(defultTimeSheet);
+      contractor.TimeSheet.unshift(defultTimeSheet);
       contractor.save(function (err) {
         if (!err) console.log('Success!');
       });
@@ -164,7 +192,6 @@ function updateContractor(req, res) {}
 function removeContractor(req, res) {}
 
 function updateTimesheet(req, res) {
- // console.log(req.body.datas.timesheetData);
   User.update({'TimeSheet._id': req.body.datas.id}, {'$set': {
     'TimeSheet.$.Date1': req.body.datas.timesheetData.date1 ,
     'TimeSheet.$.Time1': req.body.datas.timesheetData.timein1 ,
@@ -259,7 +286,6 @@ function search(req,res){
       message: 'search',
       search : approvelNeeded
     });
-
   });
 }
 
@@ -272,7 +298,6 @@ function paid(req,res){
           return item.Status
        }
     })
-    console.log(needToPay)
     return res.status(200).send({
       message: 'invoice approvel',
       needToPay : needToPay
@@ -289,12 +314,33 @@ function changePaidStatus(req,res){
          User.update({'TimeSheet._id': item._id}, {'$set': {
            'TimeSheet.$.Status' : 'paid'
          }}, function(err) {if(!err) console.log('sucessfully timesheet is approved and paid')});
+         defultInvoice.Invoice = item._id;
+         contractor.Invoice.push(defultInvoice);
+         contractor.save(function (err) {
+           if (!err) console.log('Invoice ID has been added!' + item._id  );
+         });
        }
     })
-    console.log(needToPay)
     return res.status(200).send({
       message: 'invoice approvel',
       needToPay : needToPay
+    });
+  });
+}
+
+
+function invoiceSearch(req,res){
+  User.find({firstName : {$regex : ".*"+req.body.searchInvoice+".*"} }, function (err, contractor) {
+    if (err) return res.status(401).send({error: err});
+    if (!contractor) return res.status(500).send({error: 'Database error, is it connected?'});
+    var invoice = contractor.map(function(item,i){
+      if(item.Invoice.length > 0){
+      return item.TimeSheet.id(item.Invoice[i].Invoice);
+      }
+    })
+    return res.status(200).send({
+      message: 'invoice search',
+      invoiceSearch : invoice
     });
   });
 }
@@ -318,7 +364,8 @@ module.exports = {
   getComment : getComment,
   search : search,
   paid : paid,
-  changePaidStatus : changePaidStatus
+  changePaidStatus : changePaidStatus,
+  invoiceSearch : invoiceSearch
 }
 
 

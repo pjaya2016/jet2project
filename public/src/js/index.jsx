@@ -20,6 +20,7 @@ var search                 = require('./components/search_approved');
 var paidInvoice            = require('./components/ViewPaidInvoice');
 var InvoiceAdmin           = require('./components/invoiceAdmin');
 var view_all_contractor_approved  = require('./components/all_contractor_approved.js');
+var search_invoice_admin = require('./components/search_invoice_admin.js');
 /************************************************************************/
 var App = React.createClass({
   render: function() {
@@ -49,6 +50,7 @@ ReactDOM.render(
       <Route path="/invoiceadmin/:id" component={InvoiceAdmin} />
       <Route path="/viewpaidinvoice" component={paidInvoice} />
       <Route path="/needpay" component={view_all_contractor_approved} />
+      <Route path="/invoicesearch" component={search_invoice_admin} />
     </Route>
   </Router>
   , document.getElementById('app'), function() {

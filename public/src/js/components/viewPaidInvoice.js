@@ -8,8 +8,6 @@ var userStore      = require("../stores/userStore.js");
 var Link           = require('react-router').Link;
 
 
-
-
 var ViewPaidInvoice = React.createClass({
   getInitialState(){
       return {
