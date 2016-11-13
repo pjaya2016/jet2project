@@ -37,6 +37,7 @@ var ContractorDashbored = React.createClass({
     Dispatcher.dispatch({
       action : 'ADDTIMESHEET'
     })
+
    location.reload();
   },
   render: function() {
@@ -58,8 +59,8 @@ var ContractorDashbored = React.createClass({
       console.log(timesheets.length);
       return (
         <div className="col-sm-4 col-md-8 col-lg-12">
-            {timesheets.length == 5 ? <input type='button' className="btn btn-primary btn-lg" onClick={this.AddTimeSheet} value='add' disabled/> : <input type='button' className="btn btn-primary btn-lg" onClick={this.AddTimeSheet} value='add' /> }
-            {timesheets.length != 0 ? <Link className="btn btn-success btn-lg" to='/viewtimesheets' >Submit for approvel</Link> : '' }
+            {timesheets.length == 5 ? <input type='button' className="btn btn-danger btn-lg btn-block" onClick={this.AddTimeSheet} value='Add' disabled/> : <button className="btn btn-primary btn-lg btn-block" onClick={this.AddTimeSheet} >Add</button> }
+            {timesheets.length != 0 ? <Link className="btn btn-success btn-lg btn-block" to='/viewtimesheets' >Submit for approvel</Link> : '' }
             {timesheets}
             {(declined === 'declined') ? <div className="alert alert-danger"><strong>timesheets send has been declined please check the infromation and resubmit</strong><h4>{(this.state.comment) ? ":      "+this.state.comment.data.contractor[0].comments : ''}</h4></div> : ''}
         </div>

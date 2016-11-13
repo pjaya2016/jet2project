@@ -12,13 +12,13 @@ var TimeSheet = React.createClass({
   render: function() {
     return (
       <tr className="success form-group" >
-          <td>Monday</td>
-          <td><input type="text" className="form-control" name='date' /></td>
-          <td><input type="text" className="form-control" name='timein' /></td>
-          <td><input type="text" className="form-control" name='lunchstart' /></td>
-          <td><input type="text" className="form-control" name='lunchend' /></td>
-          <td><input type="text" className="form-control" name='timeout' /></td>
-          <td><input type="text" className="form-control" name='hoursworked' disabled/></td>
+        <td>Monday</td>
+        <td><input type="text" className="form-control" name='date' /></td>
+        <td><input type="text" className="form-control" name='timein' /></td>
+        <td><input type="text" className="form-control" name='lunchstart' /></td>
+        <td><input type="text" className="form-control" name='lunchend' /></td>
+        <td><input type="text" className="form-control" name='timeout' /></td>
+        <td><input type="text" className="form-control" name='hoursworked' disabled/></td>
       </tr>
     )
   }

@@ -7,7 +7,6 @@ var Dispatcher     = require('../dispatchers/mainDispatcher.js');
 var userStore      = require("../stores/userStore.js");
 var Link           = require('react-router').Link;
 
-
 var Timesheet = React.createClass({
   getInitialState(){
     return{
@@ -22,28 +21,30 @@ var Timesheet = React.createClass({
     })
     userStore.on('approvelTimesheet',function(){
       self.setState({
-          approvelneeded : userStore.getTimesheetsApprovel()
+        approvelneeded : userStore.getTimesheetsApprovel()
       });
     })
   },
   approver(){
     Dispatcher.dispatch({
-      action : 'APPROVEDBYAPPROVER'
-      })
+      action : 'APPROVEDBYAPPROVER',
+      userId : this.props.params.id
+    })
   },
   decline(){
-        Dispatcher.dispatch({
-         action : 'DECLINEDBYAPPROVER',
-         comment : this.refs.comment.value
-     })
+    Dispatcher.dispatch({
+      action : 'DECLINEDBYAPPROVER',
+      comment : this.refs.comment.value,
+      userId : this.props.params.id
+    })
   },
   render: function() {
     var self = this;
     if(this.state.approvelneeded){
-       var approvelNeeded = self.state.approvelneeded.data.contractor.map(function(timesheet,i){
-          return (
-            <div key={i} className="well well-lg">
-              <table className="table table-bordered table-responsive">
+      var approvelNeeded = self.state.approvelneeded.data.contractor.map(function(timesheet,i){
+        return (
+          <div key={i} className="well well-lg">
+            <table className="table table-striped table-inverse table-bordered table-responsive" >
               <thead>
                 <tr>
                   <th>Day</th>
@@ -96,10 +97,10 @@ var Timesheet = React.createClass({
                   <td>{timesheet.Timeout5}</td>
                 </tr>
               </tbody>
-              </table>
-              <h5>Total hour worked : {timesheet.TotalHourWorked} </h5>
-            </div>
-          )
+            </table>
+            <h5>Total hour worked : {timesheet.TotalHourWorked} </h5>
+          </div>
+        )
       })
       return (
         <div className="col-sm-4 col-md-8 col-lg-12">
@@ -107,7 +108,7 @@ var Timesheet = React.createClass({
           {approvelNeeded}
           <input type='button' value='approve' onClick={this.approver} className='btn btn-success' />
           <input type='button' value='decline' onClick={this.decline} className='btn btn-danger' />
-            <div className="form-group">
+          <div className="form-group">
             <h1>Add Comments</h1>
             <textarea className="form-control" ref='comment' rows="5" id="comment"></textarea>
           </div>
@@ -115,7 +116,7 @@ var Timesheet = React.createClass({
       )
     }else{
       return(
-        <h1>Loading</h1>
+        <div className="loader"></div>
       )
     }
   },

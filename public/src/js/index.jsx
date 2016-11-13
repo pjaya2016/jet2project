@@ -20,17 +20,18 @@ var search                 = require('./components/search_approved');
 var paidInvoice            = require('./components/ViewPaidInvoice');
 var InvoiceAdmin           = require('./components/invoiceAdmin');
 var view_all_contractor_approved  = require('./components/all_contractor_approved.js');
-var search_invoice_admin = require('./components/search_invoice_admin.js');
+var search_invoice_admin    = require('./components/search_invoice_admin.js');
+var email_send_for_approvel = require('./components/email_send_for_approvel.js');
 /************************************************************************/
 var App = React.createClass({
   render: function() {
     return (
-        <div className="container" >
-          <Nav />
-          <div className="row">
-               {this.props.children}
-          </div>
+      <div className="container" >
+        <Nav />
+        <div className="row">
+          {this.props.children}
         </div>
+      </div>
     )
   }
 });
@@ -51,8 +52,9 @@ ReactDOM.render(
       <Route path="/viewpaidinvoice" component={paidInvoice} />
       <Route path="/needpay" component={view_all_contractor_approved} />
       <Route path="/invoicesearch" component={search_invoice_admin} />
+      <Route path="/emailsendforapprovel/:boolean/:id" component={email_send_for_approvel} />
     </Route>
   </Router>
   , document.getElementById('app'), function() {
-  console.log('react app rendered successfully onto the dom!');
-})
+    console.log('react app rendered successfully onto the dom!');
+  })

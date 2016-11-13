@@ -1,3 +1,4 @@
+/*******************View all contarctor **********/
 var React          = require('react');
 var ReactDOM       = require('react-dom');
 var Router         = require('react-router').Router;
@@ -26,7 +27,6 @@ var ApproverViewContarctor = React.createClass({
   },
   render: function() {
     var self = this;
-    //  console.log(this.state.contractor);
     if(this.state.contractor){
       var contractors = self.state.contractor.data.contractor.map(function(contractor,i){
         return (
@@ -35,12 +35,10 @@ var ApproverViewContarctor = React.createClass({
             <td>{contractor.enddate}</td>
             <td>{contractor.firstName}</td>
             <td>{contractor.lastName}</td>
-
             <td><Link to={`invoiceadmin/${contractor._id}`}>View TimeSheets</Link></td>
-
           </tr>
         );
-          });
+      });
       return (
         <table className="table">
           <thead>
@@ -49,20 +47,18 @@ var ApproverViewContarctor = React.createClass({
               <th>End Date</th>
               <th>First Name</th>
               <th>Last Name</th>
-
               <th>View TimeSheets</th>
-            
             </tr>
           </thead>
-            <tbody>
+          <tbody>
             {contractors}
-            </tbody>
-          </table>
-              )
+          </tbody>
+        </table>
+      )
     }else{
       return (
         <div className="loader"></div>
-             )
+      )
     }
   }
 });

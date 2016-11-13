@@ -1,29 +1,31 @@
-var merge = require('merge');
-var EventEmitter = require('events').EventEmitter;
-var axios = require('axios');
-var Dispatcher = require('../dispatchers/mainDispatcher.js');
-var getToken = require('../helpers/token.js');
-var assign = require('object-assign');
-var browserHistory = require('react-router').browserHistory;
+var merge           = require('merge');
+var EventEmitter    = require('events').EventEmitter;
+var axios           = require('axios');
+var Dispatcher      = require('../dispatchers/mainDispatcher.js');
+var getToken        = require('../helpers/token.js');
+var assign          = require('object-assign');
+var browserHistory  = require('react-router').browserHistory;
 
-var _getContarctor = null;
+var _getContarctor  = null;
 
-var _getTimesheet = null;
+var _getTimesheet   = null;
 
 var _getIdTimesheet = null;
-//////////////////////////////////////////////////////////////////////////////
-var approvel = null;
 
-var  _invoice = null;
+var approvel        = null;
 
-var _getComment = null;
+var  _invoice       = null;
 
-var _search = null;
+var _getComment     = null;
 
-var _invoiceSearch = null;
+var _search         = null;
 
-var id = localStorage.getItem('id');
+var _invoiceSearch  = null;
 
+var id              = localStorage.getItem('id');
+/**********************************************************************/
+/************************        UserStore     ************************/
+/**********************************************************************/
 var UserStore = merge(EventEmitter.prototype, {
   getContractors(){
     return _getContarctor;
@@ -48,67 +50,69 @@ var UserStore = merge(EventEmitter.prototype, {
   }
 });
 module.exports = UserStore;
-
-
-
+/**********************************************************************/
+/************************       Dispatcher     ************************/
+/**********************************************************************/
 Dispatcher.register(handleAction);
+
 function handleAction(payload){
   switch(payload.action){
     case 'REGISTER':
-      return createContractor(payload);
-      break;
+    return createContractor(payload);
+    break;
     case 'LOGIN':
-      return Login(payload);
-      break;
+    return Login(payload);
+    break;
     case 'GETCONTRACTOR':
-      return getContractor();
-      break;
+    return getContractor();
+    break;
     case 'ADDTIMESHEET':
-      return addTimeSheet();
-      break;
+    return addTimeSheet();
+    break;
     case 'GETTIMESHEET':
-      return getTimeSheet();
-      break;
+    return getTimeSheet();
+    break;
     case 'GETIDTIMESHEET':
-      return getIdTimeSheet(payload);
-      break;
+    return getIdTimeSheet(payload);
+    break;
     case 'TIMESHEETDATASEND':
-      return updateTimeSheet(payload);
-      break;
+    return updateTimeSheet(payload);
+    break;
     case 'DELTIMESHEET':
-      return deleteTimesheet(payload);
-      break;
+    return deleteTimesheet(payload);
+    break;
     case 'SENDFORAPPROVEL':
-      return sendForApprovel(payload);
-      break;
+    return sendForApprovel(payload);
+    break;
     case 'CHECKFORAPPROVEL':
-      return getApprovel(payload);
-      break;
+    return getApprovel(payload);
+    break;
     case 'APPROVEDBYAPPROVER':
-       return approverApproved();
-      break;
+    return approverApproved();
+    break;
     case 'DECLINEDBYAPPROVER':
-      return approverDecline(payload);
-      break;
+    return approverDecline(payload);
+    break;
     case 'GETCOMMENT':
-      return getComment();
-      break;
+    return getComment();
+    break;
     case 'SEARCH':
-      return search(payload);
-      break;
+    return search(payload);
+    break;
     case 'INVOICE':
-      return invoice(payload);
-      break;
+    return invoice(payload);
+    break;
     case 'PAID':
-      return paid(payload);
-      break;
+    return paid(payload);
+    break;
     case 'SEARCHINVOICE':
-      return InvoiceSearchAdmin(payload.search);
-      break;
+    return InvoiceSearchAdmin(payload.search);
+    break;
   }
-
 }
-
+/**********************************************************************/
+/************************       FUNCTIONS      ************************/
+/**********************************************************************/
 function getApprovel(paylaod){
   axios({
     method : 'GET',
@@ -118,8 +122,8 @@ function getApprovel(paylaod){
     }
   })
   .then(function(response){
-  approvel = response
-  UserStore.emit("approvelTimesheet");
+    approvel = response
+    UserStore.emit("approvelTimesheet");
   });
 }
 
@@ -135,30 +139,31 @@ function createContractor(payload){
     enddate : payload.data.enddate,
     comments : '',
     type: payload.data.type
-    })
-    .then(function (response) {
-      console.log(response);
-      UserStore.emit('contractorCreated');
-    })
-    .catch(function (error) {
-      console.log(error);
-    });
+  })
+  .then(function (response) {
+    console.log(response);
+    UserStore.emit('contractorCreated');
+  })
+  .catch(function (error) {
+    console.log(error);
+  });
 }
 
 function Login(payload){
   axios.post('/api/login', {
     username : payload.data.username,
     password : payload.data.password
-    })
-    .then(function (response) {
-      localStorage.setItem("token", response.data.token);
-      localStorage.setItem("id", response.data.user._id);
-      browserHistory.push('approverhome')
-    })
-    .catch(function (error) {
-      UserStore.emit("wrongLoginDetails");
-      console.log(error);
-    });
+  })
+  .then(function (response) {
+    localStorage.setItem("token", response.data.token);
+    localStorage.setItem("type" , response.data.user.type);
+    localStorage.setItem("id"   , response.data.user._id);
+    browserHistory.push('approverhome')
+  })
+  .catch(function (error) {
+    UserStore.emit("wrongLoginDetails");
+    console.log(error);
+  });
 }
 
 function getContractor(){
@@ -170,8 +175,8 @@ function getContractor(){
     }
   })
   .then(function(response){
-   _getContarctor = response
-   UserStore.emit("getContractor");
+    _getContarctor = response
+    UserStore.emit("getContractor");
   });
 }
 
@@ -184,73 +189,68 @@ function addTimeSheet(payload){
     }
   })
   .then(function(response){
-  //  _getContarctor = response
-  //  UserStore.emit("getContractor");
-  console.log(response)
+    console.log(response)
   });
 }
 
-
 function getTimeSheet(){
   axios({
-      method : 'GET',
-      url : '/api/addTimesheet/' + id ,
-      headers : {
-        'token': getToken()
-      }
-    })
+    method : 'GET',
+    url : '/api/addTimesheet/' + id ,
+    headers : {
+      'token': getToken()
+    }
+  })
   .then(function(response){
-   _getTimesheet = response
-   UserStore.emit("getTimeSheets");
+    _getTimesheet = response
+    UserStore.emit("getTimeSheets");
   });
 }
 
 function getIdTimeSheet(payload){
   axios({
-      method : 'POST',
-      url : '/api/getidtimesheet/' + id ,
-      data: {
-            TimeSheet : payload.data
-            },
-      headers : {
-        'token': getToken()
-      }
-    })
+    method : 'POST',
+    url : '/api/getidtimesheet/' + id ,
+    data: {
+      TimeSheet : payload.data
+    },
+    headers : {
+      'token': getToken()
+    }
+  })
   .then(function(response){
-   _getIdTimesheet = response
-   UserStore.emit("getIdTimeSheets");
+    _getIdTimesheet = response
+    UserStore.emit("getIdTimeSheets");
   });
 }
 
 function updateTimeSheet(payload){
   axios({
-      method : 'POST',
-      url : '/api/updateTimesheet/' + id ,
-      data: {
-            datas : payload.data
-            },
-      headers : {
-        'token': getToken()
-      }
-    })
+    method : 'POST',
+    url : '/api/updateTimesheet/' + id ,
+    data: {
+      datas : payload.data
+    },
+    headers : {
+      'token': getToken()
+    }
+  })
   .then(function(response){
-  //  _getIdTimesheet = response
-  //  UserStore.emit("getIdTimeSheets");
+    console.log(response)
   });
 }
 
 function deleteTimesheet(payload){
-
   axios({
-      method : 'DELETE',
-      url : '/api/deleteTimesheet/' + id ,
-      data: {
-            id : payload.data.id
-            },
-      headers : {
-        'token': getToken()
-      }
-    })
+    method : 'DELETE',
+    url : '/api/deleteTimesheet/' + id ,
+    data: {
+      id : payload.data.id
+    },
+    headers : {
+      'token': getToken()
+    }
+  })
   .then(function(response){
     console.log(response.data.message);
     if(response.data.message === "DELETED"){
@@ -261,15 +261,15 @@ function deleteTimesheet(payload){
 
 function sendForApprovel(payload){
   axios({
-      method : 'POST',
-      url : '/api/sendforapprovel/' + id ,
-      data: {
-            approvelContarctor : payload.data.data.contractor
-            },
-      headers : {
-        'token': getToken()
-      }
-    })
+    method : 'POST',
+    url : '/api/sendforapprovel/' + id ,
+    data: {
+      approvelContarctor : payload.data.data.contractor
+    },
+    headers : {
+      'token': getToken()
+    }
+  })
   .then(function(response){
     console.log(response);
   });
@@ -277,12 +277,12 @@ function sendForApprovel(payload){
 
 function approverApproved(){
   axios({
-      method : 'POST',
-      url : '/api/approverapproved/' + id ,
-      headers : {
-        'token': getToken()
-      }
-    })
+    method : 'POST',
+    url : '/api/approverapproved/' + payload.userId ,
+    headers : {
+      'token': getToken()
+    }
+  })
   .then(function(response){
     console.log(response);
   });
@@ -290,15 +290,15 @@ function approverApproved(){
 
 function approverDecline(payload){
   axios({
-      method : 'POST',
-      url : '/api/approverdeclined/' + id ,
-      data: {
-            comment : payload.comment
-            },
-      headers : {
-        'token': getToken()
-      }
-    })
+    method : 'POST',
+    url : '/api/approverdeclined/' + payload.userId ,
+    data: {
+      comment : payload.comment
+    },
+    headers : {
+      'token': getToken()
+    }
+  })
   .then(function(response){
     console.log(response);
   });
@@ -306,78 +306,74 @@ function approverDecline(payload){
 
 function getComment(){
   axios({
-      method : 'GET',
-      url : '/api/getcomment/' + id ,
-      headers : {
-        'token': getToken()
-      }
-    })
+    method : 'GET',
+    url : '/api/getcomment/' + id ,
+    headers : {
+      'token': getToken()
+    }
+  })
   .then(function(response){
-   _getComment = response
-  UserStore.emit("getcomment");
+    _getComment = response
+    UserStore.emit("getcomment");
   });
-
 }
 
 function search(payload){
   axios({
-      method : 'POST',
-      url : '/api/search/' + id ,
-      data : {
-        search : payload.searchInfo
-      },
-      headers : {
-        'token': getToken()
-      }
-    })
+    method : 'POST',
+    url : '/api/search/' + id ,
+    data : {
+      search : payload.searchInfo
+    },
+    headers : {
+      'token': getToken()
+    }
+  })
   .then(function(response){
-  _search = response
-  UserStore.emit("search");
+    _search = response
+    UserStore.emit("search");
   });
 }
 
 function invoice(payload){
   axios({
-      method : 'POST',
-      url : '/api/paid/' + payload.id.userId ,
-      headers : {
-        'token': getToken()
-      }
-    })
+    method : 'POST',
+    url : '/api/paid/' + payload.id.userId ,
+    headers : {
+      'token': getToken()
+    }
+  })
   .then(function(response){
-   _invoice = response
+    _invoice = response
     UserStore.emit("invoice");
   });
 }
 
 function paid(payload){
   axios({
-      method : 'POST',
-      url : '/api/changePaid/' + payload.id.userId ,
-      headers : {
-        'token': getToken()
-      }
-    })
+    method : 'POST',
+    url : '/api/changePaid/' + payload.id.userId ,
+    headers : {
+      'token': getToken()
+    }
+  })
   .then(function(response){
-  //  _invoice = response
-  //   UserStore.emit("invoice");
-  console.log(response)
+    console.log(response)
   });
 }
 
 function InvoiceSearchAdmin(payload){
   axios({
-      method : 'POST',
-      url : '/api/invoicesearch',
-      data :{
-        searchInvoice : payload
-      },
-      headers : {
-        'token': getToken()
-      }
-    })
+    method : 'POST',
+    url : '/api/invoicesearch',
+    data :{
+      searchInvoice : payload
+    },
+    headers : {
+      'token': getToken()
+    }
+  })
   .then(function(response){
-    // _invoiceSearch = response
     UserStore.emit('invoiceSearch',response)
   });
 }

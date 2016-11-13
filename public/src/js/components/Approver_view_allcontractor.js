@@ -7,10 +7,12 @@ var userStore      = require('../stores/userStore');
 var Dispatcher     = require('../dispatchers/mainDispatcher.js');
 var Link           = require('react-router').Link
 
+var ar = [];
+var ar2 = [];
 var ApproverViewContarctor = React.createClass({
   getInitialState(){
     return{
-      contractor : userStore.getContractors()
+      contractor : userStore.getContractors(),
     }
   },
   componentWillMount: function() {
@@ -26,9 +28,14 @@ var ApproverViewContarctor = React.createClass({
   },
   render: function() {
     var self = this;
-    //  console.log(this.state.contractor);
+    var timesheetNudge = '';
     if(this.state.contractor){
       var contractors = self.state.contractor.data.contractor.map(function(contractor,i){
+          timesheetNudge = contractor.TimeSheet.map(function(timesheet,i){
+          if(timesheet.Status === 'needApprovel'){
+            ar.push(contractor.firstName)
+          }
+        });
         return (
           <tr key={i} className="success">
             <td>{contractor.startdate}</td>
@@ -40,29 +47,44 @@ var ApproverViewContarctor = React.createClass({
             <td><Link to={`timesheet/${contractor._id}`}>Delete</Link></td>
           </tr>
         );
-          });
+      });
+      for(var i = 0 ; i <= ar.length ; i++){
+          if(ar[i] !== ar[i + 1]){
+            ar2.push(ar[i])
+          }
+      }
+      var nudge = ar2.map(function(item,i){
+        return(
+          <div key={i} className="alert alert-warning">
+            <strong>{item}</strong> Timesheets Needs Approvel.
+          </div>
+        )
+      })
       return (
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Start Date</th>
-              <th>End Date</th>
-              <th>First Name</th>
-              <th>Last Name</th>
-              <th>Edit</th>
-              <th>View TimeSheets</th>
-              <th>Delete</th>
-            </tr>
-          </thead>
+        <div>
+          <table className="table table-striped table-inverse">
+            <thead>
+              <tr>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Edit</th>
+                <th>View TimeSheets</th>
+                <th>Delete</th>
+              </tr>
+            </thead>
             <tbody>
-            {contractors}
+              {contractors}
             </tbody>
           </table>
-              )
+          {nudge}
+        </div>
+      )
     }else{
       return (
         <div className="loader"></div>
-             )
+      )
     }
   }
 });

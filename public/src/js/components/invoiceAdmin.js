@@ -21,17 +21,13 @@ var InvoiceSend = React.createClass({
         userId : this.props.params.id
       }
     })
-
-
-userStore.on('invoice',function(){
-    self.setState({
+    userStore.on('invoice',function(){
+      self.setState({
         invoice : userStore.getInvoice()
+      })
     })
-})
-
   },
   paid(){
-
     Dispatcher.dispatch({
       action : 'PAID',
       id : {
@@ -102,22 +98,20 @@ userStore.on('invoice',function(){
            </div>
          )
        })
-
-      return (
-        <div className="col-sm-4 col-md-8 col-lg-12">
-          <h1>InvoiceSend</h1>
-          {invoice}
-          <input type='button' value='paid' onClick={this.paid}/>
-        </div>
-      )
-    }else{
-      return (
-        <div className="col-sm-4 col-md-8 col-lg-12">
-          <h1>InvoiceSend</h1>
-        </div>
-      )
-    }
-
-  }
+       return (
+         <div className="col-sm-4 col-md-8 col-lg-12">
+           <h1>InvoiceSend</h1>
+           {invoice}
+           <input type='button' value='paid' onClick={this.paid}/>
+         </div>
+       )
+     }else{
+       return (
+         <div className="col-sm-4 col-md-8 col-lg-12">
+           <h1>InvoiceSend</h1>
+         </div>
+       )
+     }
+   }
 });
 module.exports = InvoiceSend;

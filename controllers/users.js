@@ -1,4 +1,5 @@
-var User = require('../models/user');
+var User       = require('../models/user');
+var nodemailer = require('nodemailer');
 
 var date = new Date();
 monday = date.setDate(date.getDate());
@@ -22,8 +23,6 @@ firday = new Date(firday);
 firday = firday.toString().substring(0, 15);
 
 var dateForInvoice = date.toString().substring(0, 15);
-
-
 
 var defultTimeSheet = {
   Date1           : monday,
@@ -57,10 +56,10 @@ var defultTimeSheet = {
   Status          : 'appending'
 }
 
-var defultInvoice = {
-Invoice : '',
-date    : dateForInvoice
-}
+  var defultInvoice = {
+  Invoice : '',
+  date    : dateForInvoice
+  }
 
 function getContractor(req, res) {
   User.find({type : 'contractor'}, function (err, contractor) {
@@ -165,13 +164,97 @@ function sendForApprovel(req,res){
            'TimeSheet.$.Status' : 'needApprovel'
          }}, function(err) {if(!err) console.log('sucessfully send for approvel')});
        }
+       
+       var transporter = nodemailer.createTransport({
+           service : 'Gmail',
+           auth :{
+             user:'Testwebapps2015@gmail.com',
+             pass:'fatcat12345'
+           }
+         });
+
+         var mailOptions = {
+           from : `${contractor.firstName}`,
+           to: 'Testwebapps2015@gmail.com',
+           subject:`Submission send for approvel by ${contractor.firstName + "   " + contractor.lastName }`,
+           text:'The user has requested a approvel for his/her timesheet' ,
+           html : `
+           <div>
+           <h1>${contractor.firstName}</h1>
+           <table >
+           <thead>
+             <tr>
+               <th>Day</th>
+               <th>Dates</th>
+               <th>Time In</th>
+               <th>Lunch Start</th>
+               <th>Lunch End</th>
+               <th>Time Out</th>
+             </tr>
+           </thead>
+           <tbody>
+             <tr>
+               <td>Monday</td>
+               <td>${item.Date1}</td>
+               <td>${item.Time1}</td>
+               <td>${item.LunchStart1}</td>
+               <td>${item.LunchEnd1}</td>
+               <td>${item.Timeout1}</td>
+             </tr>
+             <tr>
+               <td>Tuesday</td>
+               <td>${item.Date2}</td>
+               <td>${item.Time2}</td>
+               <td>${item.LunchStart2}</td>
+               <td>${item.LunchEnd2}</td>
+               <td>${item.Timeout2}</td>
+             </tr>
+             <tr>
+               <td>Wednessday</td>
+               <td>${item.Date3}</td>
+               <td>${item.Time3}</td>
+               <td>${item.LunchStart3}</td>
+               <td>${item.LunchEnd3}</td>
+               <td>${item.Timeout3}</td>
+             </tr>
+             <tr>
+               <td>Thursday</td>
+               <td>${item.Date4}</td>
+               <td>${item.Time4}</td>
+               <td>${item.LunchStart4}</td>
+               <td>${item.LunchEnd4}</td>
+               <td>${item.Timeout4}</td>
+             </tr>
+             <tr>
+               <td>Firday</td>
+               <td>${item.Date5}</td>
+               <td>${item.Time5}</td>
+               <td>${item.LunchStart5}</td>
+               <td>${item.LunchEnd5}</td>
+               <td>${item.Timeout5}</td>
+             </tr>
+           </tbody>
+           </table>
+           <h5>Total hour worked : ${item.TotalHourWorked} </h5>
+           <button style='background-color : blue'><a style='color : white' href='http://localhost:3000/emailsendforapprovel/1/${contractor._id}'>Approve</a></button>
+           <button style='background-color : red'><a style='color : white' href='http://localhost:3000/emailsendforapprovel/0/${contractor._id}'>Decline</a></button>
+           </div>
+          `
+         }
+
+       transporter.sendMail(mailOptions,function(err,info){
+       if(err) {
+         console.log(err);
+       }else{
+         console.log('mail send')
+       }
     })
+    });
     return res.status(200).send({
       message: 'send timeshetts that need for approvel',
     });
   });
 }
-
 
 function getTimeSheetNeedsApprovel(req, res) {
   User.findOne({_id: req.params.id}, function (err, contractor) {
@@ -330,22 +413,40 @@ function changePaidStatus(req,res){
 
 
 function invoiceSearch(req,res){
-  User.find({firstName : {$regex : ".*"+req.body.searchInvoice+".*"} }, function (err, contractor) {
-    if (err) return res.status(401).send({error: err});
-    if (!contractor) return res.status(500).send({error: 'Database error, is it connected?'});
-    var invoice = contractor.map(function(item,i){
-      if(item.Invoice.length > 0){
-      return item.TimeSheet.id(item.Invoice[i].Invoice);
-      }
-    })
-    return res.status(200).send({
-      message: 'invoice search',
-      invoiceSearch : invoice
+var date = new Date(req.body.searchInvoice)
+  if(date != 'Invalid Date'){
+    User.find({startdate : {$regex : ".*"+req.body.searchInvoice+".*"} }, function (err, contractor) {
+      if (err) return res.status(401).send({error: err});
+      if (!contractor) return res.status(500).send({error: 'Database error, is it connected?'});
+      var invoice = contractor.map(function(item,i){
+        if(item.Invoice.length > 0){
+        return item.TimeSheet.id(item.Invoice[i].Invoice);
+        }
+      })
+      return res.status(200).send({
+        message: 'invoice search',
+        invoiceSearch : invoice,
+        contractor : contractor
+      });
     });
-  });
+
+  }else{
+    User.find({firstName : {$regex : ".*"+req.body.searchInvoice+".*"} }, function (err, contractor) {
+      if (err) return res.status(401).send({error: err});
+      if (!contractor) return res.status(500).send({error: 'Database error, is it connected?'});
+      var invoice = contractor.map(function(item,i){
+        if(item.Invoice.length > 0){
+        return item.TimeSheet.id(item.Invoice[i].Invoice);
+        }
+      })
+      return res.status(200).send({
+        message: 'invoice search',
+        invoiceSearch : invoice,
+        contractor : contractor
+      });
+    });
+  }
 }
-
-
 
 module.exports = {
   sendForApprovel : sendForApprovel,
@@ -367,7 +468,6 @@ module.exports = {
   changePaidStatus : changePaidStatus,
   invoiceSearch : invoiceSearch
 }
-
 
 /*******
 appending,
