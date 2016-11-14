@@ -7,6 +7,8 @@ var Dispatcher     = require('../dispatchers/mainDispatcher.js');
 var userStore      = require("../stores/userStore.js");
 var Link           = require('react-router').Link;
 
+var noMatch = '';
+
 //need to do invoice date
 var SearchForInvoiceAdmin = React.createClass({
   getInitialState(){
@@ -16,10 +18,15 @@ var SearchForInvoiceAdmin = React.createClass({
   },
   search(e){
     var self = this;
+
+if(self.refs.search.value.length != 0){
+
     Dispatcher.dispatch({
       action : 'SEARCHINVOICE',
-      search : this.refs.search.value
+      search : self.refs.search.value
     })
+
+  }
 
     userStore.on('invoiceSearch',function(data){
       this.setState({

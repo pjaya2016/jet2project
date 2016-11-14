@@ -39622,6 +39622,8 @@
 	var userStore = __webpack_require__(231);
 	var Link = __webpack_require__(172).Link;
 
+	var noMatch = '';
+
 	//need to do invoice date
 	var SearchForInvoiceAdmin = React.createClass({
 	  displayName: 'SearchForInvoiceAdmin',
@@ -39632,10 +39634,14 @@
 	  },
 	  search: function search(e) {
 	    var self = this;
-	    Dispatcher.dispatch({
-	      action: 'SEARCHINVOICE',
-	      search: this.refs.search.value
-	    });
+
+	    if (self.refs.search.value.length != 0) {
+
+	      Dispatcher.dispatch({
+	        action: 'SEARCHINVOICE',
+	        search: self.refs.search.value
+	      });
+	    }
 
 	    userStore.on('invoiceSearch', function (data) {
 	      this.setState({
@@ -40015,7 +40021,6 @@
 	        success: true
 	      });
 	    });
-
 	    event.preventDefault();
 	  },
 

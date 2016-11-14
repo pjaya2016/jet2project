@@ -413,9 +413,11 @@ function changePaidStatus(req,res){
 
 
 function invoiceSearch(req,res){
+console.log(req.body.searchInvoice)
+
 var date = new Date(req.body.searchInvoice)
   if(date != 'Invalid Date'){
-    User.find({startdate : {$regex : ".*"+req.body.searchInvoice+".*"} }, function (err, contractor) {
+    User.find({startdate : req.body.searchInvoice }, function (err, contractor) {
       if (err) return res.status(401).send({error: err});
       if (!contractor) return res.status(500).send({error: 'Database error, is it connected?'});
       var invoice = contractor.map(function(item,i){
@@ -429,9 +431,9 @@ var date = new Date(req.body.searchInvoice)
         contractor : contractor
       });
     });
-
   }else{
-    User.find({firstName : {$regex : ".*"+req.body.searchInvoice+".*"} }, function (err, contractor) {
+
+    User.find({firstName : {$regex : "^" + req.body.searchInvoice } }, function (err, contractor) {
       if (err) return res.status(401).send({error: err});
       if (!contractor) return res.status(500).send({error: 'Database error, is it connected?'});
       var invoice = contractor.map(function(item,i){

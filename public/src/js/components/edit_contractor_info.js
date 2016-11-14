@@ -44,30 +44,30 @@ var EditContractorInfo = React.createClass({
     var username  = '';
     var email  = '';
 
-if(this.refs.firstName.value){
-  firstName = this.refs.firstName.value
-}else{
-  firstName = this.state.firstName
-}
+    if(this.refs.firstName.value){
+      firstName = this.refs.firstName.value
+    }else{
+      firstName = this.state.firstName
+    }
 
-if(this.refs.lastName.value){
-  lastName = this.refs.lastName.value
-}else{
-  lastName = this.state.lastName
-}
+    if(this.refs.lastName.value){
+      lastName = this.refs.lastName.value
+    }else{
+      lastName = this.state.lastName
+    }
 
-if(this.refs.username.value){
-  username = this.refs.username.value
-}else{
-  username = this.state.username
-}
+    if(this.refs.username.value){
+      username = this.refs.username.value
+    }else{
+      username = this.state.username
+    }
 
 
-if(this.refs.email.value){
-  email = this.refs.email.value
-}else{
-  email = this.state.Email
-}
+    if(this.refs.email.value){
+      email = this.refs.email.value
+    }else{
+      email = this.state.Email
+    }
 
     Dispatcher.dispatch({
       action : 'UPDATECONTRACTOR',
@@ -85,7 +85,6 @@ if(this.refs.email.value){
         success : true
       });
     })
-
     event.preventDefault();
   },
   render: function() {
