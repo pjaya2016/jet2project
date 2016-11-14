@@ -58,21 +58,22 @@
 	var ApproverHome = __webpack_require__(261);
 	var Approveradduser = __webpack_require__(262);
 	var ApproverViewContarctor = __webpack_require__(263);
-	var TimeSheet = __webpack_require__(264);
-	var Nav = __webpack_require__(265);
-	var AddTimeSheet = __webpack_require__(266);
-	var dashbored = __webpack_require__(268);
-	var ViewTimesheets = __webpack_require__(269);
-	var deleteTimesheet = __webpack_require__(399);
-	var search = __webpack_require__(400);
-	var paidInvoice = __webpack_require__(401);
-	var InvoiceAdmin = __webpack_require__(402);
-	var view_all_contractor_approved = __webpack_require__(403);
-	var search_invoice_admin = __webpack_require__(404);
-	var email_send_for_approvel = __webpack_require__(405);
-	var redirectViewAllcontractor = __webpack_require__(408);
-	var Logout = __webpack_require__(406);
-	var LiveChat = __webpack_require__(458);
+	var TimeSheet = __webpack_require__(313);
+	var Nav = __webpack_require__(314);
+	var AddTimeSheet = __webpack_require__(315);
+	var dashbored = __webpack_require__(316);
+	var ViewTimesheets = __webpack_require__(317);
+	var deleteTimesheet = __webpack_require__(318);
+	var search = __webpack_require__(319);
+	var paidInvoice = __webpack_require__(320);
+	var InvoiceAdmin = __webpack_require__(321);
+	var view_all_contractor_approved = __webpack_require__(322);
+	var search_invoice_admin = __webpack_require__(323);
+	var email_send_for_approvel = __webpack_require__(324);
+	var redirectViewAllcontractor = __webpack_require__(325);
+	var Logout = __webpack_require__(326);
+	var LiveChat = __webpack_require__(327);
+	var EditContractorInfo = __webpack_require__(328);
 
 	/************************************************************************/
 	var token = localStorage.getItem('token');
@@ -117,7 +118,8 @@
 	    React.createElement(Route, { path: '/emailsendforapprovel/:boolean/:id', component: email_send_for_approvel }),
 	    React.createElement(Route, { path: '/redirecttoapproverviewuser', component: redirectViewAllcontractor }),
 	    React.createElement(Route, { path: '/logout', component: Logout }),
-	    React.createElement(Route, { path: '/livechat', component: LiveChat })
+	    React.createElement(Route, { path: '/livechat', component: LiveChat }),
+	    React.createElement(Route, { path: '/editcontractor/:id', component: EditContractorInfo })
 	  )
 	), document.getElementById('app'), function () {
 	  console.log('react app rendered successfully onto the dom!');
@@ -26780,6 +26782,8 @@
 
 	var _invoiceSearch = null;
 
+	var _getcontractorid = null;
+
 	var id = localStorage.getItem('id');
 	/**********************************************************************/
 	/************************        UserStore     ************************/
@@ -26805,6 +26809,9 @@
 	  },
 	  getInvoice: function getInvoice() {
 	    return _invoice;
+	  },
+	  getContractorId: function getContractorId() {
+	    return _getcontractorid;
 	  }
 	});
 	module.exports = UserStore;
@@ -26866,6 +26873,13 @@
 	    case 'SEARCHINVOICE':
 	      return InvoiceSearchAdmin(payload.search);
 	      break;
+	    case 'UPDATECONTRACTOR':
+	      return updateContractor(payload);
+	      break;
+	    case 'GETCONTRACTORID':
+	      return getContractorId(payload);
+	      break;
+
 	  }
 	}
 	/**********************************************************************/
@@ -27115,6 +27129,34 @@
 	    }
 	  }).then(function (response) {
 	    UserStore.emit('invoiceSearch', response);
+	  });
+	}
+
+	function updateContractor(payload) {
+	  axios({
+	    method: 'POST',
+	    url: '/api/updatecontractor/' + payload.id,
+	    data: {
+	      datas: payload
+	    },
+	    headers: {
+	      'token': getToken()
+	    }
+	  }).then(function (response) {
+	    console.log(response);
+	  });
+	}
+
+	function getContractorId(payload) {
+	  axios({
+	    method: 'GET',
+	    url: '/api/getcontractorid/' + payload.id,
+	    headers: {
+	      'token': getToken()
+	    }
+	  }).then(function (response) {
+	    UserStore.emit('getcontractorid', response);
+	    _getcontractorid = response;
 	  });
 	}
 
@@ -29334,7 +29376,7 @@
 	var userStore = __webpack_require__(231);
 	var Dispatcher = __webpack_require__(228);
 	var Link = __webpack_require__(172).Link;
-	var socket = __webpack_require__(409)();
+	var socket = __webpack_require__(264)();
 
 	socket.on('chat message', function (msg) {
 	  $('#alert').text('Contractor would like to chat with you live');
@@ -29399,7 +29441,7 @@
 	            null,
 	            React.createElement(
 	              Link,
-	              { to: 'timesheet/' + contractor._id },
+	              { to: 'editcontractor/' + contractor._id },
 	              'Edit'
 	            )
 	          ),
@@ -29512,2725 +29554,15 @@
 /* 264 */
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
-
-	var React = __webpack_require__(1);
-	var ReactDOM = __webpack_require__(34);
-	var Router = __webpack_require__(172).Router;
-	var Route = __webpack_require__(172).Route;
-	var browserHistory = __webpack_require__(172).browserHistory;
-	var Dispatcher = __webpack_require__(228);
-	var userStore = __webpack_require__(231);
-	var Link = __webpack_require__(172).Link;
-
-	var Timesheet = React.createClass({
-	  displayName: 'Timesheet',
-	  getInitialState: function getInitialState() {
-	    return {
-	      approvelneeded: userStore.getTimesheetsApprovel()
-	    };
-	  },
-
-	  componentWillMount: function componentWillMount() {
-	    var self = this;
-	    Dispatcher.dispatch({
-	      action: 'CHECKFORAPPROVEL',
-	      contractorId: this.props.params.id
-	    });
-	    userStore.on('approvelTimesheet', function () {
-	      self.setState({
-	        approvelneeded: userStore.getTimesheetsApprovel()
-	      });
-	    });
-	  },
-	  approver: function approver() {
-	    Dispatcher.dispatch({
-	      action: 'APPROVEDBYAPPROVER',
-	      userId: this.props.params.id
-	    });
-	  },
-	  decline: function decline() {
-	    Dispatcher.dispatch({
-	      action: 'DECLINEDBYAPPROVER',
-	      comment: this.refs.comment.value,
-	      userId: this.props.params.id
-	    });
-	  },
-
-	  render: function render() {
-	    var self = this;
-	    if (this.state.approvelneeded) {
-	      var approvelNeeded = self.state.approvelneeded.data.contractor.map(function (timesheet, i) {
-	        return React.createElement(
-	          'div',
-	          { key: i, className: 'well well-lg' },
-	          React.createElement(
-	            'table',
-	            { className: 'table table-striped table-inverse table-bordered table-responsive' },
-	            React.createElement(
-	              'thead',
-	              null,
-	              React.createElement(
-	                'tr',
-	                null,
-	                React.createElement(
-	                  'th',
-	                  null,
-	                  'Day'
-	                ),
-	                React.createElement(
-	                  'th',
-	                  null,
-	                  'Dates'
-	                ),
-	                React.createElement(
-	                  'th',
-	                  null,
-	                  'Time In'
-	                ),
-	                React.createElement(
-	                  'th',
-	                  null,
-	                  'Lunch Start'
-	                ),
-	                React.createElement(
-	                  'th',
-	                  null,
-	                  'Lunch End'
-	                ),
-	                React.createElement(
-	                  'th',
-	                  null,
-	                  'Time Out'
-	                )
-	              )
-	            ),
-	            React.createElement(
-	              'tbody',
-	              null,
-	              React.createElement(
-	                'tr',
-	                null,
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  'Monday'
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Date1
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Time1
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchStart1
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchEnd1
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Timeout1
-	                )
-	              ),
-	              React.createElement(
-	                'tr',
-	                null,
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  'Tuesday'
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Date2
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Time2
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchStart2
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchEnd2
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Timeout2
-	                )
-	              ),
-	              React.createElement(
-	                'tr',
-	                null,
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  'Wednessday'
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Date3
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Time3
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchStart3
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchEnd3
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Timeout3
-	                )
-	              ),
-	              React.createElement(
-	                'tr',
-	                null,
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  'Thursday'
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Date4
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Time4
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchStart4
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchEnd4
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Timeout4
-	                )
-	              ),
-	              React.createElement(
-	                'tr',
-	                null,
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  'Firday'
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Date5
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Time5
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchStart5
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchEnd5
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Timeout5
-	                )
-	              )
-	            )
-	          ),
-	          React.createElement(
-	            'h5',
-	            null,
-	            'Total hour worked : ',
-	            timesheet.TotalHourWorked,
-	            ' '
-	          )
-	        );
-	      });
-	      return React.createElement(
-	        'div',
-	        { className: 'col-sm-4 col-md-8 col-lg-12' },
-	        React.createElement(
-	          'h3',
-	          null,
-	          'Timesheet User ID : ',
-	          this.props.params.id
-	        ),
-	        approvelNeeded,
-	        React.createElement('input', { type: 'button', value: 'approve', onClick: this.approver, className: 'btn btn-success' }),
-	        React.createElement('input', { type: 'button', value: 'decline', onClick: this.decline, className: 'btn btn-danger' }),
-	        React.createElement(
-	          'div',
-	          { className: 'form-group' },
-	          React.createElement(
-	            'h1',
-	            null,
-	            'Add Comments'
-	          ),
-	          React.createElement('textarea', { className: 'form-control', ref: 'comment', rows: '5', id: 'comment' })
-	        )
-	      );
-	    } else {
-	      return React.createElement('div', { className: 'loader' });
-	    }
-	  }
-	});
-	module.exports = Timesheet;
-
-/***/ },
-/* 265 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var React = __webpack_require__(1);
-	var browserHistory = __webpack_require__(172).browserHistory;
-	var Link = __webpack_require__(172).Link;
-
-	/*********************/
-	/****LocalStorage*****/
-	/********************/
-
-	var token = localStorage.getItem('token');
-	var id = localStorage.getItem('id');
-	var type = localStorage.getItem('type');
-
-	if (!token) browserHistory.push('/login');
-
-	var Nav = React.createClass({
-	  displayName: 'Nav',
-
-	  render: function render() {
-	    return React.createElement(
-	      'nav',
-	      { className: 'navbar navbar-inverse' },
-	      React.createElement(
-	        'div',
-	        { className: 'container-fluid' },
-	        React.createElement(
-	          'div',
-	          { className: 'navbar-header' },
-	          React.createElement(
-	            'a',
-	            { className: 'navbar-brand', href: '#' },
-	            'JetTwoProject'
-	          )
-	        ),
-	        React.createElement(
-	          'ul',
-	          { className: 'nav navbar-nav navbar-right' },
-	          type === 'contractor' ? React.createElement(
-	            'li',
-	            null,
-	            React.createElement(
-	              Link,
-	              { to: '/dashbored' },
-	              'Dashbored'
-	            )
-	          ) : '',
-	          type === 'contractor' ? React.createElement(
-	            'li',
-	            null,
-	            React.createElement(
-	              Link,
-	              { to: '/search' },
-	              'Search'
-	            )
-	          ) : '',
-	          type === 'contractor' ? React.createElement(
-	            'li',
-	            null,
-	            React.createElement(
-	              Link,
-	              { to: '/viewpaidinvoice' },
-	              'View Paid Invoice'
-	            )
-	          ) : '',
-	          type === 'approver' ? React.createElement(
-	            'li',
-	            null,
-	            React.createElement(
-	              Link,
-	              { to: '/redirecttoapproverviewuser' },
-	              'View All Contractor'
-	            )
-	          ) : '',
-	          type === 'approver' ? React.createElement(
-	            'li',
-	            null,
-	            React.createElement(
-	              Link,
-	              { to: '/approveradduser' },
-	              'Add User'
-	            )
-	          ) : '',
-	          type === 'approver' ? React.createElement(
-	            'li',
-	            null,
-	            React.createElement(
-	              Link,
-	              { to: '/livechat' },
-	              'Live Chat'
-	            )
-	          ) : '',
-	          type === 'invoice_admin' ? React.createElement(
-	            'li',
-	            null,
-	            React.createElement(
-	              Link,
-	              { to: '/needpay' },
-	              'Need Pay'
-	            )
-	          ) : '',
-	          type === 'invoice_admin' ? React.createElement(
-	            'li',
-	            null,
-	            React.createElement(
-	              Link,
-	              { to: '/invoicesearch' },
-	              'Invoice Search'
-	            )
-	          ) : '',
-	          this.props.tokens ? React.createElement(
-	            'li',
-	            null,
-	            React.createElement(
-	              Link,
-	              { to: '/login', className: 'glyphicon glyphicon-log-in' },
-	              'Login'
-	            )
-	          ) : React.createElement(
-	            'li',
-	            null,
-	            React.createElement(
-	              Link,
-	              { to: '/logout', className: '\tglyphicon glyphicon-log-out' },
-	              'Logout'
-	            )
-	          )
-	        )
-	      )
-	    );
-	  }
-	});
-	module.exports = Nav;
-
-/***/ },
-/* 266 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	/********* ADD Contractor ***************/
-
-	var React = __webpack_require__(1);
-	var ReactDOM = __webpack_require__(34);
-	var Router = __webpack_require__(172).Router;
-	var Route = __webpack_require__(172).Route;
-	var browserHistory = __webpack_require__(172).browserHistory;
-	var Dispatcher = __webpack_require__(228);
-	var userStore = __webpack_require__(231);
-
-	var data = {};
-
-	var AddTimeSheet = React.createClass({
-	  displayName: 'AddTimeSheet',
-	  componentWillMount: function componentWillMount() {
-	    var self = this;
-	    Dispatcher.dispatch({
-	      action: 'GETIDTIMESHEET',
-	      data: this.props.params.id
-	    });
-	    userStore.on('getIdTimeSheets', function () {
-	      self.setState({
-	        getTimeSheets: userStore.getIdTimeSheets()
-	      });
-	    });
-	  },
-	  getInitialState: function getInitialState() {
-	    return {
-	      getTimeSheets: userStore.getIdTimeSheets(),
-	      mondayHourWorked: 0,
-	      tuesdayHourWorked: 0,
-	      wednesdayHourWorked: 0,
-	      thursdayHourWorked: 0,
-	      fridayHourWorked: 0
-	    };
-	  },
-	  getData: function getData(event) {
-	    data.date1 = this.refs.date1.value;
-	    data.timein1 = this.refs.timein1.value;
-	    data.lunchstart1 = this.refs.lunchstart1.value;
-	    data.lunchend1 = this.refs.lunchend1.value;
-	    data.Timeout1 = this.refs.timeout1.value;
-
-	    data.date2 = this.refs.date2.value;
-	    data.timein2 = this.refs.timein2.value;
-	    data.lunchstart2 = this.refs.lunchstart2.value;
-	    data.lunchend2 = this.refs.lunchend2.value;
-	    data.Timeout2 = this.refs.timeout2.value;
-
-	    data.date3 = this.refs.date3.value;
-	    data.timein3 = this.refs.timein3.value;
-	    data.lunchstart3 = this.refs.lunchstart3.value;
-	    data.lunchend3 = this.refs.lunchend3.value;
-	    data.Timeout3 = this.refs.timeout3.value;
-
-	    data.date4 = this.refs.date4.value;
-	    data.timein4 = this.refs.timein4.value;
-	    data.lunchstart4 = this.refs.lunchstart4.value;
-	    data.lunchend4 = this.refs.lunchend4.value;
-	    data.Timeout4 = this.refs.timeout4.value;
-
-	    data.date5 = this.refs.date5.value;
-	    data.timein5 = this.refs.timein5.value;
-	    data.lunchstart5 = this.refs.lunchstart5.value;
-	    data.lunchend5 = this.refs.lunchend5.value;
-	    data.Timeout5 = this.refs.timeout5.value;
-
-	    data.totalWorkedHour = this.monday() + this.tuesday() + this.wednesday() + this.thursday() + this.friday();
-	    // console.log(this.monday() + this.tuesday() + this.wednesday() + this.thursday()+ this.friday())
-	    Dispatcher.dispatch({
-	      action: 'TIMESHEETDATASEND',
-	      data: {
-	        id: this.props.params.id,
-	        timesheetData: data
-	      }
-	    });
-
-	    var monday = typeof this.monday() == 'number' ? this.monday() : 0;
-	    var tuesday = typeof this.tuesday() == 'number' ? this.tuesday() : 0;
-	    var wednesday = typeof this.wednesday() == 'number' ? this.wednesday() : 0;
-	    var thursday = typeof this.thursday() == 'number' ? this.thursday() : 0;
-	    var firday = typeof this.friday() == 'number' ? this.friday() : 0;
-
-	    this.setState({
-	      mondayHourWorked: monday,
-	      tuesdayHourWorked: tuesday,
-	      wednesdayHourWorked: wednesday,
-	      thursdayHourWorked: thursday,
-	      fridayHourWorked: firday
-	    });
-	  },
-	  monday: function monday() {
-	    var self = this;
-	    var totalDay = parseInt(this.refs.timeout1.value) - parseInt(this.refs.timein1.value);
-	    var totalLuch = parseInt(this.refs.lunchend1.value) - parseInt(this.refs.lunchstart1.value);
-	    var workedHour = totalDay - totalLuch;
-	    if (workedHour > 0 && workedHour != 'NaN') {
-	      return workedHour;
-	    }
-	  },
-	  tuesday: function tuesday() {
-	    var self = this;
-	    var totalDay = parseInt(this.refs.timeout2.value) - parseInt(this.refs.timein2.value);
-	    var totalLuch = parseInt(this.refs.lunchend2.value) - parseInt(this.refs.lunchstart2.value);
-	    var workedHour = totalDay - totalLuch;
-	    if (workedHour > 0 && workedHour != 'NaN') {
-	      return workedHour;
-	    }
-	  },
-	  wednesday: function wednesday() {
-	    var self = this;
-	    var totalDay = parseInt(this.refs.timeout3.value) - parseInt(this.refs.timein3.value);
-	    var totalLuch = parseInt(this.refs.lunchend3.value) - parseInt(this.refs.lunchstart3.value);
-	    var workedHour = totalDay - totalLuch;
-	    if (workedHour > 0 && workedHour != 'NaN') {
-	      return workedHour;
-	    }
-	  },
-	  thursday: function thursday() {
-	    var self = this;
-	    var totalDay = parseInt(this.refs.timeout4.value) - parseInt(this.refs.timein4.value);
-	    var totalLuch = parseInt(this.refs.lunchend4.value) - parseInt(this.refs.lunchstart4.value);
-	    var workedHour = totalDay - totalLuch;
-	    if (workedHour > 0 && workedHour != 'NaN') {
-	      return workedHour;
-	    }
-	  },
-	  friday: function friday() {
-	    var self = this;
-	    var totalDay = parseInt(this.refs.timeout5.value) - parseInt(this.refs.timein5.value);
-	    var totalLuch = parseInt(this.refs.lunchend5.value) - parseInt(this.refs.lunchstart5.value);
-	    var workedHour = totalDay - totalLuch;
-	    if (workedHour > 0 && workedHour != 'NaN') {
-	      return workedHour;
-	    }
-	  },
-
-	  render: function render() {
-	    if (this.state.getTimeSheets) {
-	      return React.createElement(
-	        'div',
-	        { className: 'col-sm-4 col-md-8 col-lg-12' },
-	        React.createElement(
-	          'h5',
-	          null,
-	          'TimeSheet ID : ',
-	          this.props.params.id,
-	          ' '
-	        ),
-	        React.createElement(
-	          'table',
-	          { className: 'table' },
-	          React.createElement(
-	            'thead',
-	            null,
-	            React.createElement(
-	              'tr',
-	              null,
-	              React.createElement(
-	                'th',
-	                null,
-	                'Dates'
-	              ),
-	              React.createElement(
-	                'th',
-	                null,
-	                'Time In'
-	              ),
-	              React.createElement(
-	                'th',
-	                null,
-	                'Lunch Start'
-	              ),
-	              React.createElement(
-	                'th',
-	                null,
-	                'Lunch End'
-	              ),
-	              React.createElement(
-	                'th',
-	                null,
-	                'Time Out'
-	              ),
-	              React.createElement(
-	                'th',
-	                null,
-	                'Hours worked'
-	              )
-	            )
-	          ),
-	          React.createElement(
-	            'tbody',
-	            null,
-	            React.createElement(
-	              'tr',
-	              { className: 'success form-group' },
-	              React.createElement(
-	                'td',
-	                null,
-	                React.createElement('input', { type: 'text', className: 'form-control', name: 'date', ref: 'date1', defaultValue: this.state.getTimeSheets.data.TimeSheetID.Date1 })
-	              ),
-	              React.createElement(
-	                'td',
-	                null,
-	                React.createElement('input', { type: 'time', className: 'form-control', name: 'timein', ref: 'timein1', onChange: this.monday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.Time1 })
-	              ),
-	              React.createElement(
-	                'td',
-	                null,
-	                React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchstart', ref: 'lunchstart1', onChange: this.monday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.LunchStart1 })
-	              ),
-	              React.createElement(
-	                'td',
-	                null,
-	                React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchend', ref: 'lunchend1', onChange: this.monday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.LunchEnd1 })
-	              ),
-	              React.createElement(
-	                'td',
-	                null,
-	                React.createElement('input', { type: 'time', className: 'form-control', name: 'timeout', ref: 'timeout1', onChange: this.monday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.Timeout1 })
-	              ),
-	              React.createElement(
-	                'td',
-	                null,
-	                React.createElement('input', { type: 'text', className: 'form-control', name: 'hoursworked', ref: 'hoursworked1', value: this.state.mondayHourWorked, disabled: true })
-	              )
-	            ),
-	            React.createElement(
-	              'tr',
-	              { className: 'success form-group' },
-	              React.createElement(
-	                'td',
-	                null,
-	                React.createElement('input', { type: 'text', className: 'form-control', name: 'date', ref: 'date2', defaultValue: this.state.getTimeSheets.data.TimeSheetID.Date2 })
-	              ),
-	              React.createElement(
-	                'td',
-	                null,
-	                React.createElement('input', { type: 'time', className: 'form-control', name: 'timein', ref: 'timein2', onChange: this.tuesday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.Time2 })
-	              ),
-	              React.createElement(
-	                'td',
-	                null,
-	                React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchstart', ref: 'lunchstart2', onChange: this.tuesday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.LunchStart2 })
-	              ),
-	              React.createElement(
-	                'td',
-	                null,
-	                React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchend', ref: 'lunchend2', onChange: this.tuesday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.LunchEnd2 })
-	              ),
-	              React.createElement(
-	                'td',
-	                null,
-	                React.createElement('input', { type: 'time', className: 'form-control', name: 'timeout', ref: 'timeout2', onChange: this.tuesday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.Timeout2 })
-	              ),
-	              React.createElement(
-	                'td',
-	                null,
-	                React.createElement('input', { type: 'text', className: 'form-control', name: 'hoursworked', ref: 'hoursworked2', value: this.state.tuesdayHourWorked, disabled: true })
-	              )
-	            ),
-	            React.createElement(
-	              'tr',
-	              { className: 'success form-group' },
-	              React.createElement(
-	                'td',
-	                null,
-	                React.createElement('input', { type: 'text', className: 'form-control', name: 'date', ref: 'date3', defaultValue: this.state.getTimeSheets.data.TimeSheetID.Date3 })
-	              ),
-	              React.createElement(
-	                'td',
-	                null,
-	                React.createElement('input', { type: 'time', className: 'form-control', name: 'timein', ref: 'timein3', onChange: this.wednesday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.Time3 })
-	              ),
-	              React.createElement(
-	                'td',
-	                null,
-	                React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchstart', ref: 'lunchstart3', onChange: this.wednesday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.LunchStart3 })
-	              ),
-	              React.createElement(
-	                'td',
-	                null,
-	                React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchend', ref: 'lunchend3', onChange: this.wednesday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.LunchEnd3 })
-	              ),
-	              React.createElement(
-	                'td',
-	                null,
-	                React.createElement('input', { type: 'time', className: 'form-control', name: 'timeout', ref: 'timeout3', onChange: this.wednesday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.Timeout3 })
-	              ),
-	              React.createElement(
-	                'td',
-	                null,
-	                React.createElement('input', { type: 'text', className: 'form-control', name: 'hoursworked', ref: 'hoursworked3', value: this.state.wednesdayHourWorked, disabled: true })
-	              )
-	            ),
-	            React.createElement(
-	              'tr',
-	              { className: 'success form-group' },
-	              React.createElement(
-	                'td',
-	                null,
-	                React.createElement('input', { type: 'text', className: 'form-control', name: 'date', ref: 'date4', defaultValue: this.state.getTimeSheets.data.TimeSheetID.Date4 })
-	              ),
-	              React.createElement(
-	                'td',
-	                null,
-	                React.createElement('input', { type: 'time', className: 'form-control', name: 'timein', ref: 'timein4', onChange: this.thursday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.Time4 })
-	              ),
-	              React.createElement(
-	                'td',
-	                null,
-	                React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchstart', ref: 'lunchstart4', onChange: this.thursday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.LunchStart4 })
-	              ),
-	              React.createElement(
-	                'td',
-	                null,
-	                React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchend', ref: 'lunchend4', onChange: this.thursday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.LunchEnd4 })
-	              ),
-	              React.createElement(
-	                'td',
-	                null,
-	                React.createElement('input', { type: 'time', className: 'form-control', name: 'timeout', ref: 'timeout4', onChange: this.thursday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.Timeout4 })
-	              ),
-	              React.createElement(
-	                'td',
-	                null,
-	                React.createElement('input', { type: 'text', className: 'form-control', name: 'hoursworked', ref: 'hoursworked4', value: this.state.thursdayHourWorked, disabled: true })
-	              )
-	            ),
-	            React.createElement(
-	              'tr',
-	              { className: 'success form-group' },
-	              React.createElement(
-	                'td',
-	                null,
-	                React.createElement('input', { type: 'text', className: 'form-control', name: 'date', ref: 'date5', defaultValue: this.state.getTimeSheets.data.TimeSheetID.Date5 })
-	              ),
-	              React.createElement(
-	                'td',
-	                null,
-	                React.createElement('input', { type: 'time', className: 'form-control', name: 'timein', ref: 'timein5', onChange: this.friday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.Time5 })
-	              ),
-	              React.createElement(
-	                'td',
-	                null,
-	                React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchstart', ref: 'lunchstart5', onChange: this.friday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.LunchStart5 })
-	              ),
-	              React.createElement(
-	                'td',
-	                null,
-	                React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchend', ref: 'lunchend5', onChange: this.friday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.LunchEnd5 })
-	              ),
-	              React.createElement(
-	                'td',
-	                null,
-	                React.createElement('input', { type: 'time', className: 'form-control', name: 'timeout', ref: 'timeout5', onChange: this.friday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.Timeout5 })
-	              ),
-	              React.createElement(
-	                'td',
-	                null,
-	                React.createElement('input', { type: 'text', className: 'form-control', name: 'hoursworked', ref: 'hoursworked5', value: this.state.fridayHourWorked, disabled: true })
-	              )
-	            )
-	          )
-	        ),
-	        React.createElement(
-	          'h4',
-	          null,
-	          'Totle hours worked : ',
-	          this.state.mondayHourWorked + this.state.tuesdayHourWorked + this.state.wednesdayHourWorked + this.state.thursdayHourWorked + this.state.fridayHourWorked,
-	          ' '
-	        ),
-	        React.createElement('input', { type: 'button', className: 'form-control', value: 'save', onClick: this.getData })
-	      );
-	    } else {
-	      return React.createElement('div', { className: 'loader' });
-	    }
-	  },
-	  componentDidUpdate: function componentDidUpdate(prevProps, prevState) {
-	    var self = this;
-
-	    var monday = typeof this.monday() == 'number' ? this.monday() : 0;
-	    var tuesday = typeof this.tuesday() == 'number' ? this.tuesday() : 0;
-	    var wednesday = typeof this.wednesday() == 'number' ? this.wednesday() : 0;
-	    var thursday = typeof this.thursday() == 'number' ? this.thursday() : 0;
-	    var firday = typeof this.friday() == 'number' ? this.friday() : 0;
-
-	    if (prevState.tuesdayHourWorked == 0) {
-	      self.setState({
-	        mondayHourWorked: monday,
-	        tuesdayHourWorked: tuesday,
-	        wednesdayHourWorked: wednesday,
-	        thursdayHourWorked: thursday,
-	        fridayHourWorked: firday
-	      });
-	      return true;
-	    }
-	  }
-	});
-	module.exports = AddTimeSheet;
-
-/***/ },
-/* 267 */,
-/* 268 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var React = __webpack_require__(1);
-	var ReactDOM = __webpack_require__(34);
-	var Router = __webpack_require__(172).Router;
-	var Route = __webpack_require__(172).Route;
-	var browserHistory = __webpack_require__(172).browserHistory;
-	var Dispatcher = __webpack_require__(228);
-	var userStore = __webpack_require__(231);
-	var Link = __webpack_require__(172).Link;
-
-	var ContractorDashbored = React.createClass({
-	  displayName: 'ContractorDashbored',
-	  getInitialState: function getInitialState() {
-	    return {
-	      timesheet: userStore.getTimeSheets(),
-	      comment: userStore.getComment()
-	    };
-	  },
-
-	  componentWillMount: function componentWillMount() {
-	    var self = this;
-	    Dispatcher.dispatch({
-	      action: 'GETTIMESHEET'
-	    });
-	    Dispatcher.dispatch({
-	      action: 'GETCOMMENT'
-	    });
-	    userStore.on('getTimeSheets', function () {
-	      self.setState({
-	        timesheet: userStore.getTimeSheets()
-	      });
-	    });
-	    userStore.on('getcomment', function () {
-	      self.setState({
-	        comment: userStore.getComment()
-	      });
-	    });
-	  },
-	  AddTimeSheet: function AddTimeSheet() {
-	    Dispatcher.dispatch({
-	      action: 'ADDTIMESHEET'
-	    });
-
-	    location.reload();
-	  },
-
-	  render: function render() {
-	    var self = this;
-	    var declined = '';
-	    if (this.state.timesheet) {
-	      var timesheets = self.state.timesheet.data.contractor.map(function (timesheet, i) {
-	        declined = timesheet.Status;
-	        console.log(declined);
-	        return React.createElement(
-	          'div',
-	          { key: i, className: 'card card-block' },
-	          React.createElement(
-	            'h4',
-	            { className: 'card-title' },
-	            'TimeSheet id : ',
-	            timesheet._id
-	          ),
-	          React.createElement('p', { className: 'card-text' }),
-	          React.createElement(
-	            Link,
-	            { to: '/addtimesheet/' + timesheet._id },
-	            ' Edit '
-	          ),
-	          React.createElement(
-	            Link,
-	            { to: '/deletetimesheets/' + timesheet._id },
-	            ' Delete '
-	          )
-	        );
-	      });
-	      console.log(timesheets.length);
-	      return React.createElement(
-	        'div',
-	        { className: 'col-sm-4 col-md-8 col-lg-12' },
-	        timesheets.length == 5 ? React.createElement('input', { type: 'button', className: 'btn btn-danger btn-lg btn-block', onClick: this.AddTimeSheet, value: 'Add', disabled: true }) : React.createElement(
-	          'button',
-	          { className: 'btn btn-primary btn-lg btn-block', onClick: this.AddTimeSheet },
-	          'Add'
-	        ),
-	        timesheets.length != 0 ? React.createElement(
-	          Link,
-	          { className: 'btn btn-success btn-lg btn-block', to: '/viewtimesheets' },
-	          'Submit for approvel'
-	        ) : '',
-	        timesheets,
-	        declined === 'declined' ? React.createElement(
-	          'div',
-	          { className: 'alert alert-danger' },
-	          React.createElement(
-	            'strong',
-	            null,
-	            'timesheets send has been declined please check the infromation and resubmit'
-	          ),
-	          React.createElement(
-	            'h4',
-	            null,
-	            this.state.comment ? ":      " + this.state.comment.data.contractor[0].comments : ''
-	          )
-	        ) : ''
-	      );
-	    } else {
-	      return React.createElement('div', { className: 'loader' });
-	    }
-	  }
-	});
-	module.exports = ContractorDashbored;
-
-/***/ },
-/* 269 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var React = __webpack_require__(1);
-	var ReactDOM = __webpack_require__(34);
-	var Router = __webpack_require__(172).Router;
-	var Route = __webpack_require__(172).Route;
-	var browserHistory = __webpack_require__(172).browserHistory;
-	var Dispatcher = __webpack_require__(228);
-	var userStore = __webpack_require__(231);
-	var Link = __webpack_require__(172).Link;
-
-	var ViewTimesheets = React.createClass({
-	  displayName: 'ViewTimesheets',
-	  getInitialState: function getInitialState() {
-	    return {
-	      timesheet: userStore.getTimeSheets()
-	    };
-	  },
-
-	  componentWillMount: function componentWillMount() {
-	    var self = this;
-	    Dispatcher.dispatch({
-	      action: 'GETTIMESHEET'
-	    });
-
-	    userStore.on('getTimeSheets', function () {
-	      self.setState({
-	        timesheet: userStore.getTimeSheets()
-	      });
-	    });
-	  },
-	  sendApprovel: function sendApprovel() {
-
-	    Dispatcher.dispatch({
-	      action: 'SENDFORAPPROVEL',
-	      data: this.state.timesheet
-	    });
-	  },
-
-	  render: function render() {
-
-	    console.log(this.state.timesheet);
-
-	    if (this.state.timesheet) {
-	      var self = this;
-	      var total = 0;
-	      var timesheets = self.state.timesheet.data.contractor.map(function (timesheet, i) {
-	        console.log(timesheet);
-	        total += parseInt(timesheet.TotalHourWorked);
-	        return React.createElement(
-	          'div',
-	          { key: i, className: 'well well-lg' },
-	          React.createElement(
-	            'table',
-	            { className: 'table table-bordered table-responsive' },
-	            React.createElement(
-	              'thead',
-	              null,
-	              React.createElement(
-	                'tr',
-	                null,
-	                React.createElement(
-	                  'th',
-	                  null,
-	                  'Day'
-	                ),
-	                React.createElement(
-	                  'th',
-	                  null,
-	                  'Dates'
-	                ),
-	                React.createElement(
-	                  'th',
-	                  null,
-	                  'Time In'
-	                ),
-	                React.createElement(
-	                  'th',
-	                  null,
-	                  'Lunch Start'
-	                ),
-	                React.createElement(
-	                  'th',
-	                  null,
-	                  'Lunch End'
-	                ),
-	                React.createElement(
-	                  'th',
-	                  null,
-	                  'Time Out'
-	                )
-	              )
-	            ),
-	            React.createElement(
-	              'tbody',
-	              null,
-	              React.createElement(
-	                'tr',
-	                null,
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  'Monday'
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Date1
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Time1
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchStart1
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchEnd1
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Timeout1
-	                )
-	              ),
-	              React.createElement(
-	                'tr',
-	                null,
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  'Tuesday'
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Date2
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Time2
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchStart2
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchEnd2
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Timeout2
-	                )
-	              ),
-	              React.createElement(
-	                'tr',
-	                null,
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  'Wednessday'
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Date3
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Time3
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchStart3
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchEnd3
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Timeout3
-	                )
-	              ),
-	              React.createElement(
-	                'tr',
-	                null,
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  'Thursday'
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Date4
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Time4
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchStart4
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchEnd4
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Timeout4
-	                )
-	              ),
-	              React.createElement(
-	                'tr',
-	                null,
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  'Firday'
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Date5
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Time5
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchStart5
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchEnd5
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Timeout5
-	                )
-	              )
-	            )
-	          ),
-	          React.createElement(
-	            'h5',
-	            null,
-	            'Total hour worked : ',
-	            timesheet.TotalHourWorked,
-	            ' '
-	          )
-	        );
-	      });
-	      return React.createElement(
-	        'div',
-	        { className: 'col-lg-12' },
-	        timesheets,
-	        React.createElement(
-	          'h1',
-	          null,
-	          'Total hour worked : ',
-	          total
-	        ),
-	        React.createElement(
-	          'button',
-	          { type: 'button', onClick: this.sendApprovel, className: 'btn btn-success' },
-	          'Send For approvel'
-	        )
-	      );
-	    } else {
-
-	      return React.createElement('div', { className: 'loader' });
-	    }
-	  }
-	});
-	module.exports = ViewTimesheets;
-
-/***/ },
-/* 270 */,
-/* 271 */,
-/* 272 */,
-/* 273 */,
-/* 274 */,
-/* 275 */,
-/* 276 */,
-/* 277 */,
-/* 278 */,
-/* 279 */,
-/* 280 */,
-/* 281 */,
-/* 282 */,
-/* 283 */,
-/* 284 */,
-/* 285 */,
-/* 286 */,
-/* 287 */,
-/* 288 */,
-/* 289 */,
-/* 290 */,
-/* 291 */,
-/* 292 */,
-/* 293 */,
-/* 294 */,
-/* 295 */,
-/* 296 */,
-/* 297 */,
-/* 298 */,
-/* 299 */,
-/* 300 */,
-/* 301 */,
-/* 302 */,
-/* 303 */,
-/* 304 */,
-/* 305 */,
-/* 306 */,
-/* 307 */,
-/* 308 */,
-/* 309 */,
-/* 310 */,
-/* 311 */,
-/* 312 */,
-/* 313 */,
-/* 314 */,
-/* 315 */,
-/* 316 */,
-/* 317 */,
-/* 318 */,
-/* 319 */,
-/* 320 */,
-/* 321 */,
-/* 322 */,
-/* 323 */,
-/* 324 */,
-/* 325 */,
-/* 326 */,
-/* 327 */,
-/* 328 */,
-/* 329 */,
-/* 330 */,
-/* 331 */,
-/* 332 */,
-/* 333 */,
-/* 334 */,
-/* 335 */,
-/* 336 */,
-/* 337 */,
-/* 338 */,
-/* 339 */,
-/* 340 */,
-/* 341 */,
-/* 342 */,
-/* 343 */,
-/* 344 */,
-/* 345 */,
-/* 346 */,
-/* 347 */,
-/* 348 */,
-/* 349 */,
-/* 350 */,
-/* 351 */,
-/* 352 */,
-/* 353 */,
-/* 354 */,
-/* 355 */,
-/* 356 */,
-/* 357 */,
-/* 358 */,
-/* 359 */,
-/* 360 */,
-/* 361 */,
-/* 362 */,
-/* 363 */,
-/* 364 */,
-/* 365 */,
-/* 366 */,
-/* 367 */,
-/* 368 */,
-/* 369 */,
-/* 370 */,
-/* 371 */,
-/* 372 */,
-/* 373 */,
-/* 374 */,
-/* 375 */,
-/* 376 */,
-/* 377 */,
-/* 378 */,
-/* 379 */,
-/* 380 */,
-/* 381 */,
-/* 382 */,
-/* 383 */,
-/* 384 */,
-/* 385 */,
-/* 386 */,
-/* 387 */,
-/* 388 */,
-/* 389 */,
-/* 390 */,
-/* 391 */,
-/* 392 */,
-/* 393 */,
-/* 394 */,
-/* 395 */,
-/* 396 */,
-/* 397 */,
-/* 398 */,
-/* 399 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var React = __webpack_require__(1);
-	var ReactDOM = __webpack_require__(34);
-	var Router = __webpack_require__(172).Router;
-	var Route = __webpack_require__(172).Route;
-	var browserHistory = __webpack_require__(172).browserHistory;
-	var Dispatcher = __webpack_require__(228);
-	var userStore = __webpack_require__(231);
-	var Link = __webpack_require__(172).Link;
-
-	userStore.on('TIMESHEETDEL', function () {
-	  browserHistory.push('/dashbored');
-	});
-
-	var ApproverHome = React.createClass({
-	  displayName: 'ApproverHome',
-
-	  componentWillMount: function componentWillMount() {
-	    Dispatcher.dispatch({
-	      action: 'DELTIMESHEET',
-	      data: {
-	        id: this.props.params.id
-	      }
-	    });
-	  },
-	  render: function render() {
-	    return React.createElement(
-	      'div',
-	      { className: 'col-sm-4 col-md-8 col-lg-12' },
-	      React.createElement(
-	        'h1',
-	        null,
-	        'DeleteTime'
-	      )
-	    );
-	  }
-	});
-	module.exports = ApproverHome;
-
-/***/ },
-/* 400 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var React = __webpack_require__(1);
-	var ReactDOM = __webpack_require__(34);
-	var Router = __webpack_require__(172).Router;
-	var Route = __webpack_require__(172).Route;
-	var browserHistory = __webpack_require__(172).browserHistory;
-	var Dispatcher = __webpack_require__(228);
-	var userStore = __webpack_require__(231);
-	var Link = __webpack_require__(172).Link;
-
-	var ApproverHome = React.createClass({
-	  displayName: 'ApproverHome',
-	  getInitialState: function getInitialState() {
-	    return {
-	      search: userStore.getSearchResult()
-	    };
-	  },
-	  search: function search(e) {
-	    var self = this;
-	    Dispatcher.dispatch({
-	      action: 'SEARCH',
-	      searchInfo: e.target.value
-	    });
-
-	    userStore.on('search', function () {
-	      self.setState({
-	        search: userStore.getSearchResult()
-	      });
-	    });
-	  },
-
-	  render: function render() {
-	    if (this.state.search) {
-	      var search = this.state.search.data.search.map(function (timesheet, i) {
-	        return React.createElement(
-	          'div',
-	          { key: i, className: 'well well-lg' },
-	          React.createElement(
-	            'table',
-	            { className: 'table table-striped table-inverse table-bordered table-responsive' },
-	            React.createElement(
-	              'thead',
-	              null,
-	              React.createElement(
-	                'tr',
-	                null,
-	                React.createElement(
-	                  'th',
-	                  null,
-	                  'Day'
-	                ),
-	                React.createElement(
-	                  'th',
-	                  null,
-	                  'Dates'
-	                ),
-	                React.createElement(
-	                  'th',
-	                  null,
-	                  'Time In'
-	                ),
-	                React.createElement(
-	                  'th',
-	                  null,
-	                  'Lunch Start'
-	                ),
-	                React.createElement(
-	                  'th',
-	                  null,
-	                  'Lunch End'
-	                ),
-	                React.createElement(
-	                  'th',
-	                  null,
-	                  'Time Out'
-	                )
-	              )
-	            ),
-	            React.createElement(
-	              'tbody',
-	              null,
-	              React.createElement(
-	                'tr',
-	                null,
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  'Monday'
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Date1
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Time1
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchStart1
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchEnd1
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Timeout1
-	                )
-	              ),
-	              React.createElement(
-	                'tr',
-	                null,
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  'Tuesday'
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Date2
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Time2
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchStart2
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchEnd2
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Timeout2
-	                )
-	              ),
-	              React.createElement(
-	                'tr',
-	                null,
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  'Wednessday'
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Date3
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Time3
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchStart3
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchEnd3
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Timeout3
-	                )
-	              ),
-	              React.createElement(
-	                'tr',
-	                null,
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  'Thursday'
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Date4
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Time4
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchStart4
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchEnd4
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Timeout4
-	                )
-	              ),
-	              React.createElement(
-	                'tr',
-	                null,
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  'Firday'
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Date5
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Time5
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchStart5
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchEnd5
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Timeout5
-	                )
-	              )
-	            )
-	          ),
-	          React.createElement(
-	            'h5',
-	            null,
-	            'Total hour worked : ',
-	            timesheet.TotalHourWorked,
-	            ' '
-	          )
-	        );
-	      });
-	      return React.createElement(
-	        'div',
-	        { className: 'col-sm-4 col-md-8 col-lg-12' },
-	        React.createElement('input', { type: 'button', onClick: this.search, value: 'approved', className: 'btn btn-primary' }),
-	        React.createElement('input', { type: 'button', onClick: this.search, value: 'needApprovel', className: 'btn btn-primary' }),
-	        React.createElement('input', { type: 'button', onClick: this.search, value: 'declined', className: 'btn btn-primary' }),
-	        React.createElement('hr', null),
-	        search,
-	        React.createElement('hr', null)
-	      );
-	    } else {
-	      return React.createElement(
-	        'div',
-	        { className: 'col-sm-4 col-md-8 col-lg-12' },
-	        React.createElement('input', { type: 'button', onClick: this.search, value: 'approved', className: 'btn btn-primary' }),
-	        React.createElement('input', { type: 'button', onClick: this.search, value: 'needApprovel', className: 'btn btn-primary' }),
-	        React.createElement('input', { type: 'button', onClick: this.search, value: 'declined', className: 'btn btn-primary' })
-	      );
-	    }
-	  }
-	});
-	module.exports = ApproverHome;
-
-/***/ },
-/* 401 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var React = __webpack_require__(1);
-	var ReactDOM = __webpack_require__(34);
-	var Router = __webpack_require__(172).Router;
-	var Route = __webpack_require__(172).Route;
-	var browserHistory = __webpack_require__(172).browserHistory;
-	var Dispatcher = __webpack_require__(228);
-	var userStore = __webpack_require__(231);
-	var Link = __webpack_require__(172).Link;
-
-	var ViewPaidInvoice = React.createClass({
-	  displayName: 'ViewPaidInvoice',
-	  getInitialState: function getInitialState() {
-	    return {
-	      search: userStore.getSearchResult()
-	    };
-	  },
-	  search: function search(e) {
-	    var self = this;
-	    Dispatcher.dispatch({
-	      action: 'SEARCH',
-	      searchInfo: e.target.value
-	    });
-
-	    userStore.on('search', function () {
-	      self.setState({
-	        search: userStore.getSearchResult()
-	      });
-	    });
-	  },
-
-	  render: function render() {
-	    if (this.state.search) {
-	      var search = this.state.search.data.search.map(function (timesheet, i) {
-	        return React.createElement(
-	          'div',
-	          { key: i, className: 'well well-lg' },
-	          React.createElement(
-	            'table',
-	            { className: 'table table-bordered table-responsive' },
-	            React.createElement(
-	              'thead',
-	              null,
-	              React.createElement(
-	                'tr',
-	                null,
-	                React.createElement(
-	                  'th',
-	                  null,
-	                  'Day'
-	                ),
-	                React.createElement(
-	                  'th',
-	                  null,
-	                  'Dates'
-	                ),
-	                React.createElement(
-	                  'th',
-	                  null,
-	                  'Time In'
-	                ),
-	                React.createElement(
-	                  'th',
-	                  null,
-	                  'Lunch Start'
-	                ),
-	                React.createElement(
-	                  'th',
-	                  null,
-	                  'Lunch End'
-	                ),
-	                React.createElement(
-	                  'th',
-	                  null,
-	                  'Time Out'
-	                )
-	              )
-	            ),
-	            React.createElement(
-	              'tbody',
-	              null,
-	              React.createElement(
-	                'tr',
-	                null,
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  'Monday'
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Date1
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Time1
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchStart1
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchEnd1
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Timeout1
-	                )
-	              ),
-	              React.createElement(
-	                'tr',
-	                null,
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  'Tuesday'
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Date2
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Time2
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchStart2
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchEnd2
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Timeout2
-	                )
-	              ),
-	              React.createElement(
-	                'tr',
-	                null,
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  'Wednessday'
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Date3
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Time3
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchStart3
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchEnd3
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Timeout3
-	                )
-	              ),
-	              React.createElement(
-	                'tr',
-	                null,
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  'Thursday'
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Date4
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Time4
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchStart4
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchEnd4
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Timeout4
-	                )
-	              ),
-	              React.createElement(
-	                'tr',
-	                null,
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  'Firday'
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Date5
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Time5
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchStart5
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchEnd5
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Timeout5
-	                )
-	              )
-	            )
-	          ),
-	          React.createElement(
-	            'h5',
-	            null,
-	            'Total hour worked : ',
-	            timesheet.TotalHourWorked,
-	            ' '
-	          )
-	        );
-	      });
-	      return React.createElement(
-	        'div',
-	        { className: 'col-sm-4 col-md-8 col-lg-12' },
-	        React.createElement('input', { type: 'button', onClick: this.search, value: 'paid', className: 'btn btn-primary' }),
-	        React.createElement('hr', null),
-	        search,
-	        React.createElement('hr', null)
-	      );
-	    } else {
-	      return React.createElement(
-	        'div',
-	        { className: 'col-sm-4 col-md-8 col-lg-12' },
-	        React.createElement('input', { type: 'button', onClick: this.search, value: 'paid', className: 'btn btn-primary' })
-	      );
-	    }
-	  }
-	});
-	module.exports = ViewPaidInvoice;
-
-/***/ },
-/* 402 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var React = __webpack_require__(1);
-	var ReactDOM = __webpack_require__(34);
-	var Router = __webpack_require__(172).Router;
-	var Route = __webpack_require__(172).Route;
-	var browserHistory = __webpack_require__(172).browserHistory;
-	var userStore = __webpack_require__(231);
-	var Dispatcher = __webpack_require__(228);
-	var Link = __webpack_require__(172).Link;
-
-	var InvoiceSend = React.createClass({
-	  displayName: 'InvoiceSend',
-	  getInitialState: function getInitialState() {
-	    return {
-	      invoice: userStore.getInvoice()
-	    };
-	  },
-
-	  componentWillMount: function componentWillMount() {
-	    var self = this;
-	    Dispatcher.dispatch({
-	      action: 'INVOICE',
-	      id: {
-	        userId: this.props.params.id
-	      }
-	    });
-	    userStore.on('invoice', function () {
-	      self.setState({
-	        invoice: userStore.getInvoice()
-	      });
-	    });
-	  },
-	  paid: function paid() {
-	    Dispatcher.dispatch({
-	      action: 'PAID',
-	      id: {
-	        userId: this.props.params.id
-	      }
-	    });
-	  },
-
-	  render: function render() {
-	    if (this.state.invoice) {
-	      var invoice = this.state.invoice.data.needToPay.map(function (timesheet, i) {
-	        return React.createElement(
-	          'div',
-	          { key: i, className: 'well well-lg' },
-	          React.createElement(
-	            'table',
-	            { className: 'table table-bordered table-responsive' },
-	            React.createElement(
-	              'thead',
-	              null,
-	              React.createElement(
-	                'tr',
-	                null,
-	                React.createElement(
-	                  'th',
-	                  null,
-	                  'Day'
-	                ),
-	                React.createElement(
-	                  'th',
-	                  null,
-	                  'Dates'
-	                ),
-	                React.createElement(
-	                  'th',
-	                  null,
-	                  'Time In'
-	                ),
-	                React.createElement(
-	                  'th',
-	                  null,
-	                  'Lunch Start'
-	                ),
-	                React.createElement(
-	                  'th',
-	                  null,
-	                  'Lunch End'
-	                ),
-	                React.createElement(
-	                  'th',
-	                  null,
-	                  'Time Out'
-	                )
-	              )
-	            ),
-	            React.createElement(
-	              'tbody',
-	              null,
-	              React.createElement(
-	                'tr',
-	                null,
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  'Monday'
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Date1
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Time1
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchStart1
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchEnd1
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Timeout1
-	                )
-	              ),
-	              React.createElement(
-	                'tr',
-	                null,
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  'Tuesday'
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Date2
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Time2
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchStart2
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchEnd2
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Timeout2
-	                )
-	              ),
-	              React.createElement(
-	                'tr',
-	                null,
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  'Wednessday'
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Date3
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Time3
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchStart3
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchEnd3
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Timeout3
-	                )
-	              ),
-	              React.createElement(
-	                'tr',
-	                null,
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  'Thursday'
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Date4
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Time4
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchStart4
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchEnd4
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Timeout4
-	                )
-	              ),
-	              React.createElement(
-	                'tr',
-	                null,
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  'Firday'
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Date5
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Time5
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchStart5
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.LunchEnd5
-	                ),
-	                React.createElement(
-	                  'td',
-	                  null,
-	                  timesheet.Timeout5
-	                )
-	              )
-	            )
-	          ),
-	          React.createElement(
-	            'h5',
-	            null,
-	            'Total hour worked : ',
-	            timesheet.TotalHourWorked,
-	            ' '
-	          )
-	        );
-	      });
-	      return React.createElement(
-	        'div',
-	        { className: 'col-sm-4 col-md-8 col-lg-12' },
-	        React.createElement(
-	          'h1',
-	          null,
-	          'InvoiceSend'
-	        ),
-	        invoice,
-	        React.createElement('input', { type: 'button', value: 'paid', onClick: this.paid })
-	      );
-	    } else {
-	      return React.createElement(
-	        'div',
-	        { className: 'col-sm-4 col-md-8 col-lg-12' },
-	        React.createElement(
-	          'h1',
-	          null,
-	          'InvoiceSend'
-	        )
-	      );
-	    }
-	  }
-	});
-	module.exports = InvoiceSend;
-
-/***/ },
-/* 403 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	/*******************View all contarctor **********/
-	var React = __webpack_require__(1);
-	var ReactDOM = __webpack_require__(34);
-	var Router = __webpack_require__(172).Router;
-	var Route = __webpack_require__(172).Route;
-	var browserHistory = __webpack_require__(172).browserHistory;
-	var userStore = __webpack_require__(231);
-	var Dispatcher = __webpack_require__(228);
-	var Link = __webpack_require__(172).Link;
-
-	var ApproverViewContarctor = React.createClass({
-	  displayName: 'ApproverViewContarctor',
-	  getInitialState: function getInitialState() {
-	    return {
-	      contractor: userStore.getContractors()
-	    };
-	  },
-
-	  componentWillMount: function componentWillMount() {
-	    var self = this;
-	    Dispatcher.dispatch({
-	      action: 'GETCONTRACTOR'
-	    });
-	    userStore.on('getContractor', function () {
-	      self.setState({
-	        contractor: userStore.getContractors()
-	      });
-	    });
-	  },
-	  render: function render() {
-	    var self = this;
-	    if (this.state.contractor) {
-	      var contractors = self.state.contractor.data.contractor.map(function (contractor, i) {
-	        return React.createElement(
-	          'tr',
-	          { key: i, className: 'success' },
-	          React.createElement(
-	            'td',
-	            null,
-	            contractor.startdate
-	          ),
-	          React.createElement(
-	            'td',
-	            null,
-	            contractor.enddate
-	          ),
-	          React.createElement(
-	            'td',
-	            null,
-	            contractor.firstName
-	          ),
-	          React.createElement(
-	            'td',
-	            null,
-	            contractor.lastName
-	          ),
-	          React.createElement(
-	            'td',
-	            null,
-	            React.createElement(
-	              Link,
-	              { to: 'invoiceadmin/' + contractor._id },
-	              'View TimeSheets'
-	            )
-	          )
-	        );
-	      });
-	      return React.createElement(
-	        'table',
-	        { className: 'table' },
-	        React.createElement(
-	          'thead',
-	          null,
-	          React.createElement(
-	            'tr',
-	            null,
-	            React.createElement(
-	              'th',
-	              null,
-	              'Start Date'
-	            ),
-	            React.createElement(
-	              'th',
-	              null,
-	              'End Date'
-	            ),
-	            React.createElement(
-	              'th',
-	              null,
-	              'First Name'
-	            ),
-	            React.createElement(
-	              'th',
-	              null,
-	              'Last Name'
-	            ),
-	            React.createElement(
-	              'th',
-	              null,
-	              'View TimeSheets'
-	            )
-	          )
-	        ),
-	        React.createElement(
-	          'tbody',
-	          null,
-	          contractors
-	        )
-	      );
-	    } else {
-	      return React.createElement('div', { className: 'loader' });
-	    }
-	  }
-	});
-	module.exports = ApproverViewContarctor;
-
-/***/ },
-/* 404 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var React = __webpack_require__(1);
-	var ReactDOM = __webpack_require__(34);
-	var Router = __webpack_require__(172).Router;
-	var Route = __webpack_require__(172).Route;
-	var browserHistory = __webpack_require__(172).browserHistory;
-	var Dispatcher = __webpack_require__(228);
-	var userStore = __webpack_require__(231);
-	var Link = __webpack_require__(172).Link;
-
-	//need to do invoice date
-	var SearchForInvoiceAdmin = React.createClass({
-	  displayName: 'SearchForInvoiceAdmin',
-	  getInitialState: function getInitialState() {
-	    return {
-	      searchInvoice: ''
-	    };
-	  },
-	  search: function search(e) {
-	    var self = this;
-	    Dispatcher.dispatch({
-	      action: 'SEARCHINVOICE',
-	      search: this.refs.search.value
-	    });
-
-	    userStore.on('invoiceSearch', function (data) {
-	      this.setState({
-	        searchInvoice: data
-	      });
-	    }.bind(this));
-	  },
-
-	  render: function render() {
-
-	    if (this.state.searchInvoice.data) {
-	      var self = this;
-	      var map = this.state.searchInvoice.data.invoiceSearch.map(function (item, i) {
-	        if (item) {
-	          return React.createElement(
-	            'div',
-	            { key: i, className: 'panel-group' },
-	            React.createElement(
-	              'p',
-	              null,
-	              'Results ',
-	              i + 1,
-	              ' '
-	            ),
-	            React.createElement(
-	              'div',
-	              { className: 'panel panel-default' },
-	              React.createElement(
-	                'div',
-	                { className: 'panel-heading' },
-	                React.createElement(
-	                  'h4',
-	                  { className: 'panel-title' },
-	                  React.createElement(
-	                    'a',
-	                    { 'data-toggle': 'collapse', href: '#collapse1' },
-	                    'Name : ',
-	                    self.state.searchInvoice.data.contractor[i].firstName
-	                  )
-	                )
-	              ),
-	              React.createElement(
-	                'div',
-	                { id: 'collapse1', className: 'panel-collapse collapse' },
-	                React.createElement(
-	                  'div',
-	                  { className: 'panel-body' },
-	                  React.createElement(
-	                    'pre',
-	                    null,
-	                    React.createElement(
-	                      'p',
-	                      { className: 'text-warning' },
-	                      'Invoice #id :',
-	                      item._id,
-	                      ' '
-	                    ),
-	                    React.createElement(
-	                      'p',
-	                      null,
-	                      'Date'
-	                    ),
-	                    React.createElement(
-	                      'p',
-	                      null,
-	                      'total hours worked : ',
-	                      item.TotalHourWorked
-	                    ),
-	                    React.createElement(
-	                      'p',
-	                      null,
-	                      'Rate : \xA37:00'
-	                    ),
-	                    React.createElement(
-	                      'p',
-	                      { className: 'bg-danger text-center' },
-	                      'Total Pay : \xA3 ',
-	                      parseInt(item.TotalHourWorked) * 7
-	                    )
-	                  )
-	                )
-	              )
-	            )
-	          );
-	        } else if (i <= 0) {
-	          return React.createElement(
-	            'div',
-	            null,
-	            React.createElement(
-	              'h3',
-	              null,
-	              'No Match : you can search by contractor name or there start date e.g. 2016-11-12'
-	            )
-	          );
-	        }
-	      });
-	      return React.createElement(
-	        'div',
-	        { className: 'col-sm-4 col-md-8 col-lg-12' },
-	        React.createElement('input', { type: 'text', ref: 'search', className: 'form-control', placeholder: 'search ...' }),
-	        React.createElement('hr', null),
-	        React.createElement('input', { type: 'button', value: 'search', className: 'btn btn-primary', onClick: this.search }),
-	        React.createElement('hr', null),
-	        map
-	      );
-	    } else {
-	      return React.createElement(
-	        'div',
-	        { className: 'col-sm-4 col-md-8 col-lg-12' },
-	        React.createElement('input', { type: 'text', ref: 'search', className: 'form-control', placeholder: 'search ...' }),
-	        React.createElement('hr', null),
-	        React.createElement('input', { type: 'button', value: 'search', className: 'btn btn-primary', onClick: this.search })
-	      );
-	    }
-	  }
-	});
-	module.exports = SearchForInvoiceAdmin;
-
-/***/ },
-/* 405 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var React = __webpack_require__(1);
-	var ReactDOM = __webpack_require__(34);
-	var Router = __webpack_require__(172).Router;
-	var Route = __webpack_require__(172).Route;
-	var browserHistory = __webpack_require__(172).browserHistory;
-	var userStore = __webpack_require__(231);
-	var Dispatcher = __webpack_require__(228);
-
-	var EmailSendForApprovel = React.createClass({
-	  displayName: 'EmailSendForApprovel',
-
-	  componentWillMount: function componentWillMount() {
-	    if (this.props.params.boolean == 1) {
-	      Dispatcher.dispatch({
-	        action: 'APPROVEDBYAPPROVER',
-	        userId: this.props.params.id
-	      });
-	      browserHistory.push('/approverviewuser');
-	    } else {
-	      // Dispatcher.dispatch({
-	      //   action : 'DECLINEDBYAPPROVER',
-	      //   comment : 'Please Check timesheet and resubmit it',
-	      //   userId : this.props.params.id
-	      // })
-	      // browserHistory.push('/approverviewuser')
-	    }
-	  },
-	  render: function render() {
-	    return React.createElement(
-	      'div',
-	      { className: 'col-sm-4 col-md-8 col-lg-12' },
-	      React.createElement(
-	        'h1',
-	        null,
-	        'EmailSendForApprovel'
-	      )
-	    );
-	  }
-	});
-	module.exports = EmailSendForApprovel;
-
-/***/ },
-/* 406 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var React = __webpack_require__(1);
-	var ReactDOM = __webpack_require__(34);
-	var Router = __webpack_require__(172).Router;
-	var Route = __webpack_require__(172).Route;
-	var browserHistory = __webpack_require__(172).browserHistory;
-
-	var Logout = React.createClass({
-	  displayName: 'Logout',
-
-	  componentWillMount: function componentWillMount() {
-	    localStorage.removeItem('type');
-	    localStorage.removeItem('token');
-	    localStorage.removeItem('id');
-	    browserHistory.push('/login');
-	    location.reload();
-	  },
-	  render: function render() {
-	    return React.createElement(
-	      'div',
-	      { className: 'col-sm-4 col-md-8 col-lg-12' },
-	      React.createElement(
-	        'h1',
-	        null,
-	        'Logout'
-	      )
-	    );
-	  }
-	});
-	module.exports = Logout;
-
-/***/ },
-/* 407 */,
-/* 408 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var React = __webpack_require__(1);
-	var ReactDOM = __webpack_require__(34);
-	var Router = __webpack_require__(172).Router;
-	var Route = __webpack_require__(172).Route;
-	var browserHistory = __webpack_require__(172).browserHistory;
-
-	var redirectViewAllcontractor = React.createClass({
-	  displayName: 'redirectViewAllcontractor',
-
-	  componentWillMount: function componentWillMount() {
-	    location.reload();
-	    browserHistory.push('/approverviewuser');
-	  },
-	  render: function render() {
-	    return React.createElement('div', { className: 'col-sm-4 col-md-8 col-lg-12' });
-	  }
-
-	});
-	module.exports = redirectViewAllcontractor;
-
-/***/ },
-/* 409 */
-/***/ function(module, exports, __webpack_require__) {
-
 	
 	/**
 	 * Module dependencies.
 	 */
 
-	var url = __webpack_require__(410);
-	var parser = __webpack_require__(415);
-	var Manager = __webpack_require__(422);
-	var debug = __webpack_require__(412)('socket.io-client');
+	var url = __webpack_require__(265);
+	var parser = __webpack_require__(270);
+	var Manager = __webpack_require__(277);
+	var debug = __webpack_require__(267)('socket.io-client');
 
 	/**
 	 * Module exports.
@@ -32329,12 +29661,12 @@
 	 * @api public
 	 */
 
-	exports.Manager = __webpack_require__(422);
-	exports.Socket = __webpack_require__(450);
+	exports.Manager = __webpack_require__(277);
+	exports.Socket = __webpack_require__(305);
 
 
 /***/ },
-/* 410 */
+/* 265 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {
@@ -32342,8 +29674,8 @@
 	 * Module dependencies.
 	 */
 
-	var parseuri = __webpack_require__(411);
-	var debug = __webpack_require__(412)('socket.io-client:url');
+	var parseuri = __webpack_require__(266);
+	var debug = __webpack_require__(267)('socket.io-client:url');
 
 	/**
 	 * Module exports.
@@ -32416,7 +29748,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 411 */
+/* 266 */
 /***/ function(module, exports) {
 
 	/**
@@ -32461,7 +29793,7 @@
 
 
 /***/ },
-/* 412 */
+/* 267 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -32471,7 +29803,7 @@
 	 * Expose `debug()` as the module.
 	 */
 
-	exports = module.exports = __webpack_require__(413);
+	exports = module.exports = __webpack_require__(268);
 	exports.log = log;
 	exports.formatArgs = formatArgs;
 	exports.save = save;
@@ -32635,7 +29967,7 @@
 
 
 /***/ },
-/* 413 */
+/* 268 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -32651,7 +29983,7 @@
 	exports.disable = disable;
 	exports.enable = enable;
 	exports.enabled = enabled;
-	exports.humanize = __webpack_require__(414);
+	exports.humanize = __webpack_require__(269);
 
 	/**
 	 * The currently active debug mode names, and names to skip.
@@ -32838,7 +30170,7 @@
 
 
 /***/ },
-/* 414 */
+/* 269 */
 /***/ function(module, exports) {
 
 	/**
@@ -32969,7 +30301,7 @@
 
 
 /***/ },
-/* 415 */
+/* 270 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -32977,11 +30309,11 @@
 	 * Module dependencies.
 	 */
 
-	var debug = __webpack_require__(412)('socket.io-parser');
-	var json = __webpack_require__(416);
-	var Emitter = __webpack_require__(418);
-	var binary = __webpack_require__(419);
-	var isBuf = __webpack_require__(421);
+	var debug = __webpack_require__(267)('socket.io-parser');
+	var json = __webpack_require__(271);
+	var Emitter = __webpack_require__(273);
+	var binary = __webpack_require__(274);
+	var isBuf = __webpack_require__(276);
 
 	/**
 	 * Protocol version.
@@ -33379,14 +30711,14 @@
 
 
 /***/ },
-/* 416 */
+/* 271 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(module, global) {/*! JSON v3.3.2 | http://bestiejs.github.io/json3 | Copyright 2012-2014, Kit Cambridge | http://kit.mit-license.org */
 	;(function () {
 	  // Detect the `define` function exposed by asynchronous module loaders. The
 	  // strict `define` check is necessary for compatibility with `r.js`.
-	  var isLoader = "function" === "function" && __webpack_require__(417);
+	  var isLoader = "function" === "function" && __webpack_require__(272);
 
 	  // A set of types used to distinguish objects from primitives.
 	  var objectTypes = {
@@ -34288,7 +31620,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(233)(module), (function() { return this; }())))
 
 /***/ },
-/* 417 */
+/* 272 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(__webpack_amd_options__) {module.exports = __webpack_amd_options__;
@@ -34296,7 +31628,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, {}))
 
 /***/ },
-/* 418 */
+/* 273 */
 /***/ function(module, exports) {
 
 	
@@ -34466,7 +31798,7 @@
 
 
 /***/ },
-/* 419 */
+/* 274 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/*global Blob,File*/
@@ -34475,8 +31807,8 @@
 	 * Module requirements
 	 */
 
-	var isArray = __webpack_require__(420);
-	var isBuf = __webpack_require__(421);
+	var isArray = __webpack_require__(275);
+	var isBuf = __webpack_require__(276);
 
 	/**
 	 * Replaces every Buffer | ArrayBuffer in packet with a numbered placeholder.
@@ -34614,7 +31946,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 420 */
+/* 275 */
 /***/ function(module, exports) {
 
 	module.exports = Array.isArray || function (arr) {
@@ -34623,7 +31955,7 @@
 
 
 /***/ },
-/* 421 */
+/* 276 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {
@@ -34643,7 +31975,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 422 */
+/* 277 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -34651,15 +31983,15 @@
 	 * Module dependencies.
 	 */
 
-	var eio = __webpack_require__(423);
-	var Socket = __webpack_require__(450);
-	var Emitter = __webpack_require__(451);
-	var parser = __webpack_require__(415);
-	var on = __webpack_require__(453);
-	var bind = __webpack_require__(454);
-	var debug = __webpack_require__(412)('socket.io-client:manager');
-	var indexOf = __webpack_require__(448);
-	var Backoff = __webpack_require__(457);
+	var eio = __webpack_require__(278);
+	var Socket = __webpack_require__(305);
+	var Emitter = __webpack_require__(306);
+	var parser = __webpack_require__(270);
+	var on = __webpack_require__(308);
+	var bind = __webpack_require__(309);
+	var debug = __webpack_require__(267)('socket.io-client:manager');
+	var indexOf = __webpack_require__(303);
+	var Backoff = __webpack_require__(312);
 
 	/**
 	 * IE6+ hasOwnProperty
@@ -35209,19 +32541,19 @@
 
 
 /***/ },
-/* 423 */
+/* 278 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
-	module.exports = __webpack_require__(424);
+	module.exports = __webpack_require__(279);
 
 
 /***/ },
-/* 424 */
+/* 279 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
-	module.exports = __webpack_require__(425);
+	module.exports = __webpack_require__(280);
 
 	/**
 	 * Exports parser
@@ -35229,25 +32561,25 @@
 	 * @api public
 	 *
 	 */
-	module.exports.parser = __webpack_require__(432);
+	module.exports.parser = __webpack_require__(287);
 
 
 /***/ },
-/* 425 */
+/* 280 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Module dependencies.
 	 */
 
-	var transports = __webpack_require__(426);
-	var Emitter = __webpack_require__(441);
-	var debug = __webpack_require__(412)('engine.io-client:socket');
-	var index = __webpack_require__(448);
-	var parser = __webpack_require__(432);
-	var parseuri = __webpack_require__(411);
-	var parsejson = __webpack_require__(449);
-	var parseqs = __webpack_require__(442);
+	var transports = __webpack_require__(281);
+	var Emitter = __webpack_require__(296);
+	var debug = __webpack_require__(267)('engine.io-client:socket');
+	var index = __webpack_require__(303);
+	var parser = __webpack_require__(287);
+	var parseuri = __webpack_require__(266);
+	var parsejson = __webpack_require__(304);
+	var parseqs = __webpack_require__(297);
 
 	/**
 	 * Module exports.
@@ -35374,9 +32706,9 @@
 	 */
 
 	Socket.Socket = Socket;
-	Socket.Transport = __webpack_require__(431);
-	Socket.transports = __webpack_require__(426);
-	Socket.parser = __webpack_require__(432);
+	Socket.Transport = __webpack_require__(286);
+	Socket.transports = __webpack_require__(281);
+	Socket.parser = __webpack_require__(287);
 
 	/**
 	 * Creates transport of the given type.
@@ -35971,17 +33303,17 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 426 */
+/* 281 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Module dependencies
 	 */
 
-	var XMLHttpRequest = __webpack_require__(427);
-	var XHR = __webpack_require__(429);
-	var JSONP = __webpack_require__(445);
-	var websocket = __webpack_require__(446);
+	var XMLHttpRequest = __webpack_require__(282);
+	var XHR = __webpack_require__(284);
+	var JSONP = __webpack_require__(300);
+	var websocket = __webpack_require__(301);
 
 	/**
 	 * Export transports.
@@ -36031,12 +33363,12 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 427 */
+/* 282 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {// browser shim for xmlhttprequest module
 
-	var hasCORS = __webpack_require__(428);
+	var hasCORS = __webpack_require__(283);
 
 	module.exports = function (opts) {
 	  var xdomain = opts.xdomain;
@@ -36075,7 +33407,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 428 */
+/* 283 */
 /***/ function(module, exports) {
 
 	
@@ -36098,18 +33430,18 @@
 
 
 /***/ },
-/* 429 */
+/* 284 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Module requirements.
 	 */
 
-	var XMLHttpRequest = __webpack_require__(427);
-	var Polling = __webpack_require__(430);
-	var Emitter = __webpack_require__(441);
-	var inherit = __webpack_require__(443);
-	var debug = __webpack_require__(412)('engine.io-client:polling-xhr');
+	var XMLHttpRequest = __webpack_require__(282);
+	var Polling = __webpack_require__(285);
+	var Emitter = __webpack_require__(296);
+	var inherit = __webpack_require__(298);
+	var debug = __webpack_require__(267)('engine.io-client:polling-xhr');
 
 	/**
 	 * Module exports.
@@ -36522,19 +33854,19 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 430 */
+/* 285 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
 	 * Module dependencies.
 	 */
 
-	var Transport = __webpack_require__(431);
-	var parseqs = __webpack_require__(442);
-	var parser = __webpack_require__(432);
-	var inherit = __webpack_require__(443);
-	var yeast = __webpack_require__(444);
-	var debug = __webpack_require__(412)('engine.io-client:polling');
+	var Transport = __webpack_require__(286);
+	var parseqs = __webpack_require__(297);
+	var parser = __webpack_require__(287);
+	var inherit = __webpack_require__(298);
+	var yeast = __webpack_require__(299);
+	var debug = __webpack_require__(267)('engine.io-client:polling');
 
 	/**
 	 * Module exports.
@@ -36547,7 +33879,7 @@
 	 */
 
 	var hasXHR2 = (function () {
-	  var XMLHttpRequest = __webpack_require__(427);
+	  var XMLHttpRequest = __webpack_require__(282);
 	  var xhr = new XMLHttpRequest({ xdomain: false });
 	  return null != xhr.responseType;
 	})();
@@ -36773,15 +34105,15 @@
 
 
 /***/ },
-/* 431 */
+/* 286 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
 	 * Module dependencies.
 	 */
 
-	var parser = __webpack_require__(432);
-	var Emitter = __webpack_require__(441);
+	var parser = __webpack_require__(287);
+	var Emitter = __webpack_require__(296);
 
 	/**
 	 * Module exports.
@@ -36934,22 +34266,22 @@
 
 
 /***/ },
-/* 432 */
+/* 287 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Module dependencies.
 	 */
 
-	var keys = __webpack_require__(433);
-	var hasBinary = __webpack_require__(434);
-	var sliceBuffer = __webpack_require__(436);
-	var after = __webpack_require__(437);
-	var utf8 = __webpack_require__(438);
+	var keys = __webpack_require__(288);
+	var hasBinary = __webpack_require__(289);
+	var sliceBuffer = __webpack_require__(291);
+	var after = __webpack_require__(292);
+	var utf8 = __webpack_require__(293);
 
 	var base64encoder;
 	if (global && global.ArrayBuffer) {
-	  base64encoder = __webpack_require__(439);
+	  base64encoder = __webpack_require__(294);
 	}
 
 	/**
@@ -37007,7 +34339,7 @@
 	 * Create a blob api even for blob builder when vendor prefixes exist
 	 */
 
-	var Blob = __webpack_require__(440);
+	var Blob = __webpack_require__(295);
 
 	/**
 	 * Encodes a packet.
@@ -37550,7 +34882,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 433 */
+/* 288 */
 /***/ function(module, exports) {
 
 	
@@ -37575,7 +34907,7 @@
 
 
 /***/ },
-/* 434 */
+/* 289 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {
@@ -37583,7 +34915,7 @@
 	 * Module requirements.
 	 */
 
-	var isArray = __webpack_require__(435);
+	var isArray = __webpack_require__(290);
 
 	/**
 	 * Module exports.
@@ -37640,7 +34972,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 435 */
+/* 290 */
 /***/ function(module, exports) {
 
 	module.exports = Array.isArray || function (arr) {
@@ -37649,7 +34981,7 @@
 
 
 /***/ },
-/* 436 */
+/* 291 */
 /***/ function(module, exports) {
 
 	/**
@@ -37684,7 +35016,7 @@
 
 
 /***/ },
-/* 437 */
+/* 292 */
 /***/ function(module, exports) {
 
 	module.exports = after
@@ -37718,7 +35050,7 @@
 
 
 /***/ },
-/* 438 */
+/* 293 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(module, global) {/*! https://mths.be/wtf8 v1.0.0 by @mathias */
@@ -37957,7 +35289,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(233)(module), (function() { return this; }())))
 
 /***/ },
-/* 439 */
+/* 294 */
 /***/ function(module, exports) {
 
 	/*
@@ -38030,7 +35362,7 @@
 
 
 /***/ },
-/* 440 */
+/* 295 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
@@ -38133,7 +35465,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 441 */
+/* 296 */
 /***/ function(module, exports) {
 
 	
@@ -38303,7 +35635,7 @@
 
 
 /***/ },
-/* 442 */
+/* 297 */
 /***/ function(module, exports) {
 
 	/**
@@ -38346,7 +35678,7 @@
 
 
 /***/ },
-/* 443 */
+/* 298 */
 /***/ function(module, exports) {
 
 	
@@ -38358,7 +35690,7 @@
 	};
 
 /***/ },
-/* 444 */
+/* 299 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -38432,7 +35764,7 @@
 
 
 /***/ },
-/* 445 */
+/* 300 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {
@@ -38440,8 +35772,8 @@
 	 * Module requirements.
 	 */
 
-	var Polling = __webpack_require__(430);
-	var inherit = __webpack_require__(443);
+	var Polling = __webpack_require__(285);
+	var inherit = __webpack_require__(298);
 
 	/**
 	 * Module exports.
@@ -38670,19 +36002,19 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 446 */
+/* 301 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Module dependencies.
 	 */
 
-	var Transport = __webpack_require__(431);
-	var parser = __webpack_require__(432);
-	var parseqs = __webpack_require__(442);
-	var inherit = __webpack_require__(443);
-	var yeast = __webpack_require__(444);
-	var debug = __webpack_require__(412)('engine.io-client:websocket');
+	var Transport = __webpack_require__(286);
+	var parser = __webpack_require__(287);
+	var parseqs = __webpack_require__(297);
+	var inherit = __webpack_require__(298);
+	var yeast = __webpack_require__(299);
+	var debug = __webpack_require__(267)('engine.io-client:websocket');
 	var BrowserWebSocket = global.WebSocket || global.MozWebSocket;
 
 	/**
@@ -38694,7 +36026,7 @@
 	var WebSocket = BrowserWebSocket;
 	if (!WebSocket && typeof window === 'undefined') {
 	  try {
-	    WebSocket = __webpack_require__(447);
+	    WebSocket = __webpack_require__(302);
 	  } catch (e) { }
 	}
 
@@ -38951,13 +36283,13 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 447 */
+/* 302 */
 /***/ function(module, exports) {
 
 	/* (ignored) */
 
 /***/ },
-/* 448 */
+/* 303 */
 /***/ function(module, exports) {
 
 	
@@ -38972,7 +36304,7 @@
 	};
 
 /***/ },
-/* 449 */
+/* 304 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
@@ -39010,7 +36342,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 450 */
+/* 305 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -39018,13 +36350,13 @@
 	 * Module dependencies.
 	 */
 
-	var parser = __webpack_require__(415);
-	var Emitter = __webpack_require__(451);
-	var toArray = __webpack_require__(452);
-	var on = __webpack_require__(453);
-	var bind = __webpack_require__(454);
-	var debug = __webpack_require__(412)('socket.io-client:socket');
-	var hasBin = __webpack_require__(455);
+	var parser = __webpack_require__(270);
+	var Emitter = __webpack_require__(306);
+	var toArray = __webpack_require__(307);
+	var on = __webpack_require__(308);
+	var bind = __webpack_require__(309);
+	var debug = __webpack_require__(267)('socket.io-client:socket');
+	var hasBin = __webpack_require__(310);
 
 	/**
 	 * Module exports.
@@ -39435,7 +36767,7 @@
 
 
 /***/ },
-/* 451 */
+/* 306 */
 /***/ function(module, exports) {
 
 	
@@ -39602,7 +36934,7 @@
 
 
 /***/ },
-/* 452 */
+/* 307 */
 /***/ function(module, exports) {
 
 	module.exports = toArray
@@ -39621,7 +36953,7 @@
 
 
 /***/ },
-/* 453 */
+/* 308 */
 /***/ function(module, exports) {
 
 	
@@ -39651,7 +36983,7 @@
 
 
 /***/ },
-/* 454 */
+/* 309 */
 /***/ function(module, exports) {
 
 	/**
@@ -39680,7 +37012,7 @@
 
 
 /***/ },
-/* 455 */
+/* 310 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {
@@ -39688,7 +37020,7 @@
 	 * Module requirements.
 	 */
 
-	var isArray = __webpack_require__(456);
+	var isArray = __webpack_require__(311);
 
 	/**
 	 * Module exports.
@@ -39746,7 +37078,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 456 */
+/* 311 */
 /***/ function(module, exports) {
 
 	module.exports = Array.isArray || function (arr) {
@@ -39755,7 +37087,7 @@
 
 
 /***/ },
-/* 457 */
+/* 312 */
 /***/ function(module, exports) {
 
 	
@@ -39846,7 +37178,7 @@
 
 
 /***/ },
-/* 458 */
+/* 313 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -39856,13 +37188,2699 @@
 	var Router = __webpack_require__(172).Router;
 	var Route = __webpack_require__(172).Route;
 	var browserHistory = __webpack_require__(172).browserHistory;
-	var socket = __webpack_require__(409)();
+	var Dispatcher = __webpack_require__(228);
+	var userStore = __webpack_require__(231);
+	var Link = __webpack_require__(172).Link;
+
+	var Timesheet = React.createClass({
+	  displayName: 'Timesheet',
+	  getInitialState: function getInitialState() {
+	    return {
+	      approvelneeded: userStore.getTimesheetsApprovel()
+	    };
+	  },
+
+	  componentWillMount: function componentWillMount() {
+	    var self = this;
+	    Dispatcher.dispatch({
+	      action: 'CHECKFORAPPROVEL',
+	      contractorId: this.props.params.id
+	    });
+	    userStore.on('approvelTimesheet', function () {
+	      self.setState({
+	        approvelneeded: userStore.getTimesheetsApprovel()
+	      });
+	    });
+	  },
+	  approver: function approver() {
+	    Dispatcher.dispatch({
+	      action: 'APPROVEDBYAPPROVER',
+	      userId: this.props.params.id
+	    });
+	  },
+	  decline: function decline() {
+	    Dispatcher.dispatch({
+	      action: 'DECLINEDBYAPPROVER',
+	      comment: this.refs.comment.value,
+	      userId: this.props.params.id
+	    });
+	  },
+
+	  render: function render() {
+	    var self = this;
+	    if (this.state.approvelneeded) {
+	      var approvelNeeded = self.state.approvelneeded.data.contractor.map(function (timesheet, i) {
+	        return React.createElement(
+	          'div',
+	          { key: i, className: 'well well-lg' },
+	          React.createElement(
+	            'table',
+	            { className: 'table table-striped table-inverse table-bordered table-responsive' },
+	            React.createElement(
+	              'thead',
+	              null,
+	              React.createElement(
+	                'tr',
+	                null,
+	                React.createElement(
+	                  'th',
+	                  null,
+	                  'Day'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  null,
+	                  'Dates'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  null,
+	                  'Time In'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  null,
+	                  'Lunch Start'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  null,
+	                  'Lunch End'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  null,
+	                  'Time Out'
+	                )
+	              )
+	            ),
+	            React.createElement(
+	              'tbody',
+	              null,
+	              React.createElement(
+	                'tr',
+	                null,
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  'Monday'
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Date1
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Time1
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchStart1
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchEnd1
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Timeout1
+	                )
+	              ),
+	              React.createElement(
+	                'tr',
+	                null,
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  'Tuesday'
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Date2
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Time2
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchStart2
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchEnd2
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Timeout2
+	                )
+	              ),
+	              React.createElement(
+	                'tr',
+	                null,
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  'Wednessday'
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Date3
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Time3
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchStart3
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchEnd3
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Timeout3
+	                )
+	              ),
+	              React.createElement(
+	                'tr',
+	                null,
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  'Thursday'
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Date4
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Time4
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchStart4
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchEnd4
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Timeout4
+	                )
+	              ),
+	              React.createElement(
+	                'tr',
+	                null,
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  'Firday'
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Date5
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Time5
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchStart5
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchEnd5
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Timeout5
+	                )
+	              )
+	            )
+	          ),
+	          React.createElement(
+	            'h5',
+	            null,
+	            'Total hour worked : ',
+	            timesheet.TotalHourWorked,
+	            ' '
+	          )
+	        );
+	      });
+	      return React.createElement(
+	        'div',
+	        { className: 'col-sm-4 col-md-8 col-lg-12' },
+	        React.createElement(
+	          'h3',
+	          null,
+	          'Timesheet User ID : ',
+	          this.props.params.id
+	        ),
+	        approvelNeeded,
+	        React.createElement(
+	          'a',
+	          { onClick: this.approver, className: 'btn btn-info btn-lg' },
+	          React.createElement('span', { className: 'glyphicon glyphicon-ok' }),
+	          ' Approve'
+	        ),
+	        React.createElement(
+	          'a',
+	          { onClick: this.decline, className: 'btn btn-danger btn-lg' },
+	          React.createElement('span', { className: 'glyphicon glyphicon-remove' }),
+	          ' Decline'
+	        ),
+	        React.createElement(
+	          'div',
+	          { className: 'form-group' },
+	          React.createElement(
+	            'h1',
+	            null,
+	            'Add Comments'
+	          ),
+	          React.createElement('textarea', { className: 'form-control', ref: 'comment', rows: '5', id: 'comment' })
+	        )
+	      );
+	    } else {
+	      return React.createElement('div', { className: 'loader' });
+	    }
+	  }
+	});
+	module.exports = Timesheet;
+
+	// <input type='button' value='approve' onClick={this.approver} className='btn btn-success' />
+	// <input type='button' value='decline' onClick={this.decline} className='btn btn-danger' />
+
+/***/ },
+/* 314 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var React = __webpack_require__(1);
+	var browserHistory = __webpack_require__(172).browserHistory;
+	var Link = __webpack_require__(172).Link;
+
+	/*********************/
+	/****LocalStorage*****/
+	/********************/
+
+	var token = localStorage.getItem('token');
+	var id = localStorage.getItem('id');
+	var type = localStorage.getItem('type');
+
+	if (!token) browserHistory.push('/login');
+
+	var Nav = React.createClass({
+	  displayName: 'Nav',
+
+	  render: function render() {
+	    return React.createElement(
+	      'nav',
+	      { className: 'navbar navbar-inverse' },
+	      React.createElement(
+	        'div',
+	        { className: 'container-fluid' },
+	        React.createElement(
+	          'div',
+	          { className: 'navbar-header' },
+	          React.createElement(
+	            'a',
+	            { className: 'navbar-brand', href: '#' },
+	            'JetTwoProject'
+	          )
+	        ),
+	        React.createElement(
+	          'ul',
+	          { className: 'nav navbar-nav navbar-right' },
+	          type === 'contractor' ? React.createElement(
+	            'li',
+	            null,
+	            React.createElement(
+	              Link,
+	              { to: '/dashbored' },
+	              'Dashbored'
+	            )
+	          ) : '',
+	          type === 'contractor' ? React.createElement(
+	            'li',
+	            null,
+	            React.createElement(
+	              Link,
+	              { to: '/search' },
+	              'Search'
+	            )
+	          ) : '',
+	          type === 'contractor' ? React.createElement(
+	            'li',
+	            null,
+	            React.createElement(
+	              Link,
+	              { to: '/viewpaidinvoice' },
+	              'View Paid Invoice'
+	            )
+	          ) : '',
+	          type === 'contractor' ? React.createElement(
+	            'li',
+	            null,
+	            React.createElement(
+	              Link,
+	              { to: '/livechat' },
+	              'Live Chat'
+	            )
+	          ) : '',
+	          type === 'approver' ? React.createElement(
+	            'li',
+	            null,
+	            React.createElement(
+	              Link,
+	              { to: '/redirecttoapproverviewuser' },
+	              'View All Contractor'
+	            )
+	          ) : '',
+	          type === 'approver' ? React.createElement(
+	            'li',
+	            null,
+	            React.createElement(
+	              Link,
+	              { to: '/approveradduser' },
+	              'Add User'
+	            )
+	          ) : '',
+	          type === 'approver' ? React.createElement(
+	            'li',
+	            null,
+	            React.createElement(
+	              Link,
+	              { to: '/livechat' },
+	              'Live Chat'
+	            )
+	          ) : '',
+	          type === 'invoice_admin' ? React.createElement(
+	            'li',
+	            null,
+	            React.createElement(
+	              Link,
+	              { to: '/needpay' },
+	              'Need Pay'
+	            )
+	          ) : '',
+	          type === 'invoice_admin' ? React.createElement(
+	            'li',
+	            null,
+	            React.createElement(
+	              Link,
+	              { to: '/invoicesearch' },
+	              'Invoice Search'
+	            )
+	          ) : '',
+	          this.props.tokens ? React.createElement(
+	            'li',
+	            null,
+	            React.createElement(
+	              Link,
+	              { to: '/login', className: 'glyphicon glyphicon-log-in' },
+	              'Login'
+	            )
+	          ) : React.createElement(
+	            'li',
+	            null,
+	            React.createElement(
+	              Link,
+	              { to: '/logout', className: '\tglyphicon glyphicon-log-out' },
+	              'Logout'
+	            )
+	          )
+	        )
+	      )
+	    );
+	  }
+	});
+	module.exports = Nav;
+
+/***/ },
+/* 315 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	/********* ADD Contractor ***************/
+
+	var React = __webpack_require__(1);
+	var ReactDOM = __webpack_require__(34);
+	var Router = __webpack_require__(172).Router;
+	var Route = __webpack_require__(172).Route;
+	var browserHistory = __webpack_require__(172).browserHistory;
+	var Dispatcher = __webpack_require__(228);
+	var userStore = __webpack_require__(231);
+
+	var data = {};
+
+	var AddTimeSheet = React.createClass({
+	  displayName: 'AddTimeSheet',
+	  componentWillMount: function componentWillMount() {
+	    var self = this;
+	    Dispatcher.dispatch({
+	      action: 'GETIDTIMESHEET',
+	      data: this.props.params.id
+	    });
+	    userStore.on('getIdTimeSheets', function () {
+	      self.setState({
+	        getTimeSheets: userStore.getIdTimeSheets()
+	      });
+	    });
+	  },
+	  getInitialState: function getInitialState() {
+	    return {
+	      getTimeSheets: userStore.getIdTimeSheets(),
+	      mondayHourWorked: 0,
+	      tuesdayHourWorked: 0,
+	      wednesdayHourWorked: 0,
+	      thursdayHourWorked: 0,
+	      fridayHourWorked: 0
+	    };
+	  },
+	  getData: function getData(event) {
+	    data.date1 = this.refs.date1.value;
+	    data.timein1 = this.refs.timein1.value;
+	    data.lunchstart1 = this.refs.lunchstart1.value;
+	    data.lunchend1 = this.refs.lunchend1.value;
+	    data.Timeout1 = this.refs.timeout1.value;
+
+	    data.date2 = this.refs.date2.value;
+	    data.timein2 = this.refs.timein2.value;
+	    data.lunchstart2 = this.refs.lunchstart2.value;
+	    data.lunchend2 = this.refs.lunchend2.value;
+	    data.Timeout2 = this.refs.timeout2.value;
+
+	    data.date3 = this.refs.date3.value;
+	    data.timein3 = this.refs.timein3.value;
+	    data.lunchstart3 = this.refs.lunchstart3.value;
+	    data.lunchend3 = this.refs.lunchend3.value;
+	    data.Timeout3 = this.refs.timeout3.value;
+
+	    data.date4 = this.refs.date4.value;
+	    data.timein4 = this.refs.timein4.value;
+	    data.lunchstart4 = this.refs.lunchstart4.value;
+	    data.lunchend4 = this.refs.lunchend4.value;
+	    data.Timeout4 = this.refs.timeout4.value;
+
+	    data.date5 = this.refs.date5.value;
+	    data.timein5 = this.refs.timein5.value;
+	    data.lunchstart5 = this.refs.lunchstart5.value;
+	    data.lunchend5 = this.refs.lunchend5.value;
+	    data.Timeout5 = this.refs.timeout5.value;
+
+	    data.totalWorkedHour = this.monday() + this.tuesday() + this.wednesday() + this.thursday() + this.friday();
+	    // console.log(this.monday() + this.tuesday() + this.wednesday() + this.thursday()+ this.friday())
+	    Dispatcher.dispatch({
+	      action: 'TIMESHEETDATASEND',
+	      data: {
+	        id: this.props.params.id,
+	        timesheetData: data
+	      }
+	    });
+
+	    var monday = typeof this.monday() == 'number' ? this.monday() : 0;
+	    var tuesday = typeof this.tuesday() == 'number' ? this.tuesday() : 0;
+	    var wednesday = typeof this.wednesday() == 'number' ? this.wednesday() : 0;
+	    var thursday = typeof this.thursday() == 'number' ? this.thursday() : 0;
+	    var firday = typeof this.friday() == 'number' ? this.friday() : 0;
+
+	    this.setState({
+	      mondayHourWorked: monday,
+	      tuesdayHourWorked: tuesday,
+	      wednesdayHourWorked: wednesday,
+	      thursdayHourWorked: thursday,
+	      fridayHourWorked: firday
+	    });
+	  },
+	  monday: function monday() {
+	    var self = this;
+	    var totalDay = parseInt(this.refs.timeout1.value) - parseInt(this.refs.timein1.value);
+	    var totalLuch = parseInt(this.refs.lunchend1.value) - parseInt(this.refs.lunchstart1.value);
+	    var workedHour = totalDay - totalLuch;
+	    if (workedHour > 0 && workedHour != 'NaN') {
+	      return workedHour;
+	    }
+	  },
+	  tuesday: function tuesday() {
+	    var self = this;
+	    var totalDay = parseInt(this.refs.timeout2.value) - parseInt(this.refs.timein2.value);
+	    var totalLuch = parseInt(this.refs.lunchend2.value) - parseInt(this.refs.lunchstart2.value);
+	    var workedHour = totalDay - totalLuch;
+	    if (workedHour > 0 && workedHour != 'NaN') {
+	      return workedHour;
+	    }
+	  },
+	  wednesday: function wednesday() {
+	    var self = this;
+	    var totalDay = parseInt(this.refs.timeout3.value) - parseInt(this.refs.timein3.value);
+	    var totalLuch = parseInt(this.refs.lunchend3.value) - parseInt(this.refs.lunchstart3.value);
+	    var workedHour = totalDay - totalLuch;
+	    if (workedHour > 0 && workedHour != 'NaN') {
+	      return workedHour;
+	    }
+	  },
+	  thursday: function thursday() {
+	    var self = this;
+	    var totalDay = parseInt(this.refs.timeout4.value) - parseInt(this.refs.timein4.value);
+	    var totalLuch = parseInt(this.refs.lunchend4.value) - parseInt(this.refs.lunchstart4.value);
+	    var workedHour = totalDay - totalLuch;
+	    if (workedHour > 0 && workedHour != 'NaN') {
+	      return workedHour;
+	    }
+	  },
+	  friday: function friday() {
+	    var self = this;
+	    var totalDay = parseInt(this.refs.timeout5.value) - parseInt(this.refs.timein5.value);
+	    var totalLuch = parseInt(this.refs.lunchend5.value) - parseInt(this.refs.lunchstart5.value);
+	    var workedHour = totalDay - totalLuch;
+	    if (workedHour > 0 && workedHour != 'NaN') {
+	      return workedHour;
+	    }
+	  },
+
+	  render: function render() {
+	    if (this.state.getTimeSheets) {
+	      return React.createElement(
+	        'div',
+	        { className: 'col-sm-4 col-md-8 col-lg-12' },
+	        React.createElement(
+	          'h5',
+	          null,
+	          'TimeSheet ID : ',
+	          this.props.params.id,
+	          ' '
+	        ),
+	        React.createElement(
+	          'table',
+	          { className: 'table' },
+	          React.createElement(
+	            'thead',
+	            null,
+	            React.createElement(
+	              'tr',
+	              null,
+	              React.createElement(
+	                'th',
+	                null,
+	                'Dates'
+	              ),
+	              React.createElement(
+	                'th',
+	                null,
+	                'Time In'
+	              ),
+	              React.createElement(
+	                'th',
+	                null,
+	                'Lunch Start'
+	              ),
+	              React.createElement(
+	                'th',
+	                null,
+	                'Lunch End'
+	              ),
+	              React.createElement(
+	                'th',
+	                null,
+	                'Time Out'
+	              ),
+	              React.createElement(
+	                'th',
+	                null,
+	                'Hours worked'
+	              )
+	            )
+	          ),
+	          React.createElement(
+	            'tbody',
+	            null,
+	            React.createElement(
+	              'tr',
+	              { className: 'success form-group' },
+	              React.createElement(
+	                'td',
+	                null,
+	                React.createElement('input', { type: 'text', className: 'form-control', name: 'date', ref: 'date1', defaultValue: this.state.getTimeSheets.data.TimeSheetID.Date1 })
+	              ),
+	              React.createElement(
+	                'td',
+	                null,
+	                React.createElement('input', { type: 'time', className: 'form-control', name: 'timein', ref: 'timein1', onChange: this.monday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.Time1 })
+	              ),
+	              React.createElement(
+	                'td',
+	                null,
+	                React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchstart', ref: 'lunchstart1', onChange: this.monday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.LunchStart1 })
+	              ),
+	              React.createElement(
+	                'td',
+	                null,
+	                React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchend', ref: 'lunchend1', onChange: this.monday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.LunchEnd1 })
+	              ),
+	              React.createElement(
+	                'td',
+	                null,
+	                React.createElement('input', { type: 'time', className: 'form-control', name: 'timeout', ref: 'timeout1', onChange: this.monday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.Timeout1 })
+	              ),
+	              React.createElement(
+	                'td',
+	                null,
+	                React.createElement('input', { type: 'text', className: 'form-control', name: 'hoursworked', ref: 'hoursworked1', value: this.state.mondayHourWorked, disabled: true })
+	              )
+	            ),
+	            React.createElement(
+	              'tr',
+	              { className: 'success form-group' },
+	              React.createElement(
+	                'td',
+	                null,
+	                React.createElement('input', { type: 'text', className: 'form-control', name: 'date', ref: 'date2', defaultValue: this.state.getTimeSheets.data.TimeSheetID.Date2 })
+	              ),
+	              React.createElement(
+	                'td',
+	                null,
+	                React.createElement('input', { type: 'time', className: 'form-control', name: 'timein', ref: 'timein2', onChange: this.tuesday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.Time2 })
+	              ),
+	              React.createElement(
+	                'td',
+	                null,
+	                React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchstart', ref: 'lunchstart2', onChange: this.tuesday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.LunchStart2 })
+	              ),
+	              React.createElement(
+	                'td',
+	                null,
+	                React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchend', ref: 'lunchend2', onChange: this.tuesday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.LunchEnd2 })
+	              ),
+	              React.createElement(
+	                'td',
+	                null,
+	                React.createElement('input', { type: 'time', className: 'form-control', name: 'timeout', ref: 'timeout2', onChange: this.tuesday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.Timeout2 })
+	              ),
+	              React.createElement(
+	                'td',
+	                null,
+	                React.createElement('input', { type: 'text', className: 'form-control', name: 'hoursworked', ref: 'hoursworked2', value: this.state.tuesdayHourWorked, disabled: true })
+	              )
+	            ),
+	            React.createElement(
+	              'tr',
+	              { className: 'success form-group' },
+	              React.createElement(
+	                'td',
+	                null,
+	                React.createElement('input', { type: 'text', className: 'form-control', name: 'date', ref: 'date3', defaultValue: this.state.getTimeSheets.data.TimeSheetID.Date3 })
+	              ),
+	              React.createElement(
+	                'td',
+	                null,
+	                React.createElement('input', { type: 'time', className: 'form-control', name: 'timein', ref: 'timein3', onChange: this.wednesday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.Time3 })
+	              ),
+	              React.createElement(
+	                'td',
+	                null,
+	                React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchstart', ref: 'lunchstart3', onChange: this.wednesday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.LunchStart3 })
+	              ),
+	              React.createElement(
+	                'td',
+	                null,
+	                React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchend', ref: 'lunchend3', onChange: this.wednesday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.LunchEnd3 })
+	              ),
+	              React.createElement(
+	                'td',
+	                null,
+	                React.createElement('input', { type: 'time', className: 'form-control', name: 'timeout', ref: 'timeout3', onChange: this.wednesday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.Timeout3 })
+	              ),
+	              React.createElement(
+	                'td',
+	                null,
+	                React.createElement('input', { type: 'text', className: 'form-control', name: 'hoursworked', ref: 'hoursworked3', value: this.state.wednesdayHourWorked, disabled: true })
+	              )
+	            ),
+	            React.createElement(
+	              'tr',
+	              { className: 'success form-group' },
+	              React.createElement(
+	                'td',
+	                null,
+	                React.createElement('input', { type: 'text', className: 'form-control', name: 'date', ref: 'date4', defaultValue: this.state.getTimeSheets.data.TimeSheetID.Date4 })
+	              ),
+	              React.createElement(
+	                'td',
+	                null,
+	                React.createElement('input', { type: 'time', className: 'form-control', name: 'timein', ref: 'timein4', onChange: this.thursday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.Time4 })
+	              ),
+	              React.createElement(
+	                'td',
+	                null,
+	                React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchstart', ref: 'lunchstart4', onChange: this.thursday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.LunchStart4 })
+	              ),
+	              React.createElement(
+	                'td',
+	                null,
+	                React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchend', ref: 'lunchend4', onChange: this.thursday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.LunchEnd4 })
+	              ),
+	              React.createElement(
+	                'td',
+	                null,
+	                React.createElement('input', { type: 'time', className: 'form-control', name: 'timeout', ref: 'timeout4', onChange: this.thursday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.Timeout4 })
+	              ),
+	              React.createElement(
+	                'td',
+	                null,
+	                React.createElement('input', { type: 'text', className: 'form-control', name: 'hoursworked', ref: 'hoursworked4', value: this.state.thursdayHourWorked, disabled: true })
+	              )
+	            ),
+	            React.createElement(
+	              'tr',
+	              { className: 'success form-group' },
+	              React.createElement(
+	                'td',
+	                null,
+	                React.createElement('input', { type: 'text', className: 'form-control', name: 'date', ref: 'date5', defaultValue: this.state.getTimeSheets.data.TimeSheetID.Date5 })
+	              ),
+	              React.createElement(
+	                'td',
+	                null,
+	                React.createElement('input', { type: 'time', className: 'form-control', name: 'timein', ref: 'timein5', onChange: this.friday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.Time5 })
+	              ),
+	              React.createElement(
+	                'td',
+	                null,
+	                React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchstart', ref: 'lunchstart5', onChange: this.friday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.LunchStart5 })
+	              ),
+	              React.createElement(
+	                'td',
+	                null,
+	                React.createElement('input', { type: 'time', className: 'form-control', name: 'lunchend', ref: 'lunchend5', onChange: this.friday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.LunchEnd5 })
+	              ),
+	              React.createElement(
+	                'td',
+	                null,
+	                React.createElement('input', { type: 'time', className: 'form-control', name: 'timeout', ref: 'timeout5', onChange: this.friday, defaultValue: this.state.getTimeSheets.data.TimeSheetID.Timeout5 })
+	              ),
+	              React.createElement(
+	                'td',
+	                null,
+	                React.createElement('input', { type: 'text', className: 'form-control', name: 'hoursworked', ref: 'hoursworked5', value: this.state.fridayHourWorked, disabled: true })
+	              )
+	            )
+	          )
+	        ),
+	        React.createElement(
+	          'h4',
+	          null,
+	          'Totle hours worked : ',
+	          this.state.mondayHourWorked + this.state.tuesdayHourWorked + this.state.wednesdayHourWorked + this.state.thursdayHourWorked + this.state.fridayHourWorked,
+	          ' '
+	        ),
+	        React.createElement(
+	          'a',
+	          { onClick: this.getData, className: 'btn btn-info btn-lg' },
+	          React.createElement('span', { className: 'glyphicon glyphicon-floppy-disk' }),
+	          ' Save'
+	        )
+	      );
+	    } else {
+	      return React.createElement('div', { className: 'loader' });
+	    }
+	  },
+	  componentDidUpdate: function componentDidUpdate(prevProps, prevState) {
+	    var self = this;
+
+	    var monday = typeof this.monday() == 'number' ? this.monday() : 0;
+	    var tuesday = typeof this.tuesday() == 'number' ? this.tuesday() : 0;
+	    var wednesday = typeof this.wednesday() == 'number' ? this.wednesday() : 0;
+	    var thursday = typeof this.thursday() == 'number' ? this.thursday() : 0;
+	    var firday = typeof this.friday() == 'number' ? this.friday() : 0;
+
+	    if (prevState.tuesdayHourWorked == 0) {
+	      self.setState({
+	        mondayHourWorked: monday,
+	        tuesdayHourWorked: tuesday,
+	        wednesdayHourWorked: wednesday,
+	        thursdayHourWorked: thursday,
+	        fridayHourWorked: firday
+	      });
+	      return true;
+	    }
+	  }
+	});
+	module.exports = AddTimeSheet;
+
+/***/ },
+/* 316 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var React = __webpack_require__(1);
+	var ReactDOM = __webpack_require__(34);
+	var Router = __webpack_require__(172).Router;
+	var Route = __webpack_require__(172).Route;
+	var browserHistory = __webpack_require__(172).browserHistory;
+	var Dispatcher = __webpack_require__(228);
+	var userStore = __webpack_require__(231);
+	var Link = __webpack_require__(172).Link;
+
+	var ContractorDashbored = React.createClass({
+	  displayName: 'ContractorDashbored',
+	  getInitialState: function getInitialState() {
+	    return {
+	      timesheet: userStore.getTimeSheets(),
+	      comment: userStore.getComment()
+	    };
+	  },
+
+	  componentWillMount: function componentWillMount() {
+	    var self = this;
+	    Dispatcher.dispatch({
+	      action: 'GETTIMESHEET'
+	    });
+	    Dispatcher.dispatch({
+	      action: 'GETCOMMENT'
+	    });
+	    userStore.on('getTimeSheets', function () {
+	      self.setState({
+	        timesheet: userStore.getTimeSheets()
+	      });
+	    });
+	    userStore.on('getcomment', function () {
+	      self.setState({
+	        comment: userStore.getComment()
+	      });
+	    });
+	  },
+	  AddTimeSheet: function AddTimeSheet() {
+	    Dispatcher.dispatch({
+	      action: 'ADDTIMESHEET'
+	    });
+
+	    location.reload();
+	  },
+
+	  render: function render() {
+	    var self = this;
+	    var declined = '';
+	    if (this.state.timesheet) {
+	      var timesheets = self.state.timesheet.data.contractor.map(function (timesheet, i) {
+	        declined = timesheet.Status;
+	        console.log(declined);
+	        return React.createElement(
+	          'div',
+	          { key: i, className: 'card card-block' },
+	          React.createElement(
+	            'h4',
+	            { className: 'card-title' },
+	            'TimeSheet id : ',
+	            timesheet._id
+	          ),
+	          React.createElement('p', { className: 'card-text' }),
+	          React.createElement(
+	            Link,
+	            { to: '/addtimesheet/' + timesheet._id },
+	            ' Edit '
+	          ),
+	          React.createElement(
+	            Link,
+	            { to: '/deletetimesheets/' + timesheet._id },
+	            ' Delete '
+	          )
+	        );
+	      });
+	      console.log(timesheets.length);
+	      return React.createElement(
+	        'div',
+	        { className: 'col-sm-4 col-md-8 col-lg-12' },
+	        timesheets.length == 5 ? React.createElement('input', { type: 'button', className: 'btn btn-danger btn-lg btn-block', onClick: this.AddTimeSheet, value: 'Add', disabled: true }) : React.createElement(
+	          'button',
+	          { className: 'btn btn-primary btn-lg btn-block', onClick: this.AddTimeSheet },
+	          'Add'
+	        ),
+	        timesheets.length != 0 ? React.createElement(
+	          Link,
+	          { className: 'btn btn-success btn-lg btn-block', to: '/viewtimesheets' },
+	          'Submit for approvel'
+	        ) : '',
+	        timesheets,
+	        declined === 'declined' ? React.createElement(
+	          'div',
+	          { className: 'alert alert-danger' },
+	          React.createElement(
+	            'strong',
+	            null,
+	            'timesheets send has been declined please check the infromation and resubmit'
+	          ),
+	          React.createElement(
+	            'h4',
+	            null,
+	            this.state.comment ? ":      " + this.state.comment.data.contractor[0].comments : ''
+	          )
+	        ) : ''
+	      );
+	    } else {
+	      return React.createElement('div', { className: 'loader' });
+	    }
+	  }
+	});
+	module.exports = ContractorDashbored;
+
+/***/ },
+/* 317 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var React = __webpack_require__(1);
+	var ReactDOM = __webpack_require__(34);
+	var Router = __webpack_require__(172).Router;
+	var Route = __webpack_require__(172).Route;
+	var browserHistory = __webpack_require__(172).browserHistory;
+	var Dispatcher = __webpack_require__(228);
+	var userStore = __webpack_require__(231);
+	var Link = __webpack_require__(172).Link;
+
+	var ViewTimesheets = React.createClass({
+	  displayName: 'ViewTimesheets',
+	  getInitialState: function getInitialState() {
+	    return {
+	      timesheet: userStore.getTimeSheets()
+	    };
+	  },
+
+	  componentWillMount: function componentWillMount() {
+	    var self = this;
+	    Dispatcher.dispatch({
+	      action: 'GETTIMESHEET'
+	    });
+
+	    userStore.on('getTimeSheets', function () {
+	      self.setState({
+	        timesheet: userStore.getTimeSheets()
+	      });
+	    });
+	  },
+	  sendApprovel: function sendApprovel() {
+
+	    Dispatcher.dispatch({
+	      action: 'SENDFORAPPROVEL',
+	      data: this.state.timesheet
+	    });
+	  },
+
+	  render: function render() {
+
+	    console.log(this.state.timesheet);
+
+	    if (this.state.timesheet) {
+	      var self = this;
+	      var total = 0;
+	      var timesheets = self.state.timesheet.data.contractor.map(function (timesheet, i) {
+	        console.log(timesheet);
+	        total += parseInt(timesheet.TotalHourWorked);
+	        return React.createElement(
+	          'div',
+	          { key: i, className: 'well well-lg' },
+	          React.createElement(
+	            'table',
+	            { className: 'table table-bordered table-responsive' },
+	            React.createElement(
+	              'thead',
+	              null,
+	              React.createElement(
+	                'tr',
+	                null,
+	                React.createElement(
+	                  'th',
+	                  null,
+	                  'Day'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  null,
+	                  'Dates'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  null,
+	                  'Time In'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  null,
+	                  'Lunch Start'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  null,
+	                  'Lunch End'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  null,
+	                  'Time Out'
+	                )
+	              )
+	            ),
+	            React.createElement(
+	              'tbody',
+	              null,
+	              React.createElement(
+	                'tr',
+	                null,
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  'Monday'
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Date1
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Time1
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchStart1
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchEnd1
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Timeout1
+	                )
+	              ),
+	              React.createElement(
+	                'tr',
+	                null,
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  'Tuesday'
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Date2
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Time2
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchStart2
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchEnd2
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Timeout2
+	                )
+	              ),
+	              React.createElement(
+	                'tr',
+	                null,
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  'Wednessday'
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Date3
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Time3
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchStart3
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchEnd3
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Timeout3
+	                )
+	              ),
+	              React.createElement(
+	                'tr',
+	                null,
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  'Thursday'
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Date4
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Time4
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchStart4
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchEnd4
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Timeout4
+	                )
+	              ),
+	              React.createElement(
+	                'tr',
+	                null,
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  'Firday'
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Date5
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Time5
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchStart5
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchEnd5
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Timeout5
+	                )
+	              )
+	            )
+	          ),
+	          React.createElement(
+	            'h5',
+	            null,
+	            'Total hour worked : ',
+	            timesheet.TotalHourWorked,
+	            ' '
+	          )
+	        );
+	      });
+	      return React.createElement(
+	        'div',
+	        { className: 'col-lg-12' },
+	        timesheets,
+	        React.createElement(
+	          'h1',
+	          null,
+	          'Total hour worked : ',
+	          total
+	        ),
+	        React.createElement(
+	          'a',
+	          { onClick: this.sendApprovel, className: 'btn btn-info btn-lg' },
+	          React.createElement('span', { className: 'glyphicon glyphicon-send' }),
+	          ' Send For approvel'
+	        )
+	      );
+	    } else {
+
+	      return React.createElement('div', { className: 'loader' });
+	    }
+	  }
+	});
+	module.exports = ViewTimesheets;
+	//  <button type="button"  onClick={this.sendApprovel} className="btn btn-success">Send For approvel</button>
+
+/***/ },
+/* 318 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var React = __webpack_require__(1);
+	var ReactDOM = __webpack_require__(34);
+	var Router = __webpack_require__(172).Router;
+	var Route = __webpack_require__(172).Route;
+	var browserHistory = __webpack_require__(172).browserHistory;
+	var Dispatcher = __webpack_require__(228);
+	var userStore = __webpack_require__(231);
+	var Link = __webpack_require__(172).Link;
+
+	userStore.on('TIMESHEETDEL', function () {
+	  browserHistory.push('/dashbored');
+	});
+
+	var ApproverHome = React.createClass({
+	  displayName: 'ApproverHome',
+
+	  componentWillMount: function componentWillMount() {
+	    Dispatcher.dispatch({
+	      action: 'DELTIMESHEET',
+	      data: {
+	        id: this.props.params.id
+	      }
+	    });
+	  },
+	  render: function render() {
+	    return React.createElement(
+	      'div',
+	      { className: 'col-sm-4 col-md-8 col-lg-12' },
+	      React.createElement(
+	        'h1',
+	        null,
+	        'DeleteTime'
+	      )
+	    );
+	  }
+	});
+	module.exports = ApproverHome;
+
+/***/ },
+/* 319 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var React = __webpack_require__(1);
+	var ReactDOM = __webpack_require__(34);
+	var Router = __webpack_require__(172).Router;
+	var Route = __webpack_require__(172).Route;
+	var browserHistory = __webpack_require__(172).browserHistory;
+	var Dispatcher = __webpack_require__(228);
+	var userStore = __webpack_require__(231);
+	var Link = __webpack_require__(172).Link;
+
+	var ApproverHome = React.createClass({
+	  displayName: 'ApproverHome',
+	  getInitialState: function getInitialState() {
+	    return {
+	      search: userStore.getSearchResult()
+	    };
+	  },
+	  search: function search(e) {
+	    var self = this;
+	    Dispatcher.dispatch({
+	      action: 'SEARCH',
+	      searchInfo: e.target.value
+	    });
+
+	    userStore.on('search', function () {
+	      self.setState({
+	        search: userStore.getSearchResult()
+	      });
+	    });
+	  },
+
+	  render: function render() {
+	    if (this.state.search) {
+	      var search = this.state.search.data.search.map(function (timesheet, i) {
+	        return React.createElement(
+	          'div',
+	          { key: i, className: 'well well-lg' },
+	          React.createElement(
+	            'table',
+	            { className: 'table table-striped table-inverse table-bordered table-responsive' },
+	            React.createElement(
+	              'thead',
+	              null,
+	              React.createElement(
+	                'tr',
+	                null,
+	                React.createElement(
+	                  'th',
+	                  null,
+	                  'Day'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  null,
+	                  'Dates'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  null,
+	                  'Time In'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  null,
+	                  'Lunch Start'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  null,
+	                  'Lunch End'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  null,
+	                  'Time Out'
+	                )
+	              )
+	            ),
+	            React.createElement(
+	              'tbody',
+	              null,
+	              React.createElement(
+	                'tr',
+	                null,
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  'Monday'
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Date1
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Time1
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchStart1
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchEnd1
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Timeout1
+	                )
+	              ),
+	              React.createElement(
+	                'tr',
+	                null,
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  'Tuesday'
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Date2
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Time2
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchStart2
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchEnd2
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Timeout2
+	                )
+	              ),
+	              React.createElement(
+	                'tr',
+	                null,
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  'Wednessday'
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Date3
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Time3
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchStart3
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchEnd3
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Timeout3
+	                )
+	              ),
+	              React.createElement(
+	                'tr',
+	                null,
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  'Thursday'
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Date4
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Time4
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchStart4
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchEnd4
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Timeout4
+	                )
+	              ),
+	              React.createElement(
+	                'tr',
+	                null,
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  'Firday'
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Date5
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Time5
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchStart5
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchEnd5
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Timeout5
+	                )
+	              )
+	            )
+	          ),
+	          React.createElement(
+	            'h5',
+	            null,
+	            'Total hour worked : ',
+	            timesheet.TotalHourWorked,
+	            ' '
+	          )
+	        );
+	      });
+	      return React.createElement(
+	        'div',
+	        { className: 'col-sm-4 col-md-8 col-lg-12' },
+	        React.createElement(
+	          'div',
+	          { className: 'btn-group', 'data-toggle': 'buttons' },
+	          React.createElement(
+	            'label',
+	            { className: 'btn btn-primary active' },
+	            React.createElement('input', { type: 'button', onClick: this.search, value: 'approved', className: 'btn btn-success' })
+	          ),
+	          React.createElement(
+	            'label',
+	            { className: 'btn btn-primary' },
+	            React.createElement('input', { type: 'button', onClick: this.search, value: 'needApprovel', className: 'btn btn-warning' })
+	          ),
+	          React.createElement(
+	            'label',
+	            { className: 'btn btn-primary' },
+	            React.createElement('input', { type: 'button', onClick: this.search, value: 'declined', className: 'btn btn-danger' })
+	          )
+	        ),
+	        React.createElement('hr', null),
+	        search,
+	        React.createElement('hr', null)
+	      );
+	    } else {
+	      return React.createElement(
+	        'div',
+	        { className: 'col-sm-4 col-md-8 col-lg-12' },
+	        React.createElement(
+	          'div',
+	          { className: 'btn-group', 'data-toggle': 'buttons' },
+	          React.createElement(
+	            'label',
+	            { className: 'btn btn-primary active' },
+	            React.createElement('input', { type: 'button', onClick: this.search, value: 'approved', className: 'btn btn-success' })
+	          ),
+	          React.createElement(
+	            'label',
+	            { className: 'btn btn-primary' },
+	            React.createElement('input', { type: 'button', onClick: this.search, value: 'needApprovel', className: 'btn btn-warning' })
+	          ),
+	          React.createElement(
+	            'label',
+	            { className: 'btn btn-primary' },
+	            React.createElement('input', { type: 'button', onClick: this.search, value: 'declined', className: 'btn btn-danger' })
+	          )
+	        )
+	      );
+	    }
+	  }
+	});
+	module.exports = ApproverHome;
+
+/***/ },
+/* 320 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var React = __webpack_require__(1);
+	var ReactDOM = __webpack_require__(34);
+	var Router = __webpack_require__(172).Router;
+	var Route = __webpack_require__(172).Route;
+	var browserHistory = __webpack_require__(172).browserHistory;
+	var Dispatcher = __webpack_require__(228);
+	var userStore = __webpack_require__(231);
+	var Link = __webpack_require__(172).Link;
+
+	var ViewPaidInvoice = React.createClass({
+	  displayName: 'ViewPaidInvoice',
+	  getInitialState: function getInitialState() {
+	    return {
+	      search: userStore.getSearchResult()
+	    };
+	  },
+	  search: function search(e) {
+	    var self = this;
+	    Dispatcher.dispatch({
+	      action: 'SEARCH',
+	      searchInfo: e.target.value
+	    });
+
+	    userStore.on('search', function () {
+	      self.setState({
+	        search: userStore.getSearchResult()
+	      });
+	    });
+	  },
+
+	  render: function render() {
+	    if (this.state.search) {
+	      var search = this.state.search.data.search.map(function (timesheet, i) {
+	        return React.createElement(
+	          'div',
+	          { key: i, className: 'well well-lg' },
+	          React.createElement(
+	            'table',
+	            { className: 'table table-bordered table-responsive' },
+	            React.createElement(
+	              'thead',
+	              null,
+	              React.createElement(
+	                'tr',
+	                null,
+	                React.createElement(
+	                  'th',
+	                  null,
+	                  'Day'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  null,
+	                  'Dates'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  null,
+	                  'Time In'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  null,
+	                  'Lunch Start'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  null,
+	                  'Lunch End'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  null,
+	                  'Time Out'
+	                )
+	              )
+	            ),
+	            React.createElement(
+	              'tbody',
+	              null,
+	              React.createElement(
+	                'tr',
+	                null,
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  'Monday'
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Date1
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Time1
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchStart1
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchEnd1
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Timeout1
+	                )
+	              ),
+	              React.createElement(
+	                'tr',
+	                null,
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  'Tuesday'
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Date2
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Time2
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchStart2
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchEnd2
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Timeout2
+	                )
+	              ),
+	              React.createElement(
+	                'tr',
+	                null,
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  'Wednessday'
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Date3
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Time3
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchStart3
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchEnd3
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Timeout3
+	                )
+	              ),
+	              React.createElement(
+	                'tr',
+	                null,
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  'Thursday'
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Date4
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Time4
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchStart4
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchEnd4
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Timeout4
+	                )
+	              ),
+	              React.createElement(
+	                'tr',
+	                null,
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  'Firday'
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Date5
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Time5
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchStart5
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchEnd5
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Timeout5
+	                )
+	              )
+	            )
+	          ),
+	          React.createElement(
+	            'h5',
+	            null,
+	            'Total hour worked : ',
+	            timesheet.TotalHourWorked,
+	            ' '
+	          )
+	        );
+	      });
+	      return React.createElement(
+	        'div',
+	        { className: 'col-sm-4 col-md-8 col-lg-12' },
+	        React.createElement('input', { type: 'button', onClick: this.search, value: 'paid', className: 'btn btn-primary btn-lg' }),
+	        React.createElement('hr', null),
+	        search,
+	        React.createElement('hr', null)
+	      );
+	    } else {
+	      return React.createElement(
+	        'div',
+	        { className: 'col-sm-4 col-md-8 col-lg-12' },
+	        React.createElement('input', { type: 'button', onClick: this.search, value: 'paid', className: 'btn btn-primary btn-lg' })
+	      );
+	    }
+	  }
+	});
+	module.exports = ViewPaidInvoice;
+
+/***/ },
+/* 321 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var React = __webpack_require__(1);
+	var ReactDOM = __webpack_require__(34);
+	var Router = __webpack_require__(172).Router;
+	var Route = __webpack_require__(172).Route;
+	var browserHistory = __webpack_require__(172).browserHistory;
+	var userStore = __webpack_require__(231);
+	var Dispatcher = __webpack_require__(228);
+	var Link = __webpack_require__(172).Link;
+
+	var InvoiceSend = React.createClass({
+	  displayName: 'InvoiceSend',
+	  getInitialState: function getInitialState() {
+	    return {
+	      invoice: userStore.getInvoice()
+	    };
+	  },
+
+	  componentWillMount: function componentWillMount() {
+	    var self = this;
+	    Dispatcher.dispatch({
+	      action: 'INVOICE',
+	      id: {
+	        userId: this.props.params.id
+	      }
+	    });
+	    userStore.on('invoice', function () {
+	      self.setState({
+	        invoice: userStore.getInvoice()
+	      });
+	    });
+	  },
+	  paid: function paid() {
+	    Dispatcher.dispatch({
+	      action: 'PAID',
+	      id: {
+	        userId: this.props.params.id
+	      }
+	    });
+	  },
+
+	  render: function render() {
+	    if (this.state.invoice) {
+	      var invoice = this.state.invoice.data.needToPay.map(function (timesheet, i) {
+	        return React.createElement(
+	          'div',
+	          { key: i, className: 'well well-lg' },
+	          React.createElement(
+	            'table',
+	            { className: 'table table-bordered table-responsive' },
+	            React.createElement(
+	              'thead',
+	              null,
+	              React.createElement(
+	                'tr',
+	                null,
+	                React.createElement(
+	                  'th',
+	                  null,
+	                  'Day'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  null,
+	                  'Dates'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  null,
+	                  'Time In'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  null,
+	                  'Lunch Start'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  null,
+	                  'Lunch End'
+	                ),
+	                React.createElement(
+	                  'th',
+	                  null,
+	                  'Time Out'
+	                )
+	              )
+	            ),
+	            React.createElement(
+	              'tbody',
+	              null,
+	              React.createElement(
+	                'tr',
+	                null,
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  'Monday'
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Date1
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Time1
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchStart1
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchEnd1
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Timeout1
+	                )
+	              ),
+	              React.createElement(
+	                'tr',
+	                null,
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  'Tuesday'
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Date2
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Time2
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchStart2
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchEnd2
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Timeout2
+	                )
+	              ),
+	              React.createElement(
+	                'tr',
+	                null,
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  'Wednessday'
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Date3
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Time3
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchStart3
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchEnd3
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Timeout3
+	                )
+	              ),
+	              React.createElement(
+	                'tr',
+	                null,
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  'Thursday'
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Date4
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Time4
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchStart4
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchEnd4
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Timeout4
+	                )
+	              ),
+	              React.createElement(
+	                'tr',
+	                null,
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  'Firday'
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Date5
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Time5
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchStart5
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.LunchEnd5
+	                ),
+	                React.createElement(
+	                  'td',
+	                  null,
+	                  timesheet.Timeout5
+	                )
+	              )
+	            )
+	          ),
+	          React.createElement(
+	            'h5',
+	            null,
+	            'Total hour worked : ',
+	            timesheet.TotalHourWorked,
+	            ' '
+	          )
+	        );
+	      });
+	      return React.createElement(
+	        'div',
+	        { className: 'col-sm-4 col-md-8 col-lg-12' },
+	        React.createElement(
+	          'h1',
+	          null,
+	          'TimeSheets needs to be paid '
+	        ),
+	        invoice,
+	        React.createElement(
+	          'p',
+	          null,
+	          React.createElement(
+	            'a',
+	            { onClick: this.paid, className: 'btn btn-info btn-lg' },
+	            React.createElement('span', { className: 'glyphicon glyphicon-gbp' }),
+	            ' Pay'
+	          )
+	        )
+	      );
+	    } else {
+	      return React.createElement(
+	        'div',
+	        { className: 'col-sm-4 col-md-8 col-lg-12' },
+	        React.createElement(
+	          'h1',
+	          null,
+	          'InvoiceSend'
+	        )
+	      );
+	    }
+	  }
+	});
+	module.exports = InvoiceSend;
+	//   <input type='button' value='paid' onClick={this.paid}/>
+
+/***/ },
+/* 322 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	/*******************View all contarctor **********/
+	var React = __webpack_require__(1);
+	var ReactDOM = __webpack_require__(34);
+	var Router = __webpack_require__(172).Router;
+	var Route = __webpack_require__(172).Route;
+	var browserHistory = __webpack_require__(172).browserHistory;
+	var userStore = __webpack_require__(231);
+	var Dispatcher = __webpack_require__(228);
+	var Link = __webpack_require__(172).Link;
+
+	var ar = [];
+	var ar2 = [];
+
+	var ApproverViewContarctor = React.createClass({
+	  displayName: 'ApproverViewContarctor',
+	  getInitialState: function getInitialState() {
+	    return {
+	      contractor: userStore.getContractors()
+	    };
+	  },
+
+	  componentWillMount: function componentWillMount() {
+	    var self = this;
+	    Dispatcher.dispatch({
+	      action: 'GETCONTRACTOR'
+	    });
+	    userStore.on('getContractor', function () {
+	      self.setState({
+	        contractor: userStore.getContractors()
+	      });
+	    });
+	  },
+	  render: function render() {
+	    var self = this;
+	    var ApprovedNudge = '';
+
+	    if (this.state.contractor) {
+	      var contractors = self.state.contractor.data.contractor.map(function (contractor, i) {
+	        ApprovedNudge = contractor.TimeSheet.map(function (timesheet, i) {
+	          if (timesheet.Status === 'approved') {
+	            ar.push(contractor.firstName);
+	          }
+	        });
+	      });
+
+	      var contractors = self.state.contractor.data.contractor.map(function (contractor, i) {
+	        return React.createElement(
+	          'tr',
+	          { key: i, className: 'success' },
+	          React.createElement(
+	            'td',
+	            null,
+	            contractor.startdate
+	          ),
+	          React.createElement(
+	            'td',
+	            null,
+	            contractor.enddate
+	          ),
+	          React.createElement(
+	            'td',
+	            null,
+	            contractor.firstName
+	          ),
+	          React.createElement(
+	            'td',
+	            null,
+	            contractor.lastName
+	          ),
+	          React.createElement(
+	            'td',
+	            null,
+	            React.createElement(
+	              Link,
+	              { to: 'invoiceadmin/' + contractor._id },
+	              'View TimeSheets'
+	            )
+	          )
+	        );
+	      });
+
+	      for (var i = 0; i < ar.length; i++) {
+	        if (ar[i] != ar[i + 1]) {
+	          ar2.push(ar[i]);
+	        }
+	      }
+	      var nudge = ar2.map(function (item, i) {
+	        return React.createElement(
+	          'div',
+	          { key: i, className: 'alert alert-info' },
+	          React.createElement(
+	            'strong',
+	            null,
+	            item
+	          ),
+	          ' Timesheets Needs Paid.'
+	        );
+	      });
+	      return React.createElement(
+	        'div',
+	        null,
+	        nudge,
+	        React.createElement(
+	          'table',
+	          { className: 'table' },
+	          React.createElement(
+	            'thead',
+	            null,
+	            React.createElement(
+	              'tr',
+	              null,
+	              React.createElement(
+	                'th',
+	                null,
+	                'Start Date'
+	              ),
+	              React.createElement(
+	                'th',
+	                null,
+	                'End Date'
+	              ),
+	              React.createElement(
+	                'th',
+	                null,
+	                'First Name'
+	              ),
+	              React.createElement(
+	                'th',
+	                null,
+	                'Last Name'
+	              ),
+	              React.createElement(
+	                'th',
+	                null,
+	                'View TimeSheets'
+	              )
+	            )
+	          ),
+	          React.createElement(
+	            'tbody',
+	            null,
+	            contractors
+	          )
+	        )
+	      );
+	    } else {
+	      return React.createElement('div', { className: 'loader' });
+	    }
+	  }
+	});
+	module.exports = ApproverViewContarctor;
+
+/***/ },
+/* 323 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var React = __webpack_require__(1);
+	var ReactDOM = __webpack_require__(34);
+	var Router = __webpack_require__(172).Router;
+	var Route = __webpack_require__(172).Route;
+	var browserHistory = __webpack_require__(172).browserHistory;
+	var Dispatcher = __webpack_require__(228);
+	var userStore = __webpack_require__(231);
+	var Link = __webpack_require__(172).Link;
+
+	//need to do invoice date
+	var SearchForInvoiceAdmin = React.createClass({
+	  displayName: 'SearchForInvoiceAdmin',
+	  getInitialState: function getInitialState() {
+	    return {
+	      searchInvoice: ''
+	    };
+	  },
+	  search: function search(e) {
+	    var self = this;
+	    Dispatcher.dispatch({
+	      action: 'SEARCHINVOICE',
+	      search: this.refs.search.value
+	    });
+
+	    userStore.on('invoiceSearch', function (data) {
+	      this.setState({
+	        searchInvoice: data
+	      });
+	    }.bind(this));
+	  },
+
+	  render: function render() {
+
+	    if (this.state.searchInvoice.data) {
+	      var self = this;
+	      var map = this.state.searchInvoice.data.invoiceSearch.map(function (item, i) {
+	        if (item) {
+	          return React.createElement(
+	            'div',
+	            { key: i, className: 'panel-group' },
+	            React.createElement(
+	              'p',
+	              null,
+	              'Results ',
+	              i + 1,
+	              ' '
+	            ),
+	            React.createElement(
+	              'div',
+	              { className: 'panel panel-default' },
+	              React.createElement(
+	                'div',
+	                { className: 'panel-heading' },
+	                React.createElement(
+	                  'h4',
+	                  { className: 'panel-title' },
+	                  React.createElement(
+	                    'a',
+	                    { 'data-toggle': 'collapse', href: '#collapse1' },
+	                    'Name : ',
+	                    self.state.searchInvoice.data.contractor[i].firstName
+	                  )
+	                )
+	              ),
+	              React.createElement(
+	                'div',
+	                { id: 'collapse1', className: 'panel-collapse collapse' },
+	                React.createElement(
+	                  'div',
+	                  { className: 'panel-body' },
+	                  React.createElement(
+	                    'pre',
+	                    null,
+	                    React.createElement(
+	                      'p',
+	                      { className: 'text-warning' },
+	                      'Invoice #id :',
+	                      item._id,
+	                      ' '
+	                    ),
+	                    React.createElement(
+	                      'p',
+	                      null,
+	                      'Date'
+	                    ),
+	                    React.createElement(
+	                      'p',
+	                      null,
+	                      'total hours worked : ',
+	                      item.TotalHourWorked
+	                    ),
+	                    React.createElement(
+	                      'p',
+	                      null,
+	                      'Rate : \xA37:00'
+	                    ),
+	                    React.createElement(
+	                      'p',
+	                      { className: 'bg-danger text-center' },
+	                      'Total Pay : \xA3 ',
+	                      parseInt(item.TotalHourWorked) * 7
+	                    )
+	                  )
+	                )
+	              )
+	            )
+	          );
+	        } else if (i <= 0) {
+	          return React.createElement(
+	            'div',
+	            null,
+	            React.createElement(
+	              'h3',
+	              null,
+	              'No Match : you can search by contractor name or there start date e.g. 2016-11-12'
+	            )
+	          );
+	        }
+	      });
+	      return React.createElement(
+	        'div',
+	        { className: 'col-sm-4 col-md-8 col-lg-12' },
+	        React.createElement('input', { type: 'text', ref: 'search', className: 'form-control', placeholder: 'search ...' }),
+	        React.createElement('hr', null),
+	        React.createElement('input', { type: 'button', value: 'search', className: 'btn btn-primary', onClick: this.search }),
+	        React.createElement('hr', null),
+	        map
+	      );
+	    } else {
+	      return React.createElement(
+	        'div',
+	        { className: 'col-sm-4 col-md-8 col-lg-12' },
+	        React.createElement('input', { type: 'text', ref: 'search', className: 'form-control', placeholder: 'search ...' }),
+	        React.createElement('hr', null),
+	        React.createElement('input', { type: 'button', value: 'search', className: 'btn btn-primary', onClick: this.search })
+	      );
+	    }
+	  }
+	});
+	module.exports = SearchForInvoiceAdmin;
+
+/***/ },
+/* 324 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var React = __webpack_require__(1);
+	var ReactDOM = __webpack_require__(34);
+	var Router = __webpack_require__(172).Router;
+	var Route = __webpack_require__(172).Route;
+	var browserHistory = __webpack_require__(172).browserHistory;
+	var userStore = __webpack_require__(231);
+	var Dispatcher = __webpack_require__(228);
+
+	var EmailSendForApprovel = React.createClass({
+	  displayName: 'EmailSendForApprovel',
+
+	  componentWillMount: function componentWillMount() {
+	    if (this.props.params.boolean == 1) {
+	      Dispatcher.dispatch({
+	        action: 'APPROVEDBYAPPROVER',
+	        userId: this.props.params.id
+	      });
+	      browserHistory.push('/approverviewuser');
+	    } else {
+	      Dispatcher.dispatch({
+	        action: 'DECLINEDBYAPPROVER',
+	        comment: 'Please Check timesheet and resubmit it',
+	        userId: this.props.params.id
+	      });
+	      browserHistory.push('/approverviewuser');
+	    }
+	  },
+	  render: function render() {
+	    return React.createElement(
+	      'div',
+	      { className: 'col-sm-4 col-md-8 col-lg-12' },
+	      React.createElement(
+	        'h1',
+	        null,
+	        'EmailSendForApprovel'
+	      )
+	    );
+	  }
+	});
+	module.exports = EmailSendForApprovel;
+
+/***/ },
+/* 325 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var React = __webpack_require__(1);
+	var ReactDOM = __webpack_require__(34);
+	var Router = __webpack_require__(172).Router;
+	var Route = __webpack_require__(172).Route;
+	var browserHistory = __webpack_require__(172).browserHistory;
+
+	var redirectViewAllcontractor = React.createClass({
+	  displayName: 'redirectViewAllcontractor',
+
+	  componentWillMount: function componentWillMount() {
+	    location.reload();
+	    browserHistory.push('/approverviewuser');
+	  },
+	  render: function render() {
+	    return React.createElement('div', { className: 'col-sm-4 col-md-8 col-lg-12' });
+	  }
+
+	});
+	module.exports = redirectViewAllcontractor;
+
+/***/ },
+/* 326 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var React = __webpack_require__(1);
+	var ReactDOM = __webpack_require__(34);
+	var Router = __webpack_require__(172).Router;
+	var Route = __webpack_require__(172).Route;
+	var browserHistory = __webpack_require__(172).browserHistory;
+
+	var Logout = React.createClass({
+	  displayName: 'Logout',
+
+	  componentWillMount: function componentWillMount() {
+	    localStorage.removeItem('type');
+	    localStorage.removeItem('token');
+	    localStorage.removeItem('id');
+	    browserHistory.push('/login');
+	    location.reload();
+	  },
+	  render: function render() {
+	    return React.createElement(
+	      'div',
+	      { className: 'col-sm-4 col-md-8 col-lg-12' },
+	      React.createElement(
+	        'h1',
+	        null,
+	        'Logout'
+	      )
+	    );
+	  }
+	});
+	module.exports = Logout;
+
+/***/ },
+/* 327 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var React = __webpack_require__(1);
+	var ReactDOM = __webpack_require__(34);
+	var Router = __webpack_require__(172).Router;
+	var Route = __webpack_require__(172).Route;
+	var browserHistory = __webpack_require__(172).browserHistory;
+	var socket = __webpack_require__(264)();
 
 	var str = '';
 	var type = localStorage.getItem('type');
 
 	socket.on('chat message', function (msg) {
-	  $('#messages').append($('<p>').text(type + ' :' + msg));
+	  $('#messages').append($('<p>').text(msg));
 	});
 
 	var LiveChat = React.createClass({
@@ -39872,7 +39890,7 @@
 	    socket.on('connect', function () {});
 	  },
 	  send: function send() {
-	    socket.emit('chat message', this.refs.send.value);
+	    socket.emit('chat message', type + ' :' + this.refs.send.value);
 	  },
 
 	  render: function render() {
@@ -39886,12 +39904,175 @@
 	        'Live Chat '
 	      ),
 	      React.createElement('h3', { id: 'messages' }),
-	      React.createElement('input', { type: 'text', ref: 'send' }),
-	      React.createElement('input', { type: 'button', value: 'send', onClick: this.send })
+	      React.createElement('input', { className: 'form-control', type: 'text', ref: 'send' }),
+	      React.createElement('hr', null),
+	      React.createElement(
+	        'p',
+	        null,
+	        React.createElement(
+	          'a',
+	          { onClick: this.send, className: 'btn btn-info btn-lg' },
+	          React.createElement('span', { className: 'glyphicon glyphicon-menu-right' }),
+	          ' Send'
+	        )
+	      )
 	    );
 	  }
 	});
 	module.exports = LiveChat;
+
+	//<input type='button' value='send'  onClick={this.send} />
+
+/***/ },
+/* 328 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var React = __webpack_require__(1);
+	var ReactDOM = __webpack_require__(34);
+	var Router = __webpack_require__(172).Router;
+	var Route = __webpack_require__(172).Route;
+	var browserHistory = __webpack_require__(172).browserHistory;
+	var Dispatcher = __webpack_require__(228);
+	var userStore = __webpack_require__(231);
+
+	var type = localStorage.getItem('type');
+
+	var EditContractorInfo = React.createClass({
+	  displayName: 'EditContractorInfo',
+	  getInitialState: function getInitialState() {
+	    return {
+	      firstName: '',
+	      lastName: '',
+	      username: '',
+	      Email: ''
+	    };
+	  },
+
+	  componentWillMount: function componentWillMount() {
+	    var self = this;
+
+	    Dispatcher.dispatch({
+	      action: 'GETCONTRACTORID',
+	      id: this.props.params.id
+	    });
+
+	    userStore.on('getcontractorid', function (payload) {
+	      console.log(payload.data.contractor[0].firstName);
+	      self.setState({
+	        firstName: payload.data.contractor[0].firstName,
+	        lastName: payload.data.contractor[0].lastName,
+	        username: payload.data.contractor[0].username,
+	        Email: payload.data.contractor[0].email
+	      });
+	    });
+	  },
+	  updateContractor: function updateContractor() {
+	    var self = this;
+	    var firstName = '';
+	    var lastName = '';
+	    var username = '';
+	    var email = '';
+
+	    if (this.refs.firstName.value) {
+	      firstName = this.refs.firstName.value;
+	    } else {
+	      firstName = this.state.firstName;
+	    }
+
+	    if (this.refs.lastName.value) {
+	      lastName = this.refs.lastName.value;
+	    } else {
+	      lastName = this.state.lastName;
+	    }
+
+	    if (this.refs.username.value) {
+	      username = this.refs.username.value;
+	    } else {
+	      username = this.state.username;
+	    }
+
+	    if (this.refs.email.value) {
+	      email = this.refs.email.value;
+	    } else {
+	      email = this.state.Email;
+	    }
+
+	    Dispatcher.dispatch({
+	      action: 'UPDATECONTRACTOR',
+	      data: {
+	        firstName: firstName,
+	        lastName: lastName,
+	        username: username,
+	        email: email
+	      },
+	      id: this.props.params.id
+	    });
+
+	    userStore.on('contractorUpdated', function () {
+	      self.setState({
+	        success: true
+	      });
+	    });
+
+	    event.preventDefault();
+	  },
+
+	  render: function render() {
+
+	    return React.createElement(
+	      'div',
+	      { className: 'col-sm-4 col-md-8 col-lg-12' },
+	      React.createElement(
+	        'div',
+	        { className: 'form-group' },
+	        React.createElement(
+	          'label',
+	          { htmlFor: 'firstName' },
+	          'First Name:'
+	        ),
+	        React.createElement('input', { type: 'text', className: 'form-control', id: 'firstName', ref: 'firstName', placeholder: this.state.firstName })
+	      ),
+	      React.createElement(
+	        'div',
+	        { className: 'form-group' },
+	        React.createElement(
+	          'label',
+	          { htmlFor: 'lastName' },
+	          'Last Name:'
+	        ),
+	        React.createElement('input', { type: 'text', className: 'form-control', id: 'lastName', ref: 'lastName', placeholder: this.state.lastName })
+	      ),
+	      React.createElement(
+	        'div',
+	        { className: 'form-group' },
+	        React.createElement(
+	          'label',
+	          { htmlFor: 'username' },
+	          'Username:'
+	        ),
+	        React.createElement('input', { type: 'text', className: 'form-control', id: 'username', ref: 'username', placeholder: this.state.username })
+	      ),
+	      React.createElement(
+	        'div',
+	        { className: 'form-group' },
+	        React.createElement(
+	          'label',
+	          { htmlFor: 'email' },
+	          'Email:'
+	        ),
+	        React.createElement('input', { type: 'text', className: 'form-control', id: 'email', ref: 'email', placeholder: this.state.Email })
+	      ),
+	      React.createElement(
+	        'button',
+	        { type: 'submit', onClick: this.updateContractor, className: 'btn btn-default' },
+	        'Submit'
+	      )
+	    );
+	  }
+	});
+	module.exports = EditContractorInfo;
 
 /***/ }
 /******/ ]);

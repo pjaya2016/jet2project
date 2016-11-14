@@ -100,9 +100,14 @@ var InvoiceSend = React.createClass({
        })
        return (
          <div className="col-sm-4 col-md-8 col-lg-12">
-           <h1>InvoiceSend</h1>
+           <h1>TimeSheets needs to be paid </h1>
            {invoice}
-           <input type='button' value='paid' onClick={this.paid}/>
+           <p>
+              <a onClick={this.paid} className="btn btn-info btn-lg">
+                <span className="glyphicon glyphicon-gbp"></span> Pay
+              </a>
+           </p>
+
          </div>
        )
      }else{
@@ -115,3 +120,4 @@ var InvoiceSend = React.createClass({
    }
 });
 module.exports = InvoiceSend;
+//   <input type='button' value='paid' onClick={this.paid}/>

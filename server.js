@@ -7,6 +7,13 @@ var express = require('express'),
     routes = require('./routers/main.js'),
     app = express();
 
+    var http = require('http').Server(app);
+    var io = require('socket.io')(http);
+
+
+
+
+
 // ***** DATABASE ***** //
 mongoose.connect(config.db, function() {
   console.log('\nremote database connection established at ' + config.db + '\n');
@@ -55,7 +62,20 @@ app.get('*', function(req, res) {
   return res.sendFile(__dirname + '/public/index.html');
 });
 
+io.on('connection', function(socket){
+  console.log('a user connected');
+  socket.on('disconnect', function(){
+    console.log('user disconnected');
+  });
+});
+
+io.on('connection', function(socket){
+  socket.on('chat message', function(msg){
+    io.emit('chat message', msg);
+  });
+});
+
 // ***** LISTEN ***** //
-app.listen(config.port, function() {
+http.listen(config.port, function() {
   console.log('\napp is running on port ' + config.port + '\n');
 });

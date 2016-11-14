@@ -24,6 +24,7 @@ var Nav = React.createClass({
             {(type === 'contractor') ? <li><Link to='/dashbored' >Dashbored</Link></li> : ''   }
             {(type === 'contractor') ? <li><Link to='/search' >Search</Link></li> : ''   }
             {(type === 'contractor') ? <li><Link to='/viewpaidinvoice' >View Paid Invoice</Link></li> : ''   }
+            {(type === 'contractor') ? <li><Link to='/livechat' >Live Chat</Link></li> : ''   }
             {(type === 'approver') ? <li><Link to='/redirecttoapproverviewuser' >View All Contractor</Link></li> : ''   }
             {(type === 'approver') ? <li><Link to='/approveradduser' >Add User</Link></li> : ''   }
             {(type === 'approver') ? <li><Link to='/livechat' >Live Chat</Link></li> : ''   }

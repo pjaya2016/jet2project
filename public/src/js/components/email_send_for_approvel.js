@@ -15,12 +15,12 @@ var EmailSendForApprovel = React.createClass({
       })
        browserHistory.push('/approverviewuser')
     }else{
-      // Dispatcher.dispatch({
-      //   action : 'DECLINEDBYAPPROVER',
-      //   comment : 'Please Check timesheet and resubmit it',
-      //   userId : this.props.params.id
-      // })
-      // browserHistory.push('/approverviewuser')
+      Dispatcher.dispatch({
+        action : 'DECLINEDBYAPPROVER',
+        comment : 'Please Check timesheet and resubmit it',
+        userId : this.props.params.id
+      })
+      browserHistory.push('/approverviewuser')
     }
   },
   render: function() {

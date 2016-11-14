@@ -91,9 +91,17 @@ var ApproverHome = React.createClass({
       })
       return (
         <div className="col-sm-4 col-md-8 col-lg-12">
-          <input type="button" onClick={this.search}  value='approved' className="btn btn-primary" />
-          <input type="button" onClick={this.search}  value='needApprovel' className="btn btn-primary" />
-          <input type="button" onClick={this.search}  value='declined' className="btn btn-primary" />
+          <div className="btn-group" data-toggle="buttons">
+            <label className="btn btn-primary active">
+              <input type="button" onClick={this.search}  value='approved' className="btn btn-success" />
+            </label>
+            <label className="btn btn-primary">
+              <input type="button" onClick={this.search}  value='needApprovel' className="btn btn-warning" />
+            </label>
+              <label className="btn btn-primary">
+            <input type="button" onClick={this.search}  value='declined' className="btn btn-danger" />
+            </label>
+          </div>
           <hr />
           {search}
           <hr />
@@ -102,9 +110,22 @@ var ApproverHome = React.createClass({
     }else{
       return (
         <div className="col-sm-4 col-md-8 col-lg-12">
-          <input type="button" onClick={this.search}  value='approved' className="btn btn-primary" />
-          <input type="button" onClick={this.search}  value='needApprovel' className="btn btn-primary" />
-          <input type="button" onClick={this.search}  value='declined' className="btn btn-primary" />
+
+    <div className="btn-group" data-toggle="buttons">
+      <label className="btn btn-primary active">
+        <input type="button" onClick={this.search}  value='approved' className="btn btn-success" />
+      </label>
+      <label className="btn btn-primary">
+        <input type="button" onClick={this.search}  value='needApprovel' className="btn btn-warning" />
+      </label>
+        <label className="btn btn-primary">
+      <input type="button" onClick={this.search}  value='declined' className="btn btn-danger" />
+      </label>
+    </div>
+
+
+
+
         </div>
       )
     }

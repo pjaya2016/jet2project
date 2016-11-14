@@ -92,7 +92,7 @@ var ViewPaidInvoice = React.createClass({
       })
       return (
         <div className="col-sm-4 col-md-8 col-lg-12">
-          <input type="button" onClick={this.search}  value='paid' className="btn btn-primary" />
+          <input type="button" onClick={this.search}  value='paid' className="btn btn-primary btn-lg" />
           <hr />
           {search}
           <hr />
@@ -101,7 +101,7 @@ var ViewPaidInvoice = React.createClass({
     }else{
       return (
         <div className="col-sm-4 col-md-8 col-lg-12">
-          <input type="button" onClick={this.search}  value='paid' className="btn btn-primary" />
+          <input type="button" onClick={this.search}  value='paid' className="btn btn-primary btn-lg" />
         </div>
       )
     }

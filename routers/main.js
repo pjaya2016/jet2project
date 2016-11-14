@@ -57,4 +57,11 @@ router.route("/changePaid/:id")
 router.route("/invoicesearch")
       .post(userController.invoiceSearch)
 
+router.route("/updatecontractor/:id")
+      .post(userController.updateContractor)
+
+
+router.route("/getcontractorid/:id")
+      .get(userController.getContractorID)
+
 module.exports = router;

@@ -10,15 +10,15 @@ tuesday = date.setDate(date.getDate() + 1);
 tuesday = new Date(tuesday);
 tuesday = tuesday.toString().substring(0, 15);
 
-wednesday = date.setDate(date.getDate() + 2);
+wednesday = date.setDate(date.getDate() + 1);
 wednesday = new Date(wednesday);
 wednesday = wednesday.toString().substring(0, 15);
 
-thursday = date.setDate(date.getDate() + 3);
+thursday = date.setDate(date.getDate() + 1);
 thursday = new Date(thursday);
 thursday = thursday.toString().substring(0, 15);
 
-firday = date.setDate(date.getDate() + 4);
+firday = date.setDate(date.getDate() + 1);
 firday = new Date(firday);
 firday = firday.toString().substring(0, 15);
 
@@ -164,7 +164,7 @@ function sendForApprovel(req,res){
            'TimeSheet.$.Status' : 'needApprovel'
          }}, function(err) {if(!err) console.log('sucessfully send for approvel')});
        }
-       
+
        var transporter = nodemailer.createTransport({
            service : 'Gmail',
            auth :{
@@ -448,6 +448,25 @@ var date = new Date(req.body.searchInvoice)
   }
 }
 
+function updateContractor(req,res){
+  User.findByIdAndUpdate(req.body.datas.id, { $set:  { firstName : req.body.datas.data.firstName , lastName : req.body.datas.data.lastName, username : req.body.datas.data.username , email : req.body.datas.data.email }  }, function (err, contactor) {
+    if (err) return handleError(err);
+    console.log(contactor)
+  });
+}
+
+function getContractorID(req, res) {
+  User.find({_id : req.params.id}, function (err, contractor) {
+    if (err) return res.status(401).send({error: err});
+    if (!contractor) return res.status(500).send({error: 'Database error, is it connected?'});
+    console.log(contractor)
+    return res.status(200).send({
+      message: 'contractor info sucessfully accessed depanding on their id',
+      contractor : contractor
+    });
+  });
+}
+
 module.exports = {
   sendForApprovel : sendForApprovel,
   getTimeSheetAppending : getTimeSheetAppending,
@@ -466,7 +485,9 @@ module.exports = {
   search : search,
   paid : paid,
   changePaidStatus : changePaidStatus,
-  invoiceSearch : invoiceSearch
+  invoiceSearch : invoiceSearch,
+  updateContractor : updateContractor,
+  getContractorID : getContractorID
 }
 
 /*******

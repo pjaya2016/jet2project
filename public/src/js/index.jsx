@@ -25,6 +25,7 @@ var email_send_for_approvel = require('./components/email_send_for_approvel.js')
 var redirectViewAllcontractor = require('./components/veiw_all_contarctor_redirect.js')
 var Logout = require('./components/logout.js');
 var LiveChat = require('./components/livechat.js');
+var EditContractorInfo = require('./components/edit_contractor_info.js');
 
 /************************************************************************/
 var token = localStorage.getItem('token');
@@ -64,6 +65,7 @@ ReactDOM.render(
       <Route path="/redirecttoapproverviewuser" component={redirectViewAllcontractor} />
       <Route path="/logout" component={Logout} />
       <Route path="/livechat" component={LiveChat} />
+      <Route path="/editcontractor/:id" component={EditContractorInfo} />
     </Route>
   </Router>
   , document.getElementById('app'), function() {

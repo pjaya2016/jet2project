@@ -50,7 +50,7 @@ var ApproverViewContarctor = React.createClass({
             <td>{contractor.enddate}</td>
             <td>{contractor.firstName}</td>
             <td>{contractor.lastName}</td>
-            <td><Link to={`timesheet/${contractor._id}`}>Edit</Link></td>
+            <td><Link to={`editcontractor/${contractor._id}`}>Edit</Link></td>
             <td><Link to={`timesheet/${contractor._id}`}>View TimeSheets</Link></td>
             <td><Link to={`timesheet/${contractor._id}`}>Delete</Link></td>
           </tr>

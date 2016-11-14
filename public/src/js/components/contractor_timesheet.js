@@ -105,16 +105,20 @@ var Timesheet = React.createClass({
       return (
         <div className="col-sm-4 col-md-8 col-lg-12">
           <h3>Timesheet User ID : {this.props.params.id}</h3>
-          {approvelNeeded}
-          <input type='button' value='approve' onClick={this.approver} className='btn btn-success' />
-          <input type='button' value='decline' onClick={this.decline} className='btn btn-danger' />
+            {approvelNeeded}
+            <a onClick={this.approver}  className="btn btn-info btn-lg">
+             <span className="glyphicon glyphicon-ok"></span> Approve
+            </a>
+            <a onClick={this.decline} className="btn btn-danger btn-lg">
+             <span className="glyphicon glyphicon-remove"></span> Decline
+           </a>
           <div className="form-group">
             <h1>Add Comments</h1>
             <textarea className="form-control" ref='comment' rows="5" id="comment"></textarea>
           </div>
         </div>
       )
-    }else{
+      }else{
       return(
         <div className="loader"></div>
       )
@@ -122,3 +126,6 @@ var Timesheet = React.createClass({
   },
 });
 module.exports = Timesheet;
+
+// <input type='button' value='approve' onClick={this.approver} className='btn btn-success' />
+// <input type='button' value='decline' onClick={this.decline} className='btn btn-danger' />

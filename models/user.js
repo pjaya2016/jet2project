@@ -9,7 +9,7 @@ var userSchema = mongoose.Schema({
   lastName:     { type: String },
   username:     { type: String, required: true, unique: true },
   email:        { type: String, required: true, unique: true },
-  type:         { type: String ,enum: ['approver', 'contractor', 'invoice-admin'],required: true },
+  type:         { type: String ,enum: ['approver', 'contractor', 'invoice_admin'],required: true },
   passwordHash: { type: String },
   startdate :   {type : String, required: true },
   enddate :     {type : String, required: true },

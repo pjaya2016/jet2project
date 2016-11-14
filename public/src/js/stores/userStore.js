@@ -22,6 +22,8 @@ var _search         = null;
 
 var _invoiceSearch  = null;
 
+var _getcontractorid = null;
+
 var id              = localStorage.getItem('id');
 /**********************************************************************/
 /************************        UserStore     ************************/
@@ -47,6 +49,9 @@ var UserStore = merge(EventEmitter.prototype, {
   },
   getInvoice(){
     return _invoice;
+  },
+  getContractorId(){
+    return _getcontractorid;
   }
 });
 module.exports = UserStore;
@@ -108,6 +113,13 @@ function handleAction(payload){
     case 'SEARCHINVOICE':
     return InvoiceSearchAdmin(payload.search);
     break;
+    case 'UPDATECONTRACTOR':
+    return updateContractor(payload);
+    break;
+    case 'GETCONTRACTORID':
+      return getContractorId(payload);
+      break;
+
   }
 }
 /**********************************************************************/
@@ -287,7 +299,6 @@ function approverApproved(payload){
   .then(function(response){
     console.log(response);
   });
-
 }
 
 function approverDecline(payload){
@@ -377,5 +388,36 @@ function InvoiceSearchAdmin(payload){
   })
   .then(function(response){
     UserStore.emit('invoiceSearch',response)
+  });
+}
+
+function updateContractor(payload){
+  axios({
+    method : 'POST',
+    url : '/api/updatecontractor/' + payload.id,
+    data: {
+      datas : payload
+    },
+    headers : {
+      'token': getToken()
+    }
+  })
+  .then(function(response){
+    console.log(response)
+  });
+
+}
+
+function getContractorId(payload){
+  axios({
+    method : 'GET',
+    url : '/api/getcontractorid/' + payload.id,
+    headers : {
+      'token': getToken()
+    }
+  })
+  .then(function(response){
+    UserStore.emit('getcontractorid',response)
+    _getcontractorid = response;
   });
 }

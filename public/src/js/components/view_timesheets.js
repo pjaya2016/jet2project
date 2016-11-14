@@ -110,7 +110,10 @@ var ViewTimesheets = React.createClass({
           {timesheets}
 
           <h1>Total hour worked : {total}</h1>
-          <button type="button"  onClick={this.sendApprovel} className="btn btn-success">Send For approvel</button>
+            <a onClick={this.sendApprovel} className="btn btn-info btn-lg">
+            <span className="glyphicon glyphicon-send"></span> Send For approvel
+           </a>
+
         </div>
       )
 
@@ -126,3 +129,4 @@ var ViewTimesheets = React.createClass({
   }
 });
 module.exports = ViewTimesheets;
+//  <button type="button"  onClick={this.sendApprovel} className="btn btn-success">Send For approvel</button>

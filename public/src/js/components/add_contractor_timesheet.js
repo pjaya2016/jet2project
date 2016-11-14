@@ -203,7 +203,11 @@ var firday =   (typeof this.friday() == 'number') ? this.friday() : 0 ;
             </tbody>
           </table>
           <h4>Totle hours worked : {this.state.mondayHourWorked + this.state.tuesdayHourWorked + this.state.wednesdayHourWorked + this.state.thursdayHourWorked + this.state.fridayHourWorked} </h4>
-          <input type="button" className="form-control" value='save' onClick={this.getData} />
+
+           <a onClick={this.getData} className="btn btn-info btn-lg">
+            <span className="glyphicon glyphicon-floppy-disk"></span> Save
+          </a>
+         {  /* <input type="button" className="form-control" value='save' onClick={this.getData} />  */}
         </div>
       )
     }else{

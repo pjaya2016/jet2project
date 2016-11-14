@@ -9,7 +9,7 @@ var str = '';
 var type = localStorage.getItem('type')
 
 socket.on('chat message', function(msg){
-  $('#messages').append($('<p>').text(type + ' :' +msg));
+  $('#messages').append($('<p>').text(msg));
 });
 
 var LiveChat = React.createClass({
@@ -19,7 +19,7 @@ var LiveChat = React.createClass({
     });
   },
   send(){
-     socket.emit('chat message', this.refs.send.value);
+     socket.emit('chat message', type +' :'+this.refs.send.value);
   },
   render: function() {
 
@@ -30,10 +30,18 @@ var LiveChat = React.createClass({
 
       <h3 id='messages'></h3>
 
-      <input type='text'  ref='send'  />
-      <input type='button' value='send'  onClick={this.send} />
+      <input className="form-control" type='text'  ref='send'  />
+        <hr />
+        <p>
+         <a onClick={this.send} className="btn btn-info btn-lg">
+           <span className="glyphicon glyphicon-menu-right"></span> Send
+         </a>
+       </p>
+
       </div>
     )
   },
 });
 module.exports = LiveChat;
+
+//<input type='button' value='send'  onClick={this.send} />
