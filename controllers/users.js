@@ -413,7 +413,7 @@ function changePaidStatus(req,res){
 
 
 function invoiceSearch(req,res){
-console.log(req.body.searchInvoice)
+// console.log(req.body.searchInvoice)
 
 var date = new Date(req.body.searchInvoice)
   if(date != 'Invalid Date'){
@@ -453,7 +453,7 @@ var date = new Date(req.body.searchInvoice)
 function updateContractor(req,res){
   User.findByIdAndUpdate(req.body.datas.id, { $set:  { firstName : req.body.datas.data.firstName , lastName : req.body.datas.data.lastName, username : req.body.datas.data.username , email : req.body.datas.data.email }  }, function (err, contactor) {
     if (err) return handleError(err);
-    console.log(contactor)
+    // console.log(contactor)
   });
 }
 
@@ -466,6 +466,17 @@ function getContractorID(req, res) {
       message: 'contractor info sucessfully accessed depanding on their id',
       contractor : contractor
     });
+  });
+}
+
+function deleteContractor(req,res){
+  User.findByIdAndRemove(req.params.id, function (err, todo) {
+
+      var response = {
+          message: "Todo successfully deleted",
+          id: todo._id
+      };
+      res.send(response);
   });
 }
 
@@ -489,7 +500,8 @@ module.exports = {
   changePaidStatus : changePaidStatus,
   invoiceSearch : invoiceSearch,
   updateContractor : updateContractor,
-  getContractorID : getContractorID
+  getContractorID : getContractorID,
+  deleteContractor : deleteContractor
 }
 
 /*******

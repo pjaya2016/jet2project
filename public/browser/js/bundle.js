@@ -74,6 +74,7 @@
 	var Logout = __webpack_require__(326);
 	var LiveChat = __webpack_require__(327);
 	var EditContractorInfo = __webpack_require__(328);
+	var deletecontractor = __webpack_require__(329);
 
 	/************************************************************************/
 	var token = localStorage.getItem('token');
@@ -119,7 +120,8 @@
 	    React.createElement(Route, { path: '/redirecttoapproverviewuser', component: redirectViewAllcontractor }),
 	    React.createElement(Route, { path: '/logout', component: Logout }),
 	    React.createElement(Route, { path: '/livechat', component: LiveChat }),
-	    React.createElement(Route, { path: '/editcontractor/:id', component: EditContractorInfo })
+	    React.createElement(Route, { path: '/editcontractor/:id', component: EditContractorInfo }),
+	    React.createElement(Route, { path: '/deletecontractor/:id', component: deletecontractor })
 	  )
 	), document.getElementById('app'), function () {
 	  console.log('react app rendered successfully onto the dom!');
@@ -26879,6 +26881,9 @@
 	    case 'GETCONTRACTORID':
 	      return getContractorId(payload);
 	      break;
+	    case 'DELETECONTRACTOR':
+	      return DeleteContractorId(payload);
+	      break;
 
 	  }
 	}
@@ -27032,6 +27037,7 @@
 	      'token': getToken()
 	    }
 	  }).then(function (response) {
+	    browserHistory.push('/dashbored');
 	    console.log(response);
 	  });
 	}
@@ -27044,6 +27050,7 @@
 	      'token': getToken()
 	    }
 	  }).then(function (response) {
+	    browserHistory.push('/redirecttoapproverviewuser');
 	    console.log(response);
 	  });
 	}
@@ -27059,6 +27066,7 @@
 	      'token': getToken()
 	    }
 	  }).then(function (response) {
+	    browserHistory.push('/redirecttoapproverviewuser');
 	    console.log(response);
 	  });
 	}
@@ -27149,7 +27157,7 @@
 
 	function getContractorId(payload) {
 	  axios({
-	    method: 'GET',
+	    method: 'POST',
 	    url: '/api/getcontractorid/' + payload.id,
 	    headers: {
 	      'token': getToken()
@@ -27157,6 +27165,18 @@
 	  }).then(function (response) {
 	    UserStore.emit('getcontractorid', response);
 	    _getcontractorid = response;
+	  });
+	}
+
+	function DeleteContractorId(payload) {
+	  axios({
+	    method: 'POST',
+	    url: '/api/deletecontractor/' + payload.id,
+	    headers: {
+	      'token': getToken()
+	    }
+	  }).then(function (response) {
+	    console.log(response);
 	  });
 	}
 
@@ -29459,7 +29479,7 @@
 	            null,
 	            React.createElement(
 	              Link,
-	              { to: 'timesheet/' + contractor._id },
+	              { to: 'deletecontractor/' + contractor._id },
 	              'Delete'
 	            )
 	          )
@@ -40078,6 +40098,43 @@
 	  }
 	});
 	module.exports = EditContractorInfo;
+
+/***/ },
+/* 329 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var React = __webpack_require__(1);
+	var ReactDOM = __webpack_require__(34);
+	var Router = __webpack_require__(172).Router;
+	var Route = __webpack_require__(172).Route;
+	var browserHistory = __webpack_require__(172).browserHistory;
+	var userStore = __webpack_require__(231);
+	var Dispatcher = __webpack_require__(228);
+
+	var Delete = React.createClass({
+	  displayName: 'Delete',
+
+	  componentWillMount: function componentWillMount() {
+	    Dispatcher.dispatch({
+	      action: 'DELETECONTRACTOR',
+	      id: this.props.params.id
+	    });
+	  },
+
+	  render: function render() {
+	    return React.createElement(
+	      'h1',
+	      null,
+	      'Delete'
+	    );
+	  },
+	  componentDidMount: function componentDidMount() {
+	    browserHistory.push('/approverviewuser');
+	  }
+	});
+	module.exports = Delete;
 
 /***/ }
 /******/ ]);

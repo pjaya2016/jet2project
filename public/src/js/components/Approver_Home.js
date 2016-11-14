@@ -6,13 +6,13 @@ var browserHistory = require('react-router').browserHistory;
 
 var type  = localStorage.getItem('type');
 
-// if(type == 'approver'){
-//   browserHistory.push('/approverviewuser');
-// }else if(type == 'contractor'){
-//   browserHistory.push('/dashbored');
-// }else if(type == 'invoice_admin'){
-//   browserHistory.push('/needpay');
-// }
+  // if(type == 'approver'){
+  //   browserHistory.push('/approverviewuser');
+  // }else if(type == 'contractor'){
+  //   browserHistory.push('/dashbored');
+  // }else if(type == 'invoice_admin'){
+  //   browserHistory.push('/needpay');
+  // }
 
 var ApproverHome = React.createClass({
 

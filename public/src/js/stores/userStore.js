@@ -63,61 +63,64 @@ Dispatcher.register(handleAction);
 function handleAction(payload){
   switch(payload.action){
     case 'REGISTER':
-    return createContractor(payload);
-    break;
+      return createContractor(payload);
+      break;
     case 'LOGIN':
-    return Login(payload);
-    break;
+      return Login(payload);
+      break;
     case 'GETCONTRACTOR':
-    return getContractor();
-    break;
+      return getContractor();
+      break;
     case 'ADDTIMESHEET':
-    return addTimeSheet();
-    break;
+      return addTimeSheet();
+      break;
     case 'GETTIMESHEET':
-    return getTimeSheet();
-    break;
+      return getTimeSheet();
+      break;
     case 'GETIDTIMESHEET':
-    return getIdTimeSheet(payload);
-    break;
+      return getIdTimeSheet(payload);
+      break;
     case 'TIMESHEETDATASEND':
-    return updateTimeSheet(payload);
-    break;
+      return updateTimeSheet(payload);
+      break;
     case 'DELTIMESHEET':
-    return deleteTimesheet(payload);
-    break;
+      return deleteTimesheet(payload);
+      break;
     case 'SENDFORAPPROVEL':
-    return sendForApprovel(payload);
-    break;
+      return sendForApprovel(payload);
+      break;
     case 'CHECKFORAPPROVEL':
-    return getApprovel(payload);
-    break;
+      return getApprovel(payload);
+      break;
     case 'APPROVEDBYAPPROVER':
-    return approverApproved(payload);
-    break;
+      return approverApproved(payload);
+      break;
     case 'DECLINEDBYAPPROVER':
-    return approverDecline(payload);
-    break;
+      return approverDecline(payload);
+      break;
     case 'GETCOMMENT':
-    return getComment();
-    break;
+      return getComment();
+      break;
     case 'SEARCH':
-    return search(payload);
-    break;
+      return search(payload);
+      break;
     case 'INVOICE':
-    return invoice(payload);
-    break;
+      return invoice(payload);
+      break;
     case 'PAID':
-    return paid(payload);
-    break;
+      return paid(payload);
+      break;
     case 'SEARCHINVOICE':
-    return InvoiceSearchAdmin(payload.search);
-    break;
+      return InvoiceSearchAdmin(payload.search);
+      break;
     case 'UPDATECONTRACTOR':
-    return updateContractor(payload);
-    break;
+      return updateContractor(payload);
+      break;
     case 'GETCONTRACTORID':
       return getContractorId(payload);
+      break;
+    case 'DELETECONTRACTOR':
+      return DeleteContractorId(payload);
       break;
 
   }
@@ -284,6 +287,7 @@ function sendForApprovel(payload){
     }
   })
   .then(function(response){
+    browserHistory.push('/dashbored')
     console.log(response);
   });
 }
@@ -297,6 +301,7 @@ function approverApproved(payload){
     }
   })
   .then(function(response){
+    browserHistory.push('/redirecttoapproverviewuser')
     console.log(response);
   });
 }
@@ -313,6 +318,7 @@ function approverDecline(payload){
     }
   })
   .then(function(response){
+    browserHistory.push('/redirecttoapproverviewuser')
     console.log(response);
   });
 }
@@ -410,7 +416,7 @@ function updateContractor(payload){
 
 function getContractorId(payload){
   axios({
-    method : 'GET',
+    method : 'POST',
     url : '/api/getcontractorid/' + payload.id,
     headers : {
       'token': getToken()
@@ -420,4 +426,19 @@ function getContractorId(payload){
     UserStore.emit('getcontractorid',response)
     _getcontractorid = response;
   });
+}
+
+
+function DeleteContractorId(payload){
+  axios({
+    method : 'POST',
+    url : '/api/deletecontractor/' + payload.id,
+    headers : {
+      'token': getToken()
+    }
+  })
+  .then(function(response){
+    console.log(response)
+  });
+
 }

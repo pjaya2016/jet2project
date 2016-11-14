@@ -64,4 +64,9 @@ router.route("/updatecontractor/:id")
 router.route("/getcontractorid/:id")
       .get(userController.getContractorID)
 
+router.route("/deletecontractor/:id")
+      .post(userController.deleteContractor)
+
+      //deletecontractor
+
 module.exports = router;
