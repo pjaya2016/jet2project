@@ -6,6 +6,13 @@ var browserHistory = require('react-router').browserHistory;
 var userStore      = require('../stores/userStore');
 var Dispatcher     = require('../dispatchers/mainDispatcher.js');
 var Link           = require('react-router').Link
+var socket         = require('socket.io-client')();
+
+
+
+socket.on('chat message', function(msg){
+  $('#alert').text('Contractor would like to chat with you live' );
+});
 
 var ar = [];
 var ar2 = [];
@@ -25,6 +32,7 @@ var ApproverViewContarctor = React.createClass({
         contractor : userStore.getContractors()
       });
     });
+
   },
   render: function() {
     var self = this;
@@ -48,8 +56,8 @@ var ApproverViewContarctor = React.createClass({
           </tr>
         );
       });
-      for(var i = 0 ; i <= ar.length ; i++){
-          if(ar[i] !== ar[i + 1]){
+      for(var i = 0 ; i < ar.length ; i++){
+          if(ar[i] != ar[i + 1]){
             ar2.push(ar[i])
           }
       }
@@ -62,6 +70,7 @@ var ApproverViewContarctor = React.createClass({
       })
       return (
         <div>
+          {nudge}
           <table className="table table-striped table-inverse">
             <thead>
               <tr>
@@ -78,7 +87,8 @@ var ApproverViewContarctor = React.createClass({
               {contractors}
             </tbody>
           </table>
-          {nudge}
+          <hr />
+        <h3 id='alert'></h3>
         </div>
       )
     }else{
@@ -86,6 +96,8 @@ var ApproverViewContarctor = React.createClass({
         <div className="loader"></div>
       )
     }
-  }
+  },componentWillUnmount: function() {
+    ar2 = [];
+  },
 });
 module.exports = ApproverViewContarctor;

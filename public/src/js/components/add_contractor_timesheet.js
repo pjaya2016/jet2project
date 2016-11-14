@@ -5,7 +5,6 @@ var ReactDOM       = require('react-dom');
 var Router         = require('react-router').Router;
 var Route          = require('react-router').Route;
 var browserHistory = require('react-router').browserHistory;
-var TimeSheet = require('./timesheet');
 var Dispatcher     = require('../dispatchers/mainDispatcher.js');
 var userStore      = require("../stores/userStore.js");
 
@@ -65,8 +64,8 @@ var AddTimeSheet = React.createClass({
     data.lunchend5    = this.refs.lunchend5.value;
     data.Timeout5     = this.refs.timeout5.value;
 
-    data.totalWorkedHour = this.state.mondayHourWorked + this.state.tuesdayHourWorked + this.state.wednesdayHourWorked + this.state.thursdayHourWorked + this.state.fridayHourWorked ;
-
+    data.totalWorkedHour = this.monday() + this.tuesday() + this.wednesday() + this.thursday()+ this.friday() ;
+    // console.log(this.monday() + this.tuesday() + this.wednesday() + this.thursday()+ this.friday())
     Dispatcher.dispatch({
       action : 'TIMESHEETDATASEND',
       data   : {
@@ -74,6 +73,23 @@ var AddTimeSheet = React.createClass({
         timesheetData : data
       }
     })
+
+var monday  =  (typeof this.monday() == 'number') ? this.monday() : 0 ;
+var tuesday  =  (typeof this.tuesday() == 'number') ? this.tuesday() : 0 ;
+var wednesday  =  (typeof this.wednesday() == 'number') ? this.wednesday() : 0 ;
+var thursday  =  (typeof this.thursday() == 'number') ? this.thursday() : 0 ;
+var firday =   (typeof this.friday() == 'number') ? this.friday() : 0 ;
+
+
+
+    this.setState({
+      mondayHourWorked    : monday,
+      tuesdayHourWorked   : tuesday,
+      wednesdayHourWorked : wednesday,
+      thursdayHourWorked  : thursday,
+      fridayHourWorked    : firday
+    });
+
   },
   monday(){
     var self       = this;
@@ -81,9 +97,7 @@ var AddTimeSheet = React.createClass({
     var totalLuch  = parseInt(this.refs.lunchend1.value) - parseInt(this.refs.lunchstart1.value)
     var workedHour = totalDay - totalLuch;
     if(workedHour > 0 && workedHour != 'NaN'){
-      self.setState({
-        mondayHourWorked : workedHour
-      });
+      return workedHour;
     }
   },
   tuesday(){
@@ -92,9 +106,7 @@ var AddTimeSheet = React.createClass({
     var totalLuch  = parseInt(this.refs.lunchend2.value) - parseInt(this.refs.lunchstart2.value)
     var workedHour = totalDay - totalLuch;
     if(workedHour > 0 && workedHour != 'NaN'){
-      self.setState({
-        tuesdayHourWorked : workedHour
-      });
+      return workedHour;
     }
   },
   wednesday(){
@@ -103,9 +115,7 @@ var AddTimeSheet = React.createClass({
     var totalLuch  = parseInt(this.refs.lunchend3.value) - parseInt(this.refs.lunchstart3.value)
     var workedHour = totalDay - totalLuch;
     if(workedHour > 0 && workedHour != 'NaN'){
-      self.setState({
-        wednesdayHourWorked : workedHour
-      });
+      return workedHour;
     }
   },
   thursday(){
@@ -114,9 +124,7 @@ var AddTimeSheet = React.createClass({
     var totalLuch  = parseInt(this.refs.lunchend4.value) - parseInt(this.refs.lunchstart4.value)
     var workedHour = totalDay - totalLuch;
     if(workedHour > 0 && workedHour != 'NaN'){
-      self.setState({
-        thursdayHourWorked : workedHour
-      });
+      return workedHour;
     }
   },
   friday(){
@@ -125,14 +133,11 @@ var AddTimeSheet = React.createClass({
     var totalLuch  = parseInt(this.refs.lunchend5.value) - parseInt(this.refs.lunchstart5.value)
     var workedHour = totalDay - totalLuch;
     if(workedHour > 0 && workedHour != 'NaN'){
-      self.setState({
-        fridayHourWorked : workedHour
-      });
+      return workedHour;
     }
   },
   render: function() {
     if(this.state.getTimeSheets){
-      console.log(this.state.getTimeSheets.data.TimeSheetID)
       return (
         <div className="col-sm-4 col-md-8 col-lg-12">
           <h5>TimeSheet ID : {this.props.params.id} </h5>
@@ -197,7 +202,7 @@ var AddTimeSheet = React.createClass({
 
             </tbody>
           </table>
-          <h4>Totle hours worked : {this.state.mondayHourWorked + this.state.tuesdayHourWorked + this.state.wednesdayHourWorked + this.state.thursdayHourWorked + this.state.fridayHourWorked   }</h4>
+          <h4>Totle hours worked : {this.state.mondayHourWorked + this.state.tuesdayHourWorked + this.state.wednesdayHourWorked + this.state.thursdayHourWorked + this.state.fridayHourWorked} </h4>
           <input type="button" className="form-control" value='save' onClick={this.getData} />
         </div>
       )
@@ -205,6 +210,26 @@ var AddTimeSheet = React.createClass({
       return(
         <div className="loader"></div>
       )
+    }
+  },
+  componentDidUpdate: function(prevProps, prevState) {
+    var self = this;
+
+    var monday  =  (typeof this.monday() == 'number') ? this.monday() : 0 ;
+    var tuesday  =  (typeof this.tuesday() == 'number') ? this.tuesday() : 0 ;
+    var wednesday  =  (typeof this.wednesday() == 'number') ? this.wednesday() : 0 ;
+    var thursday  =  (typeof this.thursday() == 'number') ? this.thursday() : 0 ;
+    var firday =   (typeof this.friday() == 'number') ? this.friday() : 0 ;
+
+    if(prevState.tuesdayHourWorked == 0){
+      self.setState({
+        mondayHourWorked    : monday,
+        tuesdayHourWorked   : tuesday,
+        wednesdayHourWorked : wednesday,
+        thursdayHourWorked  : thursday,
+        fridayHourWorked    : firday
+      });
+      return true;
     }
   },
 });

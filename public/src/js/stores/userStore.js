@@ -88,7 +88,7 @@ function handleAction(payload){
     return getApprovel(payload);
     break;
     case 'APPROVEDBYAPPROVER':
-    return approverApproved();
+    return approverApproved(payload);
     break;
     case 'DECLINEDBYAPPROVER':
     return approverDecline(payload);
@@ -158,7 +158,8 @@ function Login(payload){
     localStorage.setItem("token", response.data.token);
     localStorage.setItem("type" , response.data.user.type);
     localStorage.setItem("id"   , response.data.user._id);
-    browserHistory.push('approverhome')
+    browserHistory.push('/approverHome')
+    location.reload()
   })
   .catch(function (error) {
     UserStore.emit("wrongLoginDetails");
@@ -275,7 +276,7 @@ function sendForApprovel(payload){
   });
 }
 
-function approverApproved(){
+function approverApproved(payload){
   axios({
     method : 'POST',
     url : '/api/approverapproved/' + payload.userId ,
@@ -286,6 +287,7 @@ function approverApproved(){
   .then(function(response){
     console.log(response);
   });
+
 }
 
 function approverDecline(payload){

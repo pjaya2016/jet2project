@@ -18,7 +18,7 @@ var ViewPaidInvoice = React.createClass({
     var self = this ;
     Dispatcher.dispatch({
       action : 'SEARCH',
-      searchInfo : e.target.value
+      searchInfo : e.target.value,
     });
 
     userStore.on('search',function(){

@@ -8,19 +8,19 @@ var Dispatcher     = require('../dispatchers/mainDispatcher.js');
 
 var EmailSendForApprovel = React.createClass({
   componentWillMount: function() {
-    if(this.props.params.boolean === 1){
+    if(this.props.params.boolean == 1){
       Dispatcher.dispatch({
         action : 'APPROVEDBYAPPROVER',
         userId : this.props.params.id
       })
-      browserHistory.push('/approverviewuser')
+       browserHistory.push('/approverviewuser')
     }else{
-      Dispatcher.dispatch({
-        action : 'DECLINEDBYAPPROVER',
-        comment : 'Please Check timesheet and resubmit it',
-        userId : this.props.params.id
-      })
-      browserHistory.push('/approverviewuser')
+      // Dispatcher.dispatch({
+      //   action : 'DECLINEDBYAPPROVER',
+      //   comment : 'Please Check timesheet and resubmit it',
+      //   userId : this.props.params.id
+      // })
+      // browserHistory.push('/approverviewuser')
     }
   },
   render: function() {

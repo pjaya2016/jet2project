@@ -22,12 +22,20 @@ var InvoiceAdmin           = require('./components/invoiceAdmin');
 var view_all_contractor_approved  = require('./components/all_contractor_approved.js');
 var search_invoice_admin    = require('./components/search_invoice_admin.js');
 var email_send_for_approvel = require('./components/email_send_for_approvel.js');
+var redirectViewAllcontractor = require('./components/veiw_all_contarctor_redirect.js')
+var Logout = require('./components/logout.js');
+var LiveChat = require('./components/livechat.js');
+
 /************************************************************************/
+var token = localStorage.getItem('token');
+var token = (!token)  ? true : false;
+
+
 var App = React.createClass({
   render: function() {
     return (
       <div className="container" >
-        <Nav />
+        <Nav  tokens={token}/>
         <div className="row">
           {this.props.children}
         </div>
@@ -53,6 +61,9 @@ ReactDOM.render(
       <Route path="/needpay" component={view_all_contractor_approved} />
       <Route path="/invoicesearch" component={search_invoice_admin} />
       <Route path="/emailsendforapprovel/:boolean/:id" component={email_send_for_approvel} />
+      <Route path="/redirecttoapproverviewuser" component={redirectViewAllcontractor} />
+      <Route path="/logout" component={Logout} />
+      <Route path="/livechat" component={LiveChat} />
     </Route>
   </Router>
   , document.getElementById('app'), function() {

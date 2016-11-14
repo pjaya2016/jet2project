@@ -48,9 +48,6 @@ var Login = React.createClass({
             <input type="password" className="form-control" id="pwd" ref='password' />
           </div>
 
-          <div className="checkbox">
-            <label><input type="checkbox"/> Remember me</label>
-          </div>
           <button type="submit" onClick={this.getData} className="btn btn-default">Submit</button>
           {this.state.error ? error : '' }
         </div>
