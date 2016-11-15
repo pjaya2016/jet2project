@@ -71,7 +71,7 @@ var Approveradduser = React.createClass({
 
         <div className="form-group">
           <label htmlFor="type">Type:</label>
-          <input type="text" className="form-control" id="type" ref="type" />
+          <input type="text" className="form-control" id="type" ref="type"  defaultValue='contractor'/>
         </div>
 
         <div className="form-group">

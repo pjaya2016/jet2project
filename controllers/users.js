@@ -420,14 +420,17 @@ var date = new Date(req.body.searchInvoice)
     User.find({startdate : req.body.searchInvoice }, function (err, contractor) {
       if (err) return res.status(401).send({error: err});
       if (!contractor) return res.status(500).send({error: 'Database error, is it connected?'});
-      var invoice = contractor.map(function(item,i){
-        if(item.Invoice.length > 0){
-        return item.TimeSheet.id(item.Invoice[i].Invoice);
-        }
-      })
+      // var invoice = contractor.map(function(item,i){
+      //   if(item.Invoice.length > 0){
+      //   return item.TimeSheet.id(item.Invoice[i].Invoice);
+      //   }
+      // })
+      var hope =  contractor[0].Invoice.map(function(item,i){
+         return contractor[0].TimeSheet.id(item.Invoice)
+        })
       return res.status(200).send({
         message: 'invoice search',
-        invoiceSearch : invoice,
+        invoiceSearch : hope,
         contractor : contractor
       });
     });
@@ -436,14 +439,19 @@ var date = new Date(req.body.searchInvoice)
     User.find({firstName : {$regex : "^" + req.body.searchInvoice } }, function (err, contractor) {
       if (err) return res.status(401).send({error: err});
       if (!contractor) return res.status(500).send({error: 'Database error, is it connected?'});
-      var invoice = contractor.map(function(item,i){
-        if(item.Invoice.length > 0){
-        return item.TimeSheet.id(item.Invoice[i].Invoice);
-        }
-      })
+
+      // var invoice = contractor.map(function(item,i){
+      //    if(item.Invoice.length > 0){
+      //   return item.TimeSheet.id(item.Invoice[i].Invoice);
+      //   }
+      // })
+
+        var hope =  contractor[0].Invoice.map(function(item,i){
+           return contractor[0].TimeSheet.id(item.Invoice)
+          })
       return res.status(200).send({
         message: 'invoice search',
-        invoiceSearch : invoice,
+        invoiceSearch : hope,
         contractor : contractor
       });
     });

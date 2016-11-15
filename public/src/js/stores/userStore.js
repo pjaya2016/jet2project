@@ -393,6 +393,7 @@ function InvoiceSearchAdmin(payload){
     }
   })
   .then(function(response){
+    console.log(response)
     UserStore.emit('invoiceSearch',response)
   });
 }
@@ -416,15 +417,16 @@ function updateContractor(payload){
 
 function getContractorId(payload){
   axios({
-    method : 'POST',
+    method : 'GET',
     url : '/api/getcontractorid/' + payload.id,
     headers : {
       'token': getToken()
     }
   })
   .then(function(response){
-    UserStore.emit('getcontractorid',response)
-    _getcontractorid = response;
+     UserStore.emit('getcontractorid',response)
+
+
   });
 }
 

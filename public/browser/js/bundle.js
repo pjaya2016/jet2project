@@ -27136,6 +27136,7 @@
 	      'token': getToken()
 	    }
 	  }).then(function (response) {
+	    console.log(response);
 	    UserStore.emit('invoiceSearch', response);
 	  });
 	}
@@ -27157,14 +27158,13 @@
 
 	function getContractorId(payload) {
 	  axios({
-	    method: 'POST',
+	    method: 'GET',
 	    url: '/api/getcontractorid/' + payload.id,
 	    headers: {
 	      'token': getToken()
 	    }
 	  }).then(function (response) {
 	    UserStore.emit('getcontractorid', response);
-	    _getcontractorid = response;
 	  });
 	}
 
@@ -29329,7 +29329,7 @@
 	          { htmlFor: 'type' },
 	          'Type:'
 	        ),
-	        React.createElement('input', { type: 'text', className: 'form-control', id: 'type', ref: 'type' })
+	        React.createElement('input', { type: 'text', className: 'form-control', id: 'type', ref: 'type', defaultValue: 'contractor' })
 	      ),
 	      React.createElement(
 	        'div',
@@ -39674,7 +39674,9 @@
 
 	    if (this.state.searchInvoice.data) {
 	      var self = this;
+	      console.log(this.state.searchInvoice.data);
 	      var map = this.state.searchInvoice.data.invoiceSearch.map(function (item, i) {
+
 	        if (item) {
 	          return React.createElement(
 	            'div',
@@ -39699,48 +39701,40 @@
 	                    'a',
 	                    { 'data-toggle': 'collapse', href: '#collapse1' },
 	                    'Name : ',
-	                    self.state.searchInvoice.data.contractor[i].firstName
+	                    self.state.searchInvoice.data.contractor[0].firstName,
+	                    ' '
 	                  )
 	                )
 	              ),
 	              React.createElement(
 	                'div',
-	                { id: 'collapse1', className: 'panel-collapse collapse' },
+	                { className: 'panel-body' },
 	                React.createElement(
-	                  'div',
-	                  { className: 'panel-body' },
+	                  'pre',
+	                  null,
 	                  React.createElement(
-	                    'pre',
+	                    'p',
+	                    { className: 'text-warning' },
+	                    'Invoice #id :',
+	                    item._id,
+	                    ' '
+	                  ),
+	                  React.createElement(
+	                    'p',
 	                    null,
-	                    React.createElement(
-	                      'p',
-	                      { className: 'text-warning' },
-	                      'Invoice #id :',
-	                      item._id,
-	                      ' '
-	                    ),
-	                    React.createElement(
-	                      'p',
-	                      null,
-	                      'Date'
-	                    ),
-	                    React.createElement(
-	                      'p',
-	                      null,
-	                      'total hours worked : ',
-	                      item.TotalHourWorked
-	                    ),
-	                    React.createElement(
-	                      'p',
-	                      null,
-	                      'Rate : \xA37:00'
-	                    ),
-	                    React.createElement(
-	                      'p',
-	                      { className: 'bg-danger text-center' },
-	                      'Total Pay : \xA3 ',
-	                      parseInt(item.TotalHourWorked) * 7
-	                    )
+	                    'total hours worked : ',
+	                    item.TotalHourWorked
+	                  ),
+	                  React.createElement(
+	                    'p',
+	                    null,
+	                    'Rate : \xA37:00'
+	                  ),
+	                  React.createElement(
+	                    'p',
+	                    { className: 'bg-danger text-center' },
+	                    'Total Pay : \xA3 ',
+	                    parseInt(item.TotalHourWorked) * 7
 	                  )
 	                )
 	              )

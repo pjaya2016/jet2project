@@ -38,7 +38,9 @@ if(self.refs.search.value.length != 0){
 
     if(this.state.searchInvoice.data){
       var self = this;
+      console.log(this.state.searchInvoice.data)
       var map = this.state.searchInvoice.data.invoiceSearch.map(function(item,i){
+
         if(item){
           return (
             <div key={i} className="panel-group">
@@ -46,19 +48,18 @@ if(self.refs.search.value.length != 0){
               <div className="panel panel-default">
                 <div className="panel-heading">
                   <h4 className="panel-title">
-                    <a data-toggle="collapse" href="#collapse1">Name : {self.state.searchInvoice.data.contractor[i].firstName}</a>
+                    <a data-toggle="collapse" href="#collapse1">Name : {self.state.searchInvoice.data.contractor[0].firstName} </a>
                   </h4>
                 </div>
-                <div id="collapse1" className="panel-collapse collapse">
+
                   <div className="panel-body">
                     <pre>
                       <p className="text-warning">Invoice #id :{ item._id } </p>
-                      <p>Date</p>
                       <p>total hours worked : {item.TotalHourWorked}</p>
                       <p>Rate : £7:00</p>
                       <p className="bg-danger text-center" >Total Pay : £ {parseInt(item.TotalHourWorked) * 7}</p>
                     </pre>
-                  </div>
+
                 </div>
               </div>
             </div>
