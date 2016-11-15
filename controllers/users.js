@@ -169,7 +169,6 @@ function sendForApprovel(req,res){
            service : 'Gmail',
            auth :{
              user:'Testwebapps2015@gmail.com',
-             pass:'fatcat12345'
            }
          });
 
