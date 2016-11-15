@@ -2,17 +2,20 @@ var mongoose  = require("mongoose");
 var bcrypt    = require("bcrypt-nodejs");
 var validator = require("validator");
 var TimeSheet = require('./timesheet');
+var Invoice = require('./invoice');
 
 var userSchema = mongoose.Schema({
   firstName:    { type: String },
   lastName:     { type: String },
   username:     { type: String, required: true, unique: true },
   email:        { type: String, required: true, unique: true },
-  type:         { type: String ,enum: ['approver', 'contractor', 'invoice-admin'],required: true },
+  type:         { type: String ,enum: ['approver', 'contractor', 'invoice_admin'],required: true },
   passwordHash: { type: String },
   startdate :   {type : String, required: true },
   enddate :     {type : String, required: true },
-  TimeSheet :   [TimeSheet]
+  comments :     {type : String},
+  TimeSheet : [TimeSheet],
+  Invoice  : [Invoice]
 });
 
 

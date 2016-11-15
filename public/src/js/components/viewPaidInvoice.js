@@ -7,44 +7,32 @@ var Dispatcher     = require('../dispatchers/mainDispatcher.js');
 var userStore      = require("../stores/userStore.js");
 var Link           = require('react-router').Link;
 
-var Timesheet = React.createClass({
+
+var ViewPaidInvoice = React.createClass({
   getInitialState(){
-    return{
-      approvelneeded : userStore.getTimesheetsApprovel()
+    return {
+      search : userStore.getSearchResult()
     }
   },
-  componentWillMount: function() {
-    var self = this;
+  search(e){
+    var self = this ;
     Dispatcher.dispatch({
-      action : 'CHECKFORAPPROVEL',
-      contractorId : this.props.params.id
-    })
-    userStore.on('approvelTimesheet',function(){
+      action : 'SEARCH',
+      searchInfo : e.target.value,
+    });
+
+    userStore.on('search',function(){
       self.setState({
-        approvelneeded : userStore.getTimesheetsApprovel()
-      });
-    })
-  },
-  approver(){
-    Dispatcher.dispatch({
-      action : 'APPROVEDBYAPPROVER',
-      userId : this.props.params.id
-    })
-  },
-  decline(){
-    Dispatcher.dispatch({
-      action : 'DECLINEDBYAPPROVER',
-      comment : this.refs.comment.value,
-      userId : this.props.params.id
+        search : userStore.getSearchResult()
+      })
     })
   },
   render: function() {
-    var self = this;
-    if(this.state.approvelneeded){
-      var approvelNeeded = self.state.approvelneeded.data.contractor.map(function(timesheet,i){
+    if(this.state.search){
+      var search = this.state.search.data.search.map(function(timesheet,i){
         return (
           <div key={i} className="well well-lg">
-            <table className="table table-striped table-inverse table-bordered table-responsive" >
+            <table className="table table-bordered table-responsive">
               <thead>
                 <tr>
                   <th>Day</th>
@@ -104,28 +92,19 @@ var Timesheet = React.createClass({
       })
       return (
         <div className="col-sm-4 col-md-8 col-lg-12">
-          <h3>Timesheet User ID : {this.props.params.id}</h3>
-            {approvelNeeded}
-            <a onClick={this.approver}  className="btn btn-info btn-lg">
-             <span className="glyphicon glyphicon-ok"></span> Approve
-            </a>
-            <a onClick={this.decline} className="btn btn-danger btn-lg">
-             <span className="glyphicon glyphicon-remove"></span> Decline
-           </a>
-          <div className="form-group">
-            <h1>Add Comments</h1>
-            <textarea className="form-control" ref='comment' rows="5" id="comment"></textarea>
-          </div>
+          <input type="button" onClick={this.search}  value='paid' className="btn btn-primary btn-lg" />
+          <hr />
+          {search}
+          <hr />
         </div>
       )
-      }else{
-      return(
-        <div className="loader"></div>
+    }else{
+      return (
+        <div className="col-sm-4 col-md-8 col-lg-12">
+          <input type="button" onClick={this.search}  value='paid' className="btn btn-primary btn-lg" />
+        </div>
       )
     }
-  },
+  }
 });
-module.exports = Timesheet;
-
-// <input type='button' value='approve' onClick={this.approver} className='btn btn-success' />
-// <input type='button' value='decline' onClick={this.decline} className='btn btn-danger' />
+module.exports = ViewPaidInvoice;

@@ -1,3 +1,4 @@
+/*********************ADD USER ***********/
 var React          = require('react');
 var ReactDOM       = require('react-dom');
 var Router         = require('react-router').Router;
@@ -8,8 +9,8 @@ var userStore      = require("../stores/userStore.js");
 
 
 var successMsg     =  (<div className="alert alert-success">
-                        <strong>Success!</strong> Indicates a successful or positive action.
-                       </div>);
+<strong>Success!</strong> Indicates a successful or positive action.
+</div>);
 
 var Approveradduser = React.createClass({
   getInitialState() {
@@ -20,26 +21,25 @@ var Approveradduser = React.createClass({
   createContractor(event){
     var self = this;
     Dispatcher.dispatch({
-        action : 'REGISTER',
-        data : {
-          firstName : this.refs.firstName.value,
-          lastName : this.refs.lastName.value,
-          username : this.refs.username.value,
-          passwordHash : this.refs.passwordHash.value,
-          passwordConfirmation : this.refs.passwordConfirmation.value,
-          email : this.refs.email.value,
-          startdate : this.refs.startdate.value,
-          enddate : this.refs.enddate.value,
-          type: this.refs.type.value,
-        }
+      action : 'REGISTER',
+      data   : {
+        firstName     : this.refs.firstName.value,
+        lastName      : this.refs.lastName.value,
+        username      : this.refs.username.value,
+        passwordHash  : this.refs.passwordHash.value,
+        passwordConfirmation : this.refs.passwordConfirmation.value,
+        email         : this.refs.email.value,
+        startdate     : this.refs.startdate.value,
+        enddate       : this.refs.enddate.value,
+        comments      : '',
+        type          : this.refs.type.value,
+      }
+    });
+    userStore.on('contractorCreated',function(){
+      self.setState({
+        success : true
       });
-
-      userStore.on('contractorCreated',function(){
-        self.setState({
-          success : true
-        });
-      })
-
+    })
     event.preventDefault();
   },
   render: function() {
@@ -47,55 +47,54 @@ var Approveradduser = React.createClass({
     return (
       <div className="col-sm-4 col-md-8 col-lg-12">
 
-              {this.state.success ? successMsg : '' }
+        {this.state.success ? successMsg : '' }
 
-              <div className="form-group">
-                <label htmlFor="firstName">First Name:</label>
-                <input type="text" className="form-control" id="firstName" ref="firstName" />
-              </div>
+        <div className="form-group">
+          <label htmlFor="firstName">First Name:</label>
+          <input type="text" className="form-control" id="firstName" ref="firstName" />
+        </div>
 
-              <div className="form-group">
-                <label htmlFor="lastName">Last Name:</label>
-                <input type="text" className="form-control" id="lastName" ref="lastName" />
-              </div>
+        <div className="form-group">
+          <label htmlFor="lastName">Last Name:</label>
+          <input type="text" className="form-control" id="lastName" ref="lastName" />
+        </div>
 
-              <div className="form-group">
-                <label htmlFor="username">Username:</label>
-                <input type="text" className="form-control" id="username" ref="username" />
-              </div>
+        <div className="form-group">
+          <label htmlFor="username">Username:</label>
+          <input type="text" className="form-control" id="username" ref="username" />
+        </div>
 
-              <div className="form-group">
-                <label htmlFor="email">Email:</label>
-                <input type="text" className="form-control" id="email" ref="email" />
-              </div>
+        <div className="form-group">
+          <label htmlFor="email">Email:</label>
+          <input type="text" className="form-control" id="email" ref="email" />
+        </div>
 
-              <div className="form-group">
-                <label htmlFor="type">Type:</label>
-                <input type="text" className="form-control" id="type" ref="type" />
-              </div>
+        <div className="form-group">
+          <label htmlFor="type">Type:</label>
+          <input type="text" className="form-control" id="type" ref="type"  defaultValue='contractor'/>
+        </div>
 
-              <div className="form-group">
-                <label htmlFor="passwordHash">Password:</label>
-                <input type="password" className="form-control" id="passwordHash" ref="passwordHash" />
-              </div>
+        <div className="form-group">
+          <label htmlFor="passwordHash">Password:</label>
+          <input type="password" className="form-control" id="passwordHash" ref="passwordHash" />
+        </div>
 
-              <div className="form-group">
-                <label htmlFor="password">Confirm password:</label>
-                <input type="password" className="form-control" id="password" ref="passwordConfirmation" />
-              </div>
+        <div className="form-group">
+          <label htmlFor="password">Confirm password:</label>
+          <input type="password" className="form-control" id="password" ref="passwordConfirmation" />
+        </div>
 
-              <div className="form-group">
-                <label htmlFor="startdate">startdate:</label>
-                <input type="date" name="startdate" id="startdate" ref='startdate'   />
-              </div>
+        <div className="form-group">
+          <label htmlFor="startdate">startdate:</label>
+          <input type="date" name="startdate" id="startdate" ref='startdate'   />
+        </div>
 
-              <div className="form-group">
-                <label htmlFor="enddate">enddate:</label>
-                <input type="date" name="enddate" id="enddate" ref='enddate'   />
-              </div>
+        <div className="form-group">
+          <label htmlFor="enddate">enddate:</label>
+          <input type="date" name="enddate" id="enddate" ref='enddate'   />
+        </div>
 
-
-              <button type="submit" onClick={this.createContractor} className="btn btn-default">Submit</button>
+        <button type="submit" onClick={this.createContractor} className="btn btn-default">Submit</button>
       </div>
     )
   }
